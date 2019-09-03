@@ -14,7 +14,12 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path, include
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 urlpatterns = [
     path('', include('tom_common.urls')),
 ]
+
+# this is to serve static file from a debug Dockerfile environment
+# this is perform a findstatic
+urlpatterns += staticfiles_urlpatterns()

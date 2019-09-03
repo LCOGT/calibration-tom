@@ -6,7 +6,8 @@ ENTRYPOINT [ "/init.sh" ]
 COPY requirements.txt /lco/calibration-tom/
 RUN apt-get -y update \
         && apt-get -y install gfortran \
-        && apt-get -y clean \ 
+        && apt-get -y clean \
+        && pip install --upgrade pip \
         && pip --no-cache-dir install numpy \
         && pip --no-cache-dir install -r /lco/calibration-tom/requirements.txt
 

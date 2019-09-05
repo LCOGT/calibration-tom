@@ -20,6 +20,7 @@ urlpatterns = [
     path('', include('tom_common.urls')),
 ]
 
-# this is to serve static file from a debug Dockerfile environment
-# this is perform a findstatic
+# this is to serve static file from a debug Dockerfile environment (performs a findstatic)
+# (i.e. without this a local Dockerfile-deployed instance won't find the staticfiles from
+# the other INSTALLED_APPS)
 urlpatterns += staticfiles_urlpatterns()

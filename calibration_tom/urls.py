@@ -18,6 +18,8 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 urlpatterns = [
     path('', include('tom_common.urls')),
+    path('calibrations/', include('calibrations.urls')),
+    # admin comes from somewhere else
 ]
 
 # this is to serve static file from a debug Dockerfile environment (performs a findstatic)

@@ -27,7 +27,7 @@ SECRET_KEY = 'uuly7s#w(7xm-h+%7jc@ej-lag5=1&amp;2-9m_185&amp;#(od0ih-!9r'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*', ]
 
 
 # Application definition
@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'tom_catalogs',
     'tom_observations',
     'tom_dataproducts',
+    'calibrations',
 ]
 
 SITE_ID = 1

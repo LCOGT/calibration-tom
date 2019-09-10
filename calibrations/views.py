@@ -1,11 +1,9 @@
+from typing import Dict
+
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpRequest
 
 
-def index(request):
-    context = {}
+def index(request: HttpRequest) -> HttpResponse:
+    context: Dict[str, str] = {}
     return render(request, 'calibrations/index.html', context)
-
-
-def index1(request):
-    return HttpResponse(f"this is the beginning of the calibrations app: {request}")

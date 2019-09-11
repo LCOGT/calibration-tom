@@ -6,9 +6,9 @@
     <p>
         I have stuff to list:
     </p>
-    <ul>
+    <ul class="list-group">
         {% for stuff in stuff_to_list %}
-            <li>{{stuff}}</li>
+            <li class="list-group-item">{{stuff}}</li>
         {% endfor %}
     </ul>
 {% else %}

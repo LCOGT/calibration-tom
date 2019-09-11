@@ -1,8 +1,24 @@
 {% extends 'tom_common/index.html' %}
+<!-- calibrations/index.html -->
 {% block content %}
+<!-- block content -->
+{% if stuff_to_list %}
+    <p>
+        I have stuff to list:
+    </p>
+    <ul>
+        {% for stuff in stuff_to_list %}
+            <li>{{stuff}}</li>
+        {% endfor %}
+    </ul>
+{% else %}
+<p>Nothing to list :-(</p>
+{% endif %}
+
 <p>
 To know that we know what we know, and to know that we do not know
 what we do not know, that is true knowledge. <br/>
 <strong>Nicolaus Copernicus</strong>
 </p>
-{% endblock %}
+<!-- endblock content -->
+{% endblock content %}

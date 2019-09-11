@@ -14,6 +14,30 @@
 {% else %}
 <p>Nothing to list :-(</p>
 {% endif %}
+{% if sites %}
+    <p>
+        I have sites!:
+    </p>
+    <ul class="list-group">
+        {% for site in sites %}
+            <li class="list-group-item">{{site}}</li>
+        {% endfor %}
+    </ul>
+{% else %}
+<p>Nothing to list :-(</p>
+{% endif %}
+{% if instruments %}
+    <p>
+        I have Instruments!:
+    </p>
+    <ul class="list-group">
+        {% for instrument in instruments %}
+            <li class="list-group-item">{{instrument}}</li>
+        {% endfor %}
+    </ul>
+{% else %}
+<p>Nothing to list :-(</p>
+{% endif %}
 
 <p>
 To know that we know what we know, and to know that we do not know

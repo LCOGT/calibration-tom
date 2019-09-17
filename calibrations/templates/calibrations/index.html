@@ -2,47 +2,26 @@
 <!-- calibrations/index.html -->
 {% block content %}
 <!-- block content -->
-{% if stuff_to_list %}
-    <p>
-        I have stuff to list:
-    </p>
-    <ul class="list-group">
-        {% for stuff in stuff_to_list %}
-            <li class="list-group-item">{{stuff}}</li>
-        {% endfor %}
-    </ul>
-{% else %}
-<p>Nothing to list :-(</p>
-{% endif %}
 {% if sites %}
-    <p>
-        I have sites!:
-    </p>
+    <h2>
+        Sites:
+    </h2>
     <ul class="list-group">
         {% for site in sites %}
-            <li class="list-group-item">{{site}}</li>
-        {% endfor %}
+            <li class="list-group-item"><em>{{site}}</em></li>
+            {% if instrument_classes %}
+            <ul class="list-group">
+                {% for instrument_class in instrument_classes %}
+                    <li class="list-group-item">{{instrument_class}}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        {% endfor %}  
     </ul>
 {% else %}
 <p>Nothing to list :-(</p>
 {% endif %}
-{% if instruments %}
-    <p>
-        I have Instruments!:
-    </p>
-    <ul class="list-group">
-        {% for instrument in instruments %}
-            <li class="list-group-item">{{instrument}}</li>
-        {% endfor %}
-    </ul>
-{% else %}
-<p>Nothing to list :-(</p>
-{% endif %}
-
-<p>
-To know that we know what we know, and to know that we do not know
-what we do not know, that is true knowledge. <br/>
-<strong>Nicolaus Copernicus</strong>
-</p>
+<a href="{% url 'floyds_ogg' %}" class="btn btn-primary" title="FLOYDS Standards - OGG">FLOYDS Standards - OGG</a>
+<a href="{% url 'floyds_coj' %}" class="btn btn-primary" title="FLOYDS Standards - COJ">FLOYDS Standards - COJ</a>
 <!-- endblock content -->
 {% endblock content %}

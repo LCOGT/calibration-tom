@@ -8,8 +8,24 @@ from .models import Instrument, Site
 
 def index(request: HttpRequest) -> HttpResponse:
     context: Dict[str, List] = {
-        'stuff_to_list': ['one', 'two', 'three', 'four'],
         'sites': Site.objects.all(),
-        'instruments': Instrument.objects.all(),
+        'instrument_classes': ['FLOYDS']
     }
     return render(request, 'calibrations/index.html', context)
+
+
+def floyds_ogg(request: HttpRequest) -> HttpResponse:
+    context: Dict[str, List] = {
+        'sites': Site.objects.all(),
+        'instrument_classes': ['FLOYDS']
+    }
+    return render(request, 'calibrations/index.html', context)
+
+
+def floyds_coj(request: HttpRequest) -> HttpResponse:
+    context: Dict[str, List] = {
+        'sites': Site.objects.all(),
+        'instrument_classes': ['FLOYDS']
+    }
+    return render(request, 'calibrations/index.html', context)
+

@@ -1,6 +1,6 @@
 from django import forms
 from django.db.models.query import QuerySet
-from tom_observations.facilities.lco import LCOFacility, LCOBaseObservationForm, LCOSpectroscopyObservationForm
+from tom_observations.facilities.lco import LCOFacility, LCOSpectroscopyObservationForm
 from tom_targets.models import Target
 from datetime import datetime, timedelta
 import ephem

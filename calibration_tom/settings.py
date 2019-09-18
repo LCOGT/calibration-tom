@@ -185,10 +185,15 @@ CACHES = {
 # TOM Specific configuration
 TARGET_TYPE = 'SIDEREAL'
 
+try:
+    from calibration_tom.secret_settings import OBS_PORTAL_DEV_API_KEY
+except ImportError:
+    OBS_PORTAL_DEV_API_KEY = ''  # you must define this in secret_settings.py
+
 FACILITIES = {
     'LCO': {
-        'portal_url': 'https://observe.lco.global',
-        'api_key': '',
+        'portal_url': 'http://observation-portal-dev.lco.gtn',
+        'api_key': OBS_PORTAL_DEV_API_KEY,
     },
     'GEM': {
         'portal_url': {
@@ -233,7 +238,11 @@ BROKER_CREDENTIALS = {
 #     {'name': 'eligible', 'type': 'boolean'},
 #     {'name': 'dicovery_date', 'type': 'datetime'}
 # ]
-EXTRA_FIELDS = []
+EXTRA_FIELDS = [
+            {'name': 'site', 'type': 'string'},
+            {'name': 'seasonal_start', 'type': 'datetime'},
+            {'name': 'seasonal_end', 'type': 'datetime'},
+]
 
 # Authentication strategy can either be LOCKED (required login for all views)
 # or READ_ONLY (read only access to views)
@@ -255,6 +264,6 @@ THUMBNAIL_MAX_SIZE = (0, 0)
 THUMBNAIL_DEFAULT_SIZE = (200, 200)
 
 try:
-    from local_settings import * # noqa
+    from local_settings import *  # noqa
 except ImportError:
     pass

@@ -17,9 +17,7 @@ FLOYDS_SITES = {'ogg': {'latitude': 20.706,
 
 
 class FloydsStandardObservationForm(LCOSpectroscopyObservationForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        acquire_radius = forms.FloatField()
+    acquire_radius = forms.FloatField()
 
     def _build_configuration(self):
         return {
@@ -30,7 +28,7 @@ class FloydsStandardObservationForm(LCOSpectroscopyObservationForm):
             'acquisition_config': {
                 'mode': 'BRIGHTEST', #TODO: de-hardcode this
                 'extra_params': {
-                    'acquire_radius': self.acquire_radius
+                    'acquire_radius': self.cleaned_data['acquire_radius']
                 }
             },
             'guiding_config': {},
@@ -38,12 +36,11 @@ class FloydsStandardObservationForm(LCOSpectroscopyObservationForm):
                 'max_airmass': self.cleaned_data['max_airmass']
             }
         }
-
-    
+    #TODO: Clean this up to look more like the LCOBaseObservationForm's observation_payload() method
     def observation_payload(self) -> Dict:
         payload = super().observation_payload()
         base_configuration = self._build_configuration()
-        payload['requests']['configurations'] = [base_configuration]
+        payload['requests'][0]['configurations'] = [base_configuration]
 
         spectrum_configuration = copy.deepcopy(base_configuration)
         lamp_flat_configuration = copy.deepcopy(base_configuration)
@@ -56,17 +53,15 @@ class FloydsStandardObservationForm(LCOSpectroscopyObservationForm):
         arc_configuration['type'] = 'ARC'
         arc_configuration['instrument_configs'][0]['exposure_time'] = 40
 
-        payload['request']['configurations'].append(spectrum_configuration)
-        payload['request']['configurations'].append(lamp_flat_configuration)
-        payload['request']['configurations'].append(arc_configuration)
+        payload['requests'][0]['configurations'].append(spectrum_configuration)
+        payload['requests'][0]['configurations'].append(lamp_flat_configuration)
+        payload['requests'][0]['configurations'].append(arc_configuration)
 
         return payload
 
 
 
 def get_floyds_targets(site, date) -> QuerySet:
-    floyds_targets = Target.objects.filter()
-
     floyds_targets = Target.objects.filter(targetextra__key__exact='site', targetextra__value__exact=site) \
                                    .filter(targetextra__key__exact='seasonal_start', targetextra__value__lte=date) \
                                    .filter(targetextra__key__exact='seasonal_end', targetextra__value__gte=date)
@@ -75,10 +70,10 @@ def get_floyds_targets(site, date) -> QuerySet:
 
 
 def submit_calibrations(site, date=datetime.utcnow()) -> List[str]:
-    for target in get_floyds_targets(site):
+    for target in get_floyds_targets(site, date):
         form = get_form_for_target(target)
-        if form.valid():
-            return LCOFacility.submit_observation(form.observation_payload())
+        if form.is_valid():
+            return LCOFacility().submit_observation(form.observation_payload())
         else:
             print("Invalid observation form!")
             return []
@@ -106,7 +101,9 @@ def get_form_for_target(target) -> FloydsStandardObservationForm:
         'exposure_count': 1,
         'exposure_time': 300,
         'max_airmass': 1.6,
-        'observation_type': 'NORMAL',
+        'target_id': target.id,
+        'observation_mode': 'NORMAL',
+        'rotator_angle': '0', #TODO: Figure out a reasonable default for this!
         'facility': 'LCO'
     })
 

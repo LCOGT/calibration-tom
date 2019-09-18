@@ -185,6 +185,11 @@ CACHES = {
 # TOM Specific configuration
 TARGET_TYPE = 'SIDEREAL'
 
+try:
+    from calibration_tom.secret_settings import OBS_PORTAL_DEV_API_KEY
+except ImportError:
+    OBS_PORTAL_DEV_API_KEY = ''  # you must define this in secret_settings.py
+
 FACILITIES = {
     'LCO': {
         'portal_url': 'https://observe.lco.global',

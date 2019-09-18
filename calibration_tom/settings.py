@@ -234,6 +234,11 @@ BROKER_CREDENTIALS = {
 #     {'name': 'dicovery_date', 'type': 'datetime'}
 # ]
 EXTRA_FIELDS = []
+EXTRA_FIELDS = [
+            {'name': 'site', 'type': 'string'},
+            {'name': 'seasonal_start', 'type': 'datetime'},
+            {'name': 'seasonal_end', 'type': 'datetime'},
+]
 
 # Authentication strategy can either be LOCKED (required login for all views)
 # or READ_ONLY (read only access to views)

@@ -16,3 +16,5 @@ COPY docker/ /
 RUN ls -l /init.sh
 
 COPY . /lco/calibration-tom/
+
+# see README.md for instructions on how to use this Dockerfile

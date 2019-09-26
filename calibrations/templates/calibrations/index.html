@@ -9,17 +9,27 @@
     <ul class="list-group">
         {% for site in sites %}
             <li class="list-group-item"><em>{{site}}</em></li>
-            {% if instrument_classes %}
-            <ul class="list-group">
-                {% for instrument_class in instrument_classes %}
-                    <li class="list-group-item">{{instrument_class}}</li>
-                {% endfor %}
-            </ul>
-            {% endif %}
-        {% endfor %}  
+        {% endfor %}
     </ul>
 {% else %}
-<p>Nothing to list :-(</p>
+<p>No sites to list :-(</p>
+{% endif %}
+{% if targets %}
+    <h2>
+        Today's Targets:
+    </h2>
+    <ul class="list-group">
+        {% for site_for_target, target in targets.items %}
+            {% if target %}
+            <ul class="list-group">
+                <li class="list-group-item">{{site_for_target}}: {{target}}</li>
+            </ul>
+            {% endif %}
+        {% endfor %}
+    </ul>
+
+{% else %}
+<p>No targets to list :-(</p>
 {% endif %}
 <a href="{% url 'floyds_ogg' %}" class="btn btn-primary" title="FLOYDS Standards - OGG">FLOYDS Standards - OGG</a>
 <a href="{% url 'floyds_coj' %}" class="btn btn-primary" title="FLOYDS Standards - COJ">FLOYDS Standards - COJ</a>

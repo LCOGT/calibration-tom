@@ -8,25 +8,24 @@ from tom_targets.models import Target
 from .models import Instrument, Site
 
 
-def _get_todays_target(site: Site) -> Dict:
+def _get_todays_targets(site: Site) -> Dict:
     now = datetime.now()
-    todays_target = Target.objects \
-        .filter(targetextra__key='site', targetextra__value=site.code.lower()) \
+    todays_targets = Target.objects \
+        .filter(targetextra__key='site', targetextra__value=site.code.upper()) \
         .filter(targetextra__key__contains='seasonal_start', targetextra__value__lte=now) \
         .filter(targetextra__key__contains='seasonal_end', targetextra__value__gte=now)
-    assert(todays_target.count == 1, f"target_count: {todays_target.count}")
-    return todays_target[0]
+    return todays_targets
 
 
 def _get_context_for_index(request: HttpRequest) -> Dict:
-    # get today's targets for the context
-    todays_target: Dict[str:Target] = {}
+    # fill the context with today's targets for each site
+    todays_targets: Dict[str:Target] = {}
     for site, site_code in [(site, site.code) for site in Site.objects.all()]:
-        todays_target[site_code] = _get_todays_target(site)
+        todays_targets[site_code] = _get_todays_targets(site)
 
     context: Dict = {
         'sites': Site.objects.all(),
-        'targets': todays_target,
+        'site_targets': todays_targets,
     }
     return context
 

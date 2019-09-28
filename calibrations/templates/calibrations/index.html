@@ -14,20 +14,24 @@
 {% else %}
 <p>No sites to list :-(</p>
 {% endif %}
-{% if targets %}
+{% if site_targets %}
     <h2>
         Today's Targets:
     </h2>
     <ul class="list-group">
-        {% for site_for_target, target in targets.items %}
-            {% if target %}
-            <ul class="list-group">
-                <li class="list-group-item">{{site_for_target}}: {{target}}</li>
-            </ul>
+        {% for site_for_target, targets in site_targets.items %}
+            {% if targets %}
+                <ul class="list-group">
+                {% for target in targets %}
+                    <li class="list-group-item">{{site_for_target}}: {{target}}</li>
+
+                {% endfor %}
+                </ul>
+            {% else %}
+                <p>No targets to list for {{site_for_target}} :-(</p>
             {% endif %}
         {% endfor %}
     </ul>
-
 {% else %}
 <p>No targets to list :-(</p>
 {% endif %}

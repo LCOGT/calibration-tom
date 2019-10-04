@@ -187,7 +187,7 @@ HINT_LEVEL = 20
 TARGET_TYPE = 'SIDEREAL'
 
 try:
-    from calibration_tom.secret_settings import OBS_PORTAL_DEV_API_KEY
+    from calibration_tom.local_settings import OBS_PORTAL_DEV_API_KEY
 except ImportError:
     OBS_PORTAL_DEV_API_KEY = ''  # you must define this in secret_settings.py
 

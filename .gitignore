@@ -10,7 +10,9 @@ db.sqlite3
 *env/
 
 # for secret SETTING never to be checked-in
-local_setttings.py
+local_settings.py
+
+
 
 # IDE and editor ignores
 .idea/

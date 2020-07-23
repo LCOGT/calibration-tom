@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'tom_catalogs',
     'tom_observations',
     'tom_dataproducts',
+    'tom_publications',
     'calibrations',
 ]
 
@@ -218,6 +219,9 @@ FACILITIES = {
         },
     },
 }
+
+# TODO: Will any be necessary?
+DATA_PRODUCT_TYPES = {}
 
 TOM_ALERT_CLASSES = [
     'tom_alerts.brokers.mars.MARSBroker',

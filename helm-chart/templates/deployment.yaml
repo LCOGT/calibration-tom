@@ -62,10 +62,12 @@ spec:
           command:
             - gunicorn
             - --bind=0.0.0.0:8080
-            - --workers=2
+            - --worker-class=gevent
+            - --workers={{ .Values.gunicornWorkers | default 2 }}
+            - --timeout={{ .Values.gunicornTimeout | default 300 }}
             - --access-logfile=-
             - --error-logfile=-
-            - app:app
+            - calibration_tom.wsgi
           ports:
             - name: http
               containerPort: 80

@@ -16,6 +16,36 @@ spec:
         app.kubernetes.io/name: {{ include "calibration-tom.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
+      initContainers:
+        {{- if .Values.applyDatabaseMigrations }}
+        - name: apply-db-migrations
+          image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - python
+            - manage.py
+            - migrate
+            - --no-input
+          env:
+            {{- include "tom-demo.backendEnv" . | nindent 12 }}
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            readOnlyRootFilesystem: true
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+              readOnly: false
+            - name: specutils
+              mountPath: /.specutils
+              readOnly: false
+            - name: astropy
+              mountPath: /.astropy
+              readonly: false
+        {{- end }}
     {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}

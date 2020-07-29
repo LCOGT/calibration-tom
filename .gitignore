@@ -3,7 +3,6 @@
 __pycache__
 
 db.sqlite3
-/static
 .DS_Store
 
 # virtural envioronments
@@ -12,7 +11,8 @@ db.sqlite3
 # for secret SETTING never to be checked-in
 local_settings.py
 
-
+# Helm 
+helm-chart/charts/
 
 # IDE and editor ignores
 .idea/

@@ -1,0 +1,15 @@
+# Development Deployment configuration values
+#
+# The configuration values in this file override the default values from the
+# `helm-chart/values.yaml` file. This file only needs to contain the settings
+# which need to be customized for the Development Environment.
+
+# Configure HTTP endpoint
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: "nginx-ingress-private"
+  hosts:
+    - host: "calibration-tom-dev.lco.gtn"
+      paths:
+        - "/"

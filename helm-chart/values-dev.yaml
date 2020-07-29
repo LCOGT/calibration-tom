@@ -4,6 +4,14 @@
 # `helm-chart/values.yaml` file. This file only needs to contain the settings
 # which need to be customized for the Development Environment.
 
+resources:
+  requests:
+    cpu: 10m
+    memory: 256Mi
+  limits:
+    cpu: 1000m
+    memory: 1024Mi
+
 # Configure HTTP endpoint
 ingress:
   enabled: true

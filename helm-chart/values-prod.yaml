@@ -7,6 +7,16 @@
 # Production applications need multiple replicas for high availability
 replicaCount: 1
 
+djangoDebug: false
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 256Mi
+  limits:
+    cpu: 1000m
+    memory: 1024Mi
+
 # Configure HTTP endpoint
 ingress:
   enabled: true

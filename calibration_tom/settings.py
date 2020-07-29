@@ -196,42 +196,15 @@ FACILITIES = {
     'LCO': {
         'portal_url': 'http://observation-portal-dev.lco.gtn',
         'api_key': OBS_PORTAL_DEV_API_KEY,
-    },
-    'GEM': {
-        'portal_url': {
-            'GS': 'https://139.229.34.15:8443',
-            'GN': 'https://128.171.88.221:8443',
-        },
-        'api_key': {
-            'GS': '',
-            'GN': '',
-        },
-        'user_email': '',
-        'programs': {
-            'GS-YYYYS-T-NNN': {
-                'MM': 'Std: Some descriptive text',
-                'NN': 'Rap: Some descriptive text'
-            },
-            'GN-YYYYS-T-NNN': {
-                'QQ': 'Std: Some descriptive text',
-                'PP': 'Rap: Some descriptive text',
-            },
-        },
-    },
+    }
 }
 
 # TODO: Will any be necessary?
 DATA_PRODUCT_TYPES = {}
 
-TOM_ALERT_CLASSES = [
-    'tom_alerts.brokers.mars.MARSBroker',
-    'tom_alerts.brokers.lasair.LasairBroker',
-    'tom_alerts.brokers.scout.ScoutBroker',
-]
+TOM_ALERT_CLASSES = []
 
-BROKER_CREDENTIALS = {
-
-}
+BROKER_CREDENTIALS = {}
 
 # Define extra target fields here. Types can be any of "number", "string", "boolean" or "datetime"
 # See https://tomtoolkit.github.io/docs/target_fields for documentation on this feature

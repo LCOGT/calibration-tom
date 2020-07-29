@@ -1,20 +1,15 @@
 FROM python:3.7
+LABEL maintainer="llindstrom@lco.global"
 
+# the exposed port must match the deployment.yaml containerPort value
 EXPOSE 80
-ENTRYPOINT [ "/init.sh" ]
+ENTRYPOINT [ "/usr/local/bin/gunicorn", "calibration_tom.wsgi", "-b", "0.0.0.0:80", "--access-logfile", "-", "--error-logfile", "-", "-k", "gevent", "--timeout", "300", "--workers", "2"]
 
-COPY requirements.txt /lco/calibration-tom/
-RUN apt-get -y update \
-        && apt-get -y install gfortran \
-        && apt-get -y clean \
-        && pip install --upgrade pip \
-        && pip --no-cache-dir install numpy \
-        && pip --no-cache-dir install -r /lco/calibration-tom/requirements.txt
+WORKDIR /calibration-tom
 
-COPY docker/ /
+COPY requirements.txt /calibration-tom
+RUN pip install --no-cache-dir -r /calibration-tom/requirements.txt
 
-RUN ls -l /init.sh
+COPY . /calibration-tom
 
-COPY . /lco/calibration-tom/
-
-# see README.md for instructions on how to use this Dockerfile
+RUN python manage.py collectstatic --noinput

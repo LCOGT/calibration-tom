@@ -10,7 +10,7 @@ For the moment, here's how to get started with local development:
  pip install --upgrade pip
  pip install -r requirements.txt 
  ./manage.py migrate
- ./manage.py runservser &
+ ./manage.py runserver &
  ```
  You may also want to
  ```

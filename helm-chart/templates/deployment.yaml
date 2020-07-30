@@ -32,7 +32,8 @@ spec:
             runAsNonRoot: true
             runAsUser: 1000
             runAsGroup: 1000
-            readOnlyRootFilesystem: true
+            # TODO: make root file system readOnly when we get rid of sqlite backend
+            readOnlyRootFilesystem: false
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:

@@ -5,7 +5,8 @@
 # which need to be customized for the Production Environment.
 
 # Production applications need multiple replicas for high availability
-replicaCount: 2
+# TODO: bump replicaCount after change from sqlite3 to postgresql
+replicaCount: 1
 
 djangoDebug: false
 

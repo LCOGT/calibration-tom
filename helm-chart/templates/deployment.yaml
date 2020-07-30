@@ -27,7 +27,7 @@ spec:
             - migrate
             - --no-input
           env:
-            {{- include "tom-demo.backendEnv" . | nindent 12 }}
+            {{- include "calibration-tom.backendEnv" . | nindent 12 }}
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000

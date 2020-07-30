@@ -54,3 +54,15 @@ Create the name of the service account to use
     {{ default "default" .Values.serviceAccount.name }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Create the environment variables for configuration of this project. They are
+repeated in a bunch of places, so to keep from repeating ourselves, we'll
+build it here and use it everywhere.
+*/}}
+{{- define "calibration-tom.backendEnv" -}}
+- name: HOME
+  value: "/tmp"
+- name: DEBUG
+  value: {{ .Values.djangoDebug | toString | lower | title | quote }}
+{{- end }}

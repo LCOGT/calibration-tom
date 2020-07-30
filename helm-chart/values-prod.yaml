@@ -5,7 +5,7 @@
 # which need to be customized for the Production Environment.
 
 # Production applications need multiple replicas for high availability
-replicaCount: 1
+replicaCount: 2
 
 djangoDebug: false
 

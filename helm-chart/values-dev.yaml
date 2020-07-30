@@ -4,6 +4,10 @@
 # `helm-chart/values.yaml` file. This file only needs to contain the settings
 # which need to be customized for the Development Environment.
 
+djangoDebug: true
+
+replicaCount: 2
+
 resources:
   requests:
     cpu: 10m

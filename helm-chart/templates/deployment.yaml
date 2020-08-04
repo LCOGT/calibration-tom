@@ -17,6 +17,34 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       initContainers:
+        # wait for database to become ready
+        - name: check-db-ready
+          image: "postgres:11.2-alpine"
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - >
+              until pg_isready \
+                  --username={{ .Values.postgresql.postgresqlUsername | quote }} \
+                  --dbname={{ .Values.postgresql.postgresqlDatabase | quote }} \
+                  --host={{ include "tom-demo.dbhost" . | quote }} \
+                  --port={{ .Values.postgresql.service.port | quote }};
+                do echo waiting for database;
+                sleep 2;
+                done;
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            readOnlyRootFilesystem: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 16Mi
+            limits:
+              cpu: 50m
+              memory: 16Mi
         {{- if .Values.applyDatabaseMigrations }}
         - name: apply-db-migrations
           image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
@@ -32,8 +60,7 @@ spec:
             runAsNonRoot: true
             runAsUser: 1000
             runAsGroup: 1000
-            # TODO: make root file system readOnly when we get rid of sqlite backend
-            readOnlyRootFilesystem: false
+            readOnlyRootFilesystem: true
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
@@ -95,6 +122,15 @@ spec:
           emptyDir:
             medium: Memory
             sizeLimit: 16Mi
+        - name: specutils
+          emptyDir:
+            medium: Memory
+            sizeLimit: 16Mi
+        - name: astropy
+          emptyDir:
+            medium: Memory
+            sizeLimit: 16Mi
+
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

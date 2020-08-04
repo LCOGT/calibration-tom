@@ -56,6 +56,19 @@ Create the name of the service account to use
 {{- end -}}
 
 {{/*
+Generate the postgres DB hostname
+*/}}
+{{- define "calibration-tom.dbhost" -}}
+{{- if .Values.postgresql.fullnameOverride -}}
+{{- .Values.postgresql.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else if .Values.useDockerizedDatabase -}}
+{{- printf "%s-postgresql" .Release.Name -}}
+{{- else -}}
+{{- required "`postgresql.hostname` must be set when `useDockerizedDatabase` is `false`" .Values.postgresql.hostname -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Create the environment variables for configuration of this project. They are
 repeated in a bunch of places, so to keep from repeating ourselves, we'll
 build it here and use it everywhere.
@@ -65,4 +78,19 @@ build it here and use it everywhere.
   value: "/tmp"
 - name: DEBUG
   value: {{ .Values.djangoDebug | toString | lower | title | quote }}
-{{- end }}
+{{/*
+Define shared database environment variables
+*/}}
+- name: DB_HOSTdefine "calibration-tom.backendEnv" -}}
+  value: {{ include "calibration-tom.dbhost" . | quote }}
+- name: DB_NAME
+  value: {{ .Values.postgresql.postgresqlDatabase | quote }}
+- name: DB_PASS
+  value: {{ .Values.postgresql.postgresqlPassword | quote }}
+- name: DB_USER
+  value: {{ .Values.postgresql.postgresqlUsername | quote }}
+- name: DB_PORT
+  value: {{ .Values.postgresql.service.port | quote }}
+- name: SECRET_KEY
+  value: {{ .Values.secretKey | quote }}
+{{- end -}}

@@ -1,3 +1,4 @@
 tomtoolkit==1.7.2
+tom_base==3.0.7
 gunicorn[gevent]==20.0.4
 whitenoise==5.2.0

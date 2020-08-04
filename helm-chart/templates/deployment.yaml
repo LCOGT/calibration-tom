@@ -28,7 +28,7 @@ spec:
               until pg_isready \
                   --username={{ .Values.postgresql.postgresqlUsername | quote }} \
                   --dbname={{ .Values.postgresql.postgresqlDatabase | quote }} \
-                  --host={{ include "tom-demo.dbhost" . | quote }} \
+                  --host={{ include "calibration-tom.dbhost" . | quote }} \
                   --port={{ .Values.postgresql.service.port | quote }};
                 do echo waiting for database;
                 sleep 2;

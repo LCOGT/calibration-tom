@@ -81,7 +81,7 @@ build it here and use it everywhere.
 {{/*
 Define shared database environment variables
 */}}
-- name: DB_HOSTdefine "calibration-tom.backendEnv" -}}
+- name: DB_HOST
   value: {{ include "calibration-tom.dbhost" . | quote }}
 - name: DB_NAME
   value: {{ .Values.postgresql.postgresqlDatabase | quote }}

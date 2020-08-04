@@ -69,7 +69,9 @@ spec:
             - --timeout={{ .Values.gunicornTimeout | default 300 }}
             - --access-logfile=-
             - --error-logfile=-
-            - calibration_tom.wsgi
+            - tom_demo.wsgi
+          env:
+            {{ include "calibration-tom.backendEnv" . | nindent 12 }}
           ports:
             - name: http
               containerPort: 8080
@@ -84,6 +86,15 @@ spec:
               port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+              readOnly: false
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: Memory
+            sizeLimit: 16Mi
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

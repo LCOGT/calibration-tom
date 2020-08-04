@@ -69,7 +69,7 @@ spec:
             - --timeout={{ .Values.gunicornTimeout | default 300 }}
             - --access-logfile=-
             - --error-logfile=-
-            - tom_demo.wsgi
+            - calibration-tom.wsgi
           env:
             {{ include "calibration-tom.backendEnv" . | nindent 12 }}
           ports:

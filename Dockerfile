@@ -13,4 +13,3 @@ RUN pip install --no-cache-dir -r /calibration-tom/requirements.txt
 COPY . /calibration-tom
 
 RUN python manage.py collectstatic --noinput
-RUN python manage.py makemigrations --noinput

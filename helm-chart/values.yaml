@@ -21,6 +21,7 @@ serviceAccount:
 
 podSecurityContext:
   fsGroup: 1000
+  readOnlyRootFilesystem: false
 
 securityContext:
   capabilities:

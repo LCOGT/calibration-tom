@@ -117,11 +117,8 @@ spec:
             - name: tmp
               mountPath: /tmp
               readOnly: false
-            - name: astropy
-              mountPath: /.astropy
-              readonly: false
 
-    volumes:
+      volumes:
         - name: tmp
           emptyDir:
             medium: Memory

@@ -21,19 +21,18 @@ serviceAccount:
 
 podSecurityContext:
   fsGroup: 1000
-  readOnlyRootFilesystem: false
 
 securityContext:
   capabilities:
     drop:
     - ALL
   readOnlyRootFilesystem: false
-  runAsNonRoot: false
+#  runAsNonRoot: false
   # TODO: make file system readOnly (etc) when we get rid of sqlite backend
   #readOnlyRootFilesystem: true
-  #runAsNonRoot: true
-  #runAsUser: 1000
-  #runAsGroup: 1000
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
 
 service:
   type: ClusterIP

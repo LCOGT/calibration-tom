@@ -231,6 +231,8 @@ EXTRA_FIELDS = [
 # or READ_ONLY (read only access to views)
 AUTH_STRATEGY = 'READ_ONLY'
 
+TARGET_PERMISSIONS_ONLY = True
+
 # URLs that should be allowed access even with AUTH_STRATEGY = LOCKED
 # for example: OPEN_URLS = ['/', '/about']
 OPEN_URLS = []

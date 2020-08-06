@@ -193,15 +193,11 @@ CACHES = {
 HINT_LEVEL = 20
 TARGET_TYPE = 'SIDEREAL'
 
-try:
-    from calibration_tom.local_settings import OBS_PORTAL_DEV_API_KEY
-except ImportError:
-    OBS_PORTAL_DEV_API_KEY = ''  # you must define this in secret_settings.py
-
+# TODO: sort out dev vs. prod URL and api_key
 FACILITIES = {
     'LCO': {
         'portal_url': 'http://observation-portal-dev.lco.gtn',
-        'api_key': OBS_PORTAL_DEV_API_KEY,
+        'api_key': os.getenv('LCO_API_KEY', 'LCO_API_KEY_env_var_not_set'),
     }
 }
 

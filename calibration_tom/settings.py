@@ -197,7 +197,7 @@ TARGET_TYPE = 'SIDEREAL'
 FACILITIES = {
     'LCO': {
         'portal_url': 'http://observation-portal-dev.lco.gtn',
-        'api_key': os.getenv('LCO_API_KEY', 'LCO_API_KEY_env_var_not_set'),
+        'api_key': os.getenv('OBSERVATION_PORTAL_DEV_API_KEY', 'not_set'),
     }
 }
 

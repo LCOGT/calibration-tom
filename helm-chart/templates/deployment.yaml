@@ -99,6 +99,9 @@ spec:
             - calibration_tom.wsgi
           env:
             {{ include "calibration-tom.backendEnv" . | nindent 12 }}
+          envFrom:
+            - secretRef:
+                name: calibration-tom
           ports:
             - name: http
               containerPort: 8080

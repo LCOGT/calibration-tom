@@ -1,5 +1,4 @@
 .pyc
-*~
 __pycache__
 
 db.sqlite3
@@ -10,6 +9,9 @@ db.sqlite3
 
 # for secret SETTING never to be checked-in
 local_settings.py
+
+# this directory is created by ./manage.py collectstatic
+_static
 
 # Helm 
 helm-chart/charts/

@@ -229,9 +229,12 @@ BROKER_CREDENTIALS = {}
 #     {'name': 'dicovery_date', 'type': 'datetime'}
 # ]
 EXTRA_FIELDS = [
-            {'name': 'site', 'type': 'string'},
-            {'name': 'seasonal_start', 'type': 'datetime'},
-            {'name': 'seasonal_end', 'type': 'datetime'},
+    {'name': 'site', 'type': 'string'},  # for FLOYDS targets
+    {'name': 'seasonal_start', 'type': 'datetime'},
+    {'name': 'seasonal_end', 'type': 'datetime'},
+    {'name': 'v_mag', 'type': 'number'},
+    {'name': 'exp_time', 'type': 'number'},
+    {'name': 'num_exp', 'type': 'number'},
 ]
 
 # Authentication strategy can either be LOCKED (required login for all views)

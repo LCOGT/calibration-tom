@@ -100,13 +100,9 @@ WSGI_APPLICATION = 'calibration_tom.wsgi.application'
 
 DATABASES = {
    'default': {
-       'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),
-       'NAME': os.getenv('DB_NAME', 'tom_demo'),
-       'USER': os.getenv('DB_USER', 'postgres'),
-       'PASSWORD': os.getenv('DB_PASS', ''),
-       'HOST': os.getenv('DB_HOST', '127.0.0.1'),
-       'PORT': os.getenv('DB_PORT', '5432'),
-   },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
 }
 
 
@@ -197,7 +193,7 @@ TARGET_TYPE = 'SIDEREAL'
 FACILITIES = {
     'LCO': {
         'portal_url': 'http://observation-portal-dev.lco.gtn',
-        'api_key': os.getenv('OBSERVATION_PORTAL_DEV_API_KEY', 'not_set'),
+        'api_key': os.getenv('OBS_PORTAL_DEV_API_KEY', 'not_set'),
     }
 }
 

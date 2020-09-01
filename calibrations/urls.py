@@ -1,9 +1,9 @@
 from django.urls import path
 
-from . import views
+from calibrations.views import CalibrationSubmissionView
 
 urlpatterns = [
-    path('', views.index, name='calibrations_index'),
-    path('floyds_ogg', views.floyds_ogg, name='floyds_ogg'),
-    path('floyds_coj', views.floyds_coj, name='floyds_coj')
+    path('', CalibrationSubmissionView.as_view(), name='calibrations_index'),
+    # path('floyds_ogg', floyds_ogg, name='floyds_ogg'),
+    # path('floyds_coj', floyds_coj, name='floyds_coj')
 ]

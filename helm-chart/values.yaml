@@ -4,6 +4,15 @@
 
 replicaCount: 1
 
+# CronJob: cron_trigger management command
+# "* * * * *" is 'at every minute'
+# "/5 * * * *" is 'every 5th minute'
+# "13 * * * *" is '13 minutes after every hour'
+crontrigger:
+  enabled: true
+  schedule: "* * * * *"
+  resources: {}
+
 image:
   repository: docker.lco.global/calibration-tom
   pullPolicy: IfNotPresent

@@ -2,9 +2,9 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: {{ include "mop.fullname" . }}-crontrigger
+  name: {{ include "calibration-tom.fullname" . }}-crontrigger
   labels:
-{{ include "mop.labels" . | indent 4 }}
+{{ include "calibration-tom.labels" . | indent 4 }}
     app.kubernetes.io/component: "crontrigger"
 spec:
   concurrencyPolicy: "Forbid"
@@ -15,14 +15,14 @@ spec:
   jobTemplate:
     metadata:
       labels:
-        {{- include "mop.labels" . | nindent 8 }}
+        {{- include "calibration-tom.labels" . | nindent 8 }}
         app.kubernetes.io/component: "crontrigger"
     spec:
       activeDeadlineSeconds: 3600
       template:
         metadata:
           labels:
-            {{- include "mop.labels" . | nindent 12 }}
+            {{- include "calibration-tom.labels" . | nindent 12 }}
             app.kubernetes.io/component: "crontrigger"
         spec:
           restartPolicy: Never
@@ -37,7 +37,7 @@ spec:
                 - manage.py
                 - cron_trigger
               env:
-                {{- include "mop.backendEnv" . | nindent 16 }}
+                {{- include "calibration-tom.backendEnv" . | nindent 16 }}
               resources:
                 {{- toYaml .Values.crontrigger.resources | nindent 16 }}
               volumeMounts:

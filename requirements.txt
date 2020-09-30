@@ -1,4 +1,5 @@
-tomtoolkit==1.7.4
+# tomtoolkit==1.12.0.a2
 psycopg2===2.8.4
 gunicorn[gevent]==20.0.4
 whitenoise==5.2.0
+-e /home/david/projects/tom_base

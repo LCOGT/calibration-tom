@@ -8,24 +8,23 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpRequest
 
 from tom_targets.models import Target
-from .models import Instrument, Site
 
 
 class CalibrationSubmissionView(TemplateView):
     template_name = 'calibrations/index.html'
 
-    def _get_todays_targets(site: Site) -> Dict:
-        now = datetime.now()
-        todays_targets = Target.objects \
-            .filter(targetextra__key='site', targetextra__value=site.code.upper()) \
-            .filter(targetextra__key__contains='seasonal_start', targetextra__value__lte=now) \
-            .filter(targetextra__key__contains='seasonal_end', targetextra__value__gte=now)
-        return todays_targets
+    # def _get_todays_targets(site: Site) -> Dict:
+    #     now = datetime.now()
+    #     todays_targets = Target.objects \
+    #         .filter(targetextra__key='site', targetextra__value=site.code.upper()) \
+    #         .filter(targetextra__key__contains='seasonal_start', targetextra__value__lte=now) \
+    #         .filter(targetextra__key__contains='seasonal_end', targetextra__value__gte=now)
+    #     return todays_targets
 
     def get_context_data(self, **kwargs):
         todays_targets: Dict[str:Target] = {}
-        for site, site_code in [(site, site.code) for site in Site.objects.all()]:
-            todays_targets[site_code] = _get_todays_targets(site)
+        # for site, site_code in [(site, site.code) for site in Site.objects.all()]:
+        #     todays_targets[site_code] = _get_todays_targets(site)
 
         # Get NRES instruments
         response = requests.get('http://configdb.lco.global/sites/')

@@ -25,7 +25,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'uuly7s#w(7xm-h+%7jc@ej-lag5=1&amp;2-9m_185&amp;#(od0ih-!9r'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', False)
+DEBUG = os.getenv('DEBUG', True)
 
 ALLOWED_HOSTS = ['*', ]
 
@@ -98,13 +98,23 @@ WSGI_APPLICATION = 'calibration_tom.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
+# DATABASES = {
+#    'default': {
+#        'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),
+#        'NAME': os.getenv('DB_NAME', 'tom_demo'),
+#        'USER': os.getenv('DB_USER', 'postgres'),
+#        'PASSWORD': os.getenv('DB_PASS', ''),
+#        'HOST': os.getenv('DB_HOST', '127.0.0.1'),
+#        'PORT': os.getenv('DB_PORT', '5432'),
+#    },
+# }
+
 DATABASES = {
    'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
@@ -186,10 +196,18 @@ CACHES = {
 }
 
 # TOM Specific configuration
+HINTS_ENABLED = False
 HINT_LEVEL = 20
 TARGET_TYPE = 'SIDEREAL'
 
 # TODO: sort out dev vs. prod URL and api_key
+# FACILITIES = {
+#     'LCO': {
+#         'portal_url': 'http://observation-portal-dev.lco.gtn',
+#         'api_key': 'efc8c22ed48db4962008085fc4af4bfa5354fd7d',
+#     }
+# }
+
 FACILITIES = {
     'LCO': {
         'portal_url': 'http://observation-portal-dev.lco.gtn',
@@ -211,7 +229,11 @@ DATA_PROCESSORS = {
     'spectroscopy': 'tom_dataproducts.processors.spectroscopy_processor.SpectroscopyProcessor',
 }
 
+TOM_FACILITY_CLASSES = ['calibrations.lco_calibration_facility.LCOCalibrationFacility']
+
 TOM_ALERT_CLASSES = []
+
+TOM_CADENCE_STRATEGIES = ['calibrations.cadences.nres_cadence.NRESCadenceStrategy']
 
 BROKER_CREDENTIALS = {}
 
@@ -225,12 +247,15 @@ BROKER_CREDENTIALS = {}
 #     {'name': 'dicovery_date', 'type': 'datetime'}
 # ]
 EXTRA_FIELDS = [
-    {'name': 'site', 'type': 'string'},  # for FLOYDS targets
+    # {'name': 'site', 'type': 'string'},  # for FLOYDS targets
     {'name': 'seasonal_start', 'type': 'datetime'},
     {'name': 'seasonal_end', 'type': 'datetime'},
-    {'name': 'v_mag', 'type': 'number'},
+    # {'name': 'v_mag', 'type': 'number'},
     {'name': 'exp_time', 'type': 'number'},
-    {'name': 'num_exp', 'type': 'number'},
+    {'name': 'exp_count', 'type': 'number'},
+    {'name': 'observing_frequency', 'type': 'number', 'default': 5},
+    {'name': 'observing_period', 'type': 'number', 'default': 3},
+    {'name': 'nres_active_target', 'type': 'boolean', 'default': False},
 ]
 
 # Authentication strategy can either be LOCKED (required login for all views)

@@ -240,14 +240,17 @@ BROKER_CREDENTIALS = {}
 # ]
 EXTRA_FIELDS = [
     # {'name': 'site', 'type': 'string'},  # for FLOYDS targets
-    {'name': 'seasonal_start', 'type': 'datetime'},
-    {'name': 'seasonal_end', 'type': 'datetime'},
+    {'name': 'seasonal_start', 'type': 'number'},  # First of this month number the target becomes visible
+    {'name': 'seasonal_end', 'type': 'number'},  # Last of this month number the target ceases to be visible
     # {'name': 'v_mag', 'type': 'number'},
     {'name': 'exp_time', 'type': 'number'},
     {'name': 'exp_count', 'type': 'number'},
     {'name': 'observing_frequency', 'type': 'number', 'default': 5},
     {'name': 'observing_period', 'type': 'number', 'default': 3},
     {'name': 'nres_active_target', 'type': 'boolean', 'default': False},
+    {'name': 'cadence_expiration_date', 'type': 'datetime'},  # The date the target is no longer valid for a cadence
+    {'name': 'expected_rv', 'type': 'number'},
+    {'name': 'standard_type', 'type': 'string'}  # Either FLUX or RV
 ]
 
 # Authentication strategy can either be LOCKED (required login for all views)

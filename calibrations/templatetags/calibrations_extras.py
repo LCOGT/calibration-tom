@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django import template
 
 register = template.Library()
@@ -13,5 +15,4 @@ def site_calibration_button(site, instrument):
 
 @register.simple_tag
 def display_seasonal_start_or_end(month):
-    return month.strftime('%B')
-    # return datetime(year=datetime.now().year, month=month, day=1).strftime('%B')
+    return datetime(year=datetime.now().year, month=int(month), day=1).strftime('%B')

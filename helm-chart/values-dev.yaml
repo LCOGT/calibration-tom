@@ -8,6 +8,17 @@ djangoDebug: true
 
 replicaCount: 1
 
+# CronJob: cron_trigger management command
+crontrigger:
+  enabled: true
+  resources:
+    requests:
+      cpu: 10m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 1024Mi
+
 resources:
   requests:
     cpu: 10m

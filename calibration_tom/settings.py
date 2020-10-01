@@ -200,18 +200,10 @@ HINTS_ENABLED = False
 HINT_LEVEL = 20
 TARGET_TYPE = 'SIDEREAL'
 
-# TODO: sort out dev vs. prod URL and api_key
-# FACILITIES = {
-#     'LCO': {
-#         'portal_url': 'http://observation-portal-dev.lco.gtn',
-#         'api_key': 'efc8c22ed48db4962008085fc4af4bfa5354fd7d',
-#     }
-# }
-
 FACILITIES = {
     'LCO': {
-        'portal_url': 'http://observation-portal-dev.lco.gtn',
-        'api_key': os.getenv('OBS_PORTAL_DEV_API_KEY', 'not_set'),
+        'portal_url': os.getenv('OBSERVATION_PORTAL_URL', 'http://observation-portal-dev.lco.gtn'),
+        'api_key': os.getenv('OBSERVATION_PORTAL_API_KEY', 'not_set'),
     }
 }
 

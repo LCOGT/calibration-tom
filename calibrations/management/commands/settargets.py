@@ -101,7 +101,7 @@ class Command(BaseCommand):
 
         eligible_targets = self.get_eligible_targets(target_ids_to_exclude=target_ids_to_exclude)
 
-        return eligible_targets[random.randint(0, len(eligible_targets)-1)]
+        return random.choice(eligible_targets)
 
     def handle(self, *args, **options):
         # Identify and get the correct DynamicCadence for a site

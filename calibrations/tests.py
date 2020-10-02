@@ -3,6 +3,7 @@ from django.test import TestCase
 from tom_targets.models import Target
 
 targets = [
+    # Name, RA, Dec, seasonal_start, seasonal_end
     ('GJ699', 269.45, 4.69, 4, 8),
     ('GJ2066', 124.033256, 1.30257423, 12, 3),
     ('HD4628', 12.09573477, 5.28061377, 8, 12),
@@ -23,7 +24,14 @@ targets = [
 ]
 
 
-class TestTargetSelection(TestCase):
+# TODO: end-to-end test settargets.py management command
+class TestSetTargets(TestCase):
+    def setUp(self):
+        pass
+
+
+# TODO: write tests
+class TestCadenceTargetSelection(TestCase):
     def setUp(self):
         self.targets = []
         for target in targets:
@@ -40,3 +48,4 @@ class TestTargetSelection(TestCase):
         # invalid seasonal end, current year, before current month
         # valid seasonal end, next year
         # invalid seasonal end, next year
+        # test seasonal start as well

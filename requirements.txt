@@ -1,4 +1,4 @@
-tomtoolkit==1.13.0-alpha.1
+tomtoolkit==1.13.0a2
 psycopg2===2.8.4
 gunicorn[gevent]==20.0.4
 whitenoise==5.2.0

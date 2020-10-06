@@ -1,29 +1,29 @@
-{{- if .Values.crontrigger.enabled -}}
+{{- if .Values.settargets.enabled -}}
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: {{ include "calibration-tom.fullname" . }}-crontrigger
+  name: {{ include "calibration-tom.fullname" . }}-settargets
   labels:
 {{ include "calibration-tom.labels" . | indent 4 }}
-    app.kubernetes.io/component: "crontrigger"
+    app.kubernetes.io/component: "settargets"
 spec:
   concurrencyPolicy: "Forbid"
-  failedJobsHistoryLimit: {{ default 1 .Values.crontrigger.failedJobsHistoryLimit }}
-  successfulJobsHistoryLimit: {{ default 3 .Values.crontrigger.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ default 1 .Values.settargets.failedJobsHistoryLimit }}
+  successfulJobsHistoryLimit: {{ default 3 .Values.settargets.successfulJobsHistoryLimit }}
   startingDeadlineSeconds: 120
-  schedule: "{{ .Values.crontrigger.schedule }}"
+  schedule: "{{ .Values.settargets.schedule }}"
   jobTemplate:
     metadata:
       labels:
         {{- include "calibration-tom.labels" . | nindent 8 }}
-        app.kubernetes.io/component: "crontrigger"
+        app.kubernetes.io/component: "settargets"
     spec:
       activeDeadlineSeconds: 3600
       template:
         metadata:
           labels:
             {{- include "calibration-tom.labels" . | nindent 12 }}
-            app.kubernetes.io/component: "crontrigger"
+            app.kubernetes.io/component: "settargets"
         spec:
           restartPolicy: Never
           containers:
@@ -35,11 +35,11 @@ spec:
               command:
                 - python
                 - manage.py
-                - crontrigger
+                - settargets
               env:
                 {{- include "calibration-tom.backendEnv" . | nindent 16 }}
               resources:
-                {{- toYaml .Values.crontrigger.resources | nindent 16 }}
+                {{- toYaml .Values.settargets.resources | nindent 16 }}
               volumeMounts:
                 - name: tmp
                   mountPath: /tmp

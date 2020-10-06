@@ -1,0 +1,68 @@
+{{- if .Values.settargets.enabled -}}
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ include "calibration-tom.fullname" . }}-settargets
+  labels:
+{{ include "calibration-tom.labels" . | indent 4 }}
+    app.kubernetes.io/component: "settargets"
+spec:
+  concurrencyPolicy: "Forbid"
+  failedJobsHistoryLimit: {{ default 1 .Values.settargets.failedJobsHistoryLimit }}
+  successfulJobsHistoryLimit: {{ default 3 .Values.settargets.successfulJobsHistoryLimit }}
+  startingDeadlineSeconds: 120
+  schedule: "{{ .Values.settargets.schedule }}"
+  jobTemplate:
+    metadata:
+      labels:
+        {{- include "calibration-tom.labels" . | nindent 8 }}
+        app.kubernetes.io/component: "settargets"
+    spec:
+      activeDeadlineSeconds: 3600
+      template:
+        metadata:
+          labels:
+            {{- include "calibration-tom.labels" . | nindent 12 }}
+            app.kubernetes.io/component: "settargets"
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: {{ .Chart.Name }}
+              securityContext:
+                {{- toYaml .Values.securityContext | nindent 16 }}
+              image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              command:
+                - python
+                - manage.py
+                - settargets
+              env:
+                {{- include "calibration-tom.backendEnv" . | nindent 16 }}
+              resources:
+                {{- toYaml .Values.settargets.resources | nindent 16 }}
+              volumeMounts:
+                - name: tmp
+                  mountPath: /tmp
+                  readOnly: false
+
+          volumes:
+            - name: tmp
+              emptyDir:
+                medium: Memory
+                sizeLimit: 16Mi
+
+
+            {{- with .Values.nodeSelector }}
+              nodeSelector:
+                {{- toYaml . | nindent 16 }}
+            {{- end }}
+            {{- with .Values.affinity }}
+              affinity:
+                {{- toYaml . | nindent 16 }}
+            {{- end }}
+            {{- with .Values.tolerations }}
+              tolerations:
+                {{- toYaml . | nindent 16 }}
+            {{- end }}
+
+{{- end }}

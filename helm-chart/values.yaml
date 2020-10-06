@@ -13,6 +13,16 @@ crontrigger:
   schedule: "*/11 * * * *"
   resources: {}
 
+runcadencestrategies:
+  enabled: true
+  schedule: "25 * * * * *"  # 'every hour at 25 minutes past the hour'
+  resources: {}
+
+settargets:
+  enabled: true
+  schedule: "0 0 * * *"  # 'once per day at 0:00'
+  resources: {}
+
 image:
   repository: docker.lco.global/calibration-tom
   pullPolicy: IfNotPresent

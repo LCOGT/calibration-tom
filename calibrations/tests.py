@@ -2,7 +2,7 @@ from django.test import TestCase
 
 from tom_targets.models import Target
 
-targets = [
+test_targets = [
     # Name, RA, Dec, seasonal_start, seasonal_end
     ('GJ699', 269.45, 4.69, 4, 8),
     ('GJ2066', 124.033256, 1.30257423, 12, 3),
@@ -34,11 +34,14 @@ class TestSetTargets(TestCase):
 class TestCadenceTargetSelection(TestCase):
     def setUp(self):
         self.targets = []
-        for target in targets:
+        for target in test_targets:
             self.targets.append(Target.objects.create(
                 name=target[0], type='SIDEREAL', ra=target[1],
-                dec=target[2], seasonal_start=target[3], seasonal_end=target[4]
-            ))
+                dec=target[2]))
+
+            # TODO: add target_extras to these targets
+            # add target_extras
+            # seasonal_start=target[3], seasonal_end=target[4]
 
     def test_get_eligible_targets(self):
         pass

@@ -15,7 +15,7 @@ crontrigger:
 
 runcadencestrategies:
   enabled: true
-  schedule: "25 * * * * *"  # 'every hour at 25 minutes past the hour'
+  schedule: "25 * * * *"  # 'every hour at 25 minutes past the hour'
   resources: {}
 
 settargets:

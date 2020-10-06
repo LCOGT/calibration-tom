@@ -1,5 +1,6 @@
 import calendar
 from datetime import datetime, timedelta
+import logging
 import random
 
 from django.core.management.base import BaseCommand
@@ -11,6 +12,8 @@ from tom_observations.models import DynamicCadence, ObservationGroup, Observatio
 
 CADENCE_DURATION = 3
 
+logger = logging.getLogger(__name__)
+
 
 class Command(BaseCommand):
     """
@@ -20,7 +23,7 @@ class Command(BaseCommand):
     help = 'Trigger an event at a specific site.'
 
     def add_arguments(self, parser):
-        parser.add_argument('-s', '--site', help=self.sites, required=True)
+        parser.add_argument('-s', '--site', required=True)
 
     def get_eligible_targets(self, target_ids_to_exclude=[]):
         """
@@ -104,13 +107,19 @@ class Command(BaseCommand):
         return random.choice(eligible_targets)
 
     def handle(self, *args, **options):
+        logger.log(msg='trigger received', level=logging.INFO)
+
         # Identify and get the correct DynamicCadence for a site
         # TODO: add "last_run" as a property for DynamicCadence
         cadence_for_site = DynamicCadence.objects.filter(cadence_parameters__site=options['site'], active=True)
         if len(cadence_for_site) == 0:
-            raise Exception(f"No active cadence was found for site {options['site']}")
+            msg = f"No active cadence was found for site {options['site']}"
+            logger.log(msg=msg, level=logging.WARNING)
+            return msg
         elif len(cadence_for_site) > 1:
-            raise Exception(f"More than one active cadence was found for site {options['site']}")
+            msg = f"More than one active cadence was found for site {options['site']}"
+            logger.log(msg=msg, level=logging.WARNING)
+            return msg
         else:
             cadence_for_site = cadence_for_site.first()
 
@@ -132,5 +141,6 @@ class Command(BaseCommand):
                 observation_group=cadence_for_site.observation_group,
                 active=True
             )
+            # TODO: log nice message summarizing result of this run
             cadence_for_site.active = False
             cadence_for_site.save()

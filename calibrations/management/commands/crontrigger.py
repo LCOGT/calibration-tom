@@ -1,32 +1,7 @@
 from django.core.management.base import BaseCommand
 
-from lcogt_logging import LCOGTFormatter
 import logging
-import logging.config
 
-# TODO: move to settings.py
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'default': {
-            '()': LCOGTFormatter
-        }
-    },
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'default'
-        },
-    },
-    'loggers': {
-        '': {
-            'handlers': ['console'],
-            'level': 'INFO'
-        },
-    }
-}
-logging.config.dictConfig(LOGGING)
 logger = logging.getLogger(__name__)
 
 

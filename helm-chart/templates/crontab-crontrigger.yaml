@@ -35,7 +35,7 @@ spec:
               command:
                 - python
                 - manage.py
-                - cron_trigger
+                - crontrigger
               env:
                 {{- include "calibration-tom.backendEnv" . | nindent 16 }}
               resources:

@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from dateutil.parser import parse
 
 from django import forms
 from django.core.exceptions import ValidationError
@@ -10,14 +11,20 @@ from tom_targets.models import Target
 class NRESCalibrationForm(LCOBaseObservationForm):
     VALID_INSTRUMENT_CODES = ['1M0-NRES-SCICAM']
     VALID_PROPOSAL_CODES = ['ENG2017AB-001']
+    # This needs to exist on both the NRESCalibrationForm and the NRESCadenceForm
+    site = forms.CharField(widget=forms.HiddenInput())
 
-    # TODO: remove end time from visible fields and default to one day window
+    # TODO: nothing exists to ensure there's only one DynamicCadence per target/site
     # TODO: remove "Apply Observation Template" from target detail page
     def __init__(self, *args, **kwargs):
-        # target_id will be in a dict in args if the form is bound, and in initial otherwise
-        target_id = kwargs.get('target_id', kwargs.get('initial')['target_id'])
-        target = Target.objects.get(id=target_id)
         super().__init__(*args, **kwargs)
+
+        # target_id will be in data dict if the form is bound, and in initial otherwise
+        # NOTE: making this self.data.get('target_id', kwargs.get('initial', {})['target_id']) results in
+        # a KeyError--is the second statement evaluated in conjunction with the first??
+        target_id = self.data.get('target_id', kwargs.get('initial', {}).get('target_id'))
+        target = Target.objects.get(id=target_id)
+
         # The first item in the tuple is the form value, the second is the display value
         self.fields['cadence_strategy'] = forms.ChoiceField(
             choices=[('', 'Once'), ('NRESCadenceStrategy', 'Repeating every')],
@@ -32,9 +39,8 @@ class NRESCalibrationForm(LCOBaseObservationForm):
         self.fields['start'].initial = datetime.now()
         self.fields['end'].widget = forms.HiddenInput()
 
-        # TODO: remove these fields, which requires ditching them from the layout
-        # for field_name in ['period', 'jitter']:
-        #     self.fields.pop(field_name)
+        for field_name in ['period', 'jitter']:
+            self.fields.pop(field_name)
 
     def _build_instrument_config(self):
         # According to ConfigDB, there are no available optical elements for NRES instruments.
@@ -55,7 +61,9 @@ class NRESCalibrationForm(LCOBaseObservationForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        cleaned_data['end'] = datetime.strftime(datetime.now() + timedelta(hours=72), '%Y-%m-%dT%H:%M:%S')  # TODO: modify timedelta to 24 hours
+        if not cleaned_data.get('end'):
+            start = parse(cleaned_data['start'])
+            cleaned_data['end'] = datetime.strftime(start + timedelta(hours=24), '%Y-%m-%dT%H:%M:%S')
 
         if cleaned_data.get('cadence_strategy') is not None and not cleaned_data.get('cadence_frequency'):
             raise ValidationError('Repeating cadence must include a cadence frequency.')
@@ -66,13 +74,11 @@ class NRESCalibrationForm(LCOBaseObservationForm):
         return [(inst[0], inst[1]) for inst in super().instrument_choices() if inst[0] in self.VALID_INSTRUMENT_CODES]
 
     def layout(self):
-        # TODO: Fix layout to be better
         layout = super().layout()
+        layout = layout[0]
         return layout
 
     def proposal_choices(self):
-        # TODO: decide whether to limit proposal choices or prefill with initial value
-        # return super().proposal_choices()
         return [(proposal[0], proposal[1])
                 for proposal in super().proposal_choices()
                 if proposal[0] in self.VALID_PROPOSAL_CODES]

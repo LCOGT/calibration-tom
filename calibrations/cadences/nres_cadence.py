@@ -43,3 +43,4 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
 
     def update_observation_payload(self, observation_payload):
         observation_payload['target_id'] = self.dynamic_cadence.cadence_parameters['target_id']
+        return observation_payload

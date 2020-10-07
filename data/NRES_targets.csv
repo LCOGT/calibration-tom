@@ -1,4 +1,4 @@
-name,type,ra,dec,pm_ra,pm_dec,v_mag,exp_time,num_exp,standard_type,expected_rv,seasonal_start,seasonal_end
+name,type,ra,dec,pm_ra,pm_dec,v_mag,exp_time,exp_count,standard_type,expected_rv,seasonal_start,seasonal_end
 GJ699,SIDEREAL,269.4520825,4.69336427,-802.0,10362.0,9.5,"1,000.00",1,RV,-110.353,4,8
 GJ2066,SIDEREAL,124.033256,1.30257423,-376.0,60.0,10,"1,000.00",1,RV,62.215,12,3
 HD4628,SIDEREAL,12.09573477,5.28061377,755.0,-1141.0,5.7,600.00,1,RV,-10.165,8,12

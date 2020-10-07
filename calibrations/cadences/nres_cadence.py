@@ -1,32 +1,27 @@
-from datetime import datetime, timedelta
-from dateutil.parser import parse
-import json
-
 from crispy_forms.layout import Column, Div, HTML, Layout, Row
 from django import forms
 
 from tom_observations.cadence import BaseCadenceForm
 from tom_observations.cadences.resume_cadence_after_failure import ResumeCadenceAfterFailureStrategy
-from tom_observations.models import ObservationGroup
+
+
+NRES_SITES = ['cpt', 'lsc', 'elp', 'tlv']  # TODO: This should go in settings.py or be pulled from ConfigDB
 
 
 class NRESCadenceForm(BaseCadenceForm):
-    site = forms.ChoiceField(required=True, choices=(('cpt', 'cpt'), ('elp', 'elp')))
+    site = forms.ChoiceField(required=True, choices=[(site, site) for site in NRES_SITES])
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.cadence_fields += ['site', 'target_id']  # TODO: decide if this should be target or target_id
+        self.cadence_fields.update(['site', 'target_id'])  # TODO: decide if this should be target or target_id
 
     def cadence_layout(self):
         return Layout(
                 Div(
                     HTML('<p>Dynamic cadencing parameters. Leave blank if no dynamic cadencing is desired.</p>'),
                 ),
-                Row('cadence_strategy'),
-                Row(
-                    Column('cadence_frequency'),
-                    Column('site'),
-                )
+                Row(Column('site')),
+                Row(Column('cadence_strategy'), Column('cadence_frequency')),
             )
 
 
@@ -44,6 +39,7 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
     description = """This strategy schedules one observation in the cadence at a time. If the observation fails, it
                      re-submits the observation until it succeeds. If it succeeds, it submits the next observation on
                      the same cadence."""
+    form = NRESCadenceForm
 
     def update_observation_payload(self, observation_payload):
         observation_payload['target_id'] = self.dynamic_cadence.cadence_parameters['target_id']

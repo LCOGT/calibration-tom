@@ -14,7 +14,8 @@ class NRESCalibrationForm(LCOBaseObservationForm):
     # TODO: remove end time from visible fields and default to one day window
     # TODO: remove "Apply Observation Template" from target detail page
     def __init__(self, *args, **kwargs):
-        target_id = kwargs.get('initial', {}).get('target_id')
+        # target_id will be in a dict in args if the form is bound, and in initial otherwise
+        target_id = kwargs.get('target_id', kwargs.get('initial')['target_id'])
         target = Target.objects.get(id=target_id)
         super().__init__(*args, **kwargs)
         # The first item in the tuple is the form value, the second is the display value

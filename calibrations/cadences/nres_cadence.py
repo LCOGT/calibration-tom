@@ -13,7 +13,7 @@ class NRESCadenceForm(BaseCadenceForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.cadence_fields.update(['site', 'target_id'])  # TODO: decide if this should be target or target_id
+        self.cadence_fields.update(['site', 'target_id'])  # self.cadence_fields is a set
 
     def cadence_layout(self):
         return Layout(

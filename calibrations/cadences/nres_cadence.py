@@ -1,9 +1,13 @@
+import logging
+
 from crispy_forms.layout import Column, Div, HTML, Layout, Row
 from django import forms
 
 from tom_observations.cadence import BaseCadenceForm
-from tom_observations.cadences.resume_cadence_after_failure import ResumeCadenceAfterFailureStrategy
+from calibrations.cadences.resume_cadence_after_failure import ResumeCadenceAfterFailureStrategy
 
+
+logger = logging.getLogger(__name__)
 
 NRES_SITES = ['cpt', 'lsc', 'elp', 'tlv']  # TODO: This should go in settings.py or be pulled from ConfigDB
 
@@ -42,5 +46,6 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
     form = NRESCadenceForm
 
     def update_observation_payload(self, observation_payload):
+        logger.log(msg='Updating observation_payload', level=logging.INFO)
         observation_payload['target_id'] = self.dynamic_cadence.cadence_parameters['target_id']
         return observation_payload

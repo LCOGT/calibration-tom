@@ -38,6 +38,9 @@ spec:
                 - runcadencestrategies
               env:
                 {{- include "calibration-tom.backendEnv" . | nindent 16 }}
+              envFrom:
+                - secretRef:
+                    name: calibration-tom
               resources:
                 {{- toYaml .Values.runcadencestrategies.resources | nindent 16 }}
               volumeMounts:

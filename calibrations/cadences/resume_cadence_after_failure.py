@@ -45,51 +45,51 @@ class ResumeCadenceAfterFailureStrategy(CadenceStrategy):
         return observation_payload
 
     def run(self):
-        logger.log(msg='Running cadence strategy resume_cadence_after_failure', level=logger.INFO)
+        logger.log(msg='Running cadence strategy resume_cadence_after_failure', level=logging.INFO)
         # gets the most recent observation because the next observation is just going to modify these parameters
         last_obs = self.dynamic_cadence.observation_group.observation_records.order_by('-created').first()
-        logger.log(msg=f'Last obs id: {last_obs.id}')
+        logger.log(msg=f'Last obs id: {last_obs.id}', level=logging.INFO)
 
         # Make a call to the facility to get the current status of the observation
         facility = get_service_class(last_obs.facility)()
         facility.update_observation_status(last_obs.observation_id)  # Updates the DB record
         last_obs.refresh_from_db()  # Gets the record updates
 
-        logger.log(msg=f'Last obs status: {last_obs.status}')
+        logger.log(msg=f'Last obs status: {last_obs.status}', level=logging.INFO)
         # Boilerplate to get necessary properties for future calls
         start_keyword, end_keyword = facility.get_start_end_keywords()
         observation_payload = last_obs.parameters_as_dict
-        logger.log(msg=f'Last obs payload: {observation_payload}')
+        logger.log(msg=f'Last obs payload: {observation_payload}', level=logging.INFO)
 
         # Cadence logic
         # If the observation hasn't finished, do nothing
         if not last_obs.terminal:
-            logger.log(msg='Observation incomplete, do nothing', level=logger.INFO)
+            logger.log(msg='Observation incomplete, do nothing', level=logging.INFO)
             return
         elif last_obs.failed:  # If the observation failed
-            logger.log(msg='Observation failed, resubmit immediately', level=logger.INFO)
+            logger.log(msg='Observation failed, resubmit immediately', level=logging.INFO)
             # Submit next observation to be taken as soon as possible with the same window length
             window_length = parse(observation_payload[end_keyword]) - parse(observation_payload[start_keyword])
             observation_payload[start_keyword] = datetime.now().isoformat()
             observation_payload[end_keyword] = (parse(observation_payload[start_keyword]) + window_length).isoformat()
         else:  # If the observation succeeded
-            logger.log(msg='Observation complete, submit according to cadence', level=logger.INFO)
+            logger.log(msg='Observation complete, submit according to cadence', level=logging.INFO)
             # Advance window normally according to cadence parameters
             observation_payload = self.advance_window(
                 observation_payload, start_keyword=start_keyword, end_keyword=end_keyword
             )
 
         observation_payload = self.update_observation_payload(observation_payload)
-        logger.log(msg=f'New observation payload: {observation_payload}')
+        logger.log(msg=f'New observation payload: {observation_payload}', level=logging.INFO)
 
         # Submission of the new observation to the facility
         obs_type = last_obs.parameters_as_dict.get('observation_type')
         form = facility.get_form(obs_type)(observation_payload)
         form.is_valid()
-        logger.log(msg=f'Form valid: {form.is_valid()}')
+        logger.log(msg=f'Form valid: {form.is_valid()}', level=logging.INFO)
         observation_ids = facility.submit_observation(form.observation_payload())
 
-        logger.log(msg=f'New observation ids: {observation_ids}')
+        logger.log(msg=f'New observation ids: {observation_ids}', level=logging.INFO)
         # Creation of corresponding ObservationRecord objects for the observations
         new_observations = []
         for observation_id in observation_ids:

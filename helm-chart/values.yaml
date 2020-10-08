@@ -13,14 +13,13 @@ crontrigger:
   schedule: "*/11 * * * *"
   resources: {}
 
-#  schedule: "25 * * * *"  # 'every hour at 25 minutes past the hour'
 runcadencestrategies:
   enabled: true
-  schedule: "*/5 * * * *"  # 'every hour at 25 minutes past the hour'
+  schedule: "25 * * * *"  # 'every hour at 25 minutes past the hour'
   resources: {}
 
 settargets:
-  enabled: true
+  enabled: false  # TODO: enable this after fixing settargets management command
   schedule: "0 0 * * *"  # 'once per day at 0:00'
   resources: {}
 

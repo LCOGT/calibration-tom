@@ -4,7 +4,7 @@ from crispy_forms.layout import Column, Div, HTML, Layout, Row
 from django import forms
 
 from tom_observations.cadence import BaseCadenceForm
-from calibrations.cadences.resume_cadence_after_failure import ResumeCadenceAfterFailureStrategy
+from tom_observations.cadences.resume_cadence_after_failure import ResumeCadenceAfterFailureStrategy
 
 
 logger = logging.getLogger(__name__)

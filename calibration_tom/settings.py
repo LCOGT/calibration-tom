@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'tom_dataproducts',
     'tom_publications',
     'calibrations',
+    'nres_calibrations',
 ]
 
 SITE_ID = 1

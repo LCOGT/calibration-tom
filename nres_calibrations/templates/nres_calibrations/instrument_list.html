@@ -1,7 +1,11 @@
-{% extends 'tom_common/index.html' %}
+{% extends 'nres_calibrations/index.html' %}
 <!-- nres_calibrations/instrument_list.html -->
 {% block content %}
 <!-- block content -->
+{% block breadcrumbs %}
+    {{ block.super }} &raquo;
+    <a href="{% url 'nres_calibrations:nres_instrument_list' %}">Instrument List</a>
+{% endblock breadcrumbs%}
 <h1>NRES Calibrations Instrument List Page</h1>
 <a href="{% url 'nres_calibrations:nres_instrument_targets' 'asdf' %}">Instrument Targets</a>
 <!-- endblock content -->

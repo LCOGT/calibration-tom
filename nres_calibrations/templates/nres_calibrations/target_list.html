@@ -4,10 +4,15 @@
 <!-- block content -->
 {% block breadcrumbs %}
     {{ block.super }} &raquo;
-    <a href="{% url 'nres_calibrations:nres_instrument_targets' 'asdf' %}">Instrument Detail</a>
+    <a href="{% url 'nres_calibrations:nres_instrument_targets' inst %}">Instrument Detail</a>
 {% endblock breadcrumbs%}
 <h1>NRES Calibrations Target List Page</h1>
-<a href="{% url 'nres_calibrations:nres_target_detail' 'asdf' 1 %}">Target Detail</a>
+
+{% for target in targets %}
+<p><a href="{% url 'nres_calibrations:nres_target_detail' inst target.id %}">{{target.name}}</a></p>
+{% endfor %}
+
+<p>kwargs: {{ kwargs }}</p>
 
 <!-- endblock content -->
 {% endblock content %}

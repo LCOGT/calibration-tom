@@ -18,7 +18,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 urlpatterns = [
     path('', include('tom_common.urls')),
-    path('nres/', include(('nres_calibrations.urls','nres_calibration'), namespace='nres_calibration')),
+    path('nres/', include('nres_calibrations.urls', namespace='nres_calibrations')),
     path('calibrations/', include('calibrations.urls')),
     # admin comes from somewhere else
 ]

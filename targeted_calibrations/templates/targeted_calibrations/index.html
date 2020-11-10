@@ -1,0 +1,19 @@
+{% extends 'tom_common/index.html' %}
+<!-- targeted_calibrations/index.html -->
+{% block content %}
+<!-- block content -->
+  {% block breadcrumbs %}
+  <a href="{% url 'targeted_calibrations:targeted_calibrations_index' %}">Targeted Calibrations Home</a>
+  <!-- endblock breadcrumbs -->
+  {% endblock breadcrumbs %}
+
+<h1>Targeted Calibrations Index Page</h1>
+{% comment %}
+TODO: this should loop through a context or queryset supplied list of instrument types
+and link to a ListView of Instruments for that InstrumentType
+{% endcomment %}
+<a href="{% url 'targeted_calibrations:nres_instrument_list' %}">NRES Instrument List (instrument_type to be listed)</a>
+<p/>
+<a href="{% url 'targeted_calibrations:imager_instrument_list' %}">Imager Instrument List (instrument_type to be listed)</a>
+<!-- endblock content -->
+{% endblock content %}

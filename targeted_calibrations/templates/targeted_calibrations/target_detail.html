@@ -1,0 +1,12 @@
+{% extends 'targeted_calibrations/target_list.html' %}
+<!-- targeted_calibrations/target_detail.html -->
+{% block content %}
+<!-- block content -->
+{% block breadcrumbs %}
+    {{ block.super }} &raquo;
+    <a href="{% url 'targeted_calibrations:nres_target_detail' 'asdf' 1 %}">Target Detail</a>
+{% endblock breadcrumbs%}
+<h1>NRES Calibrations Target Detail Page</h1>
+<p>get_context_data kwargs: {{ kwargs }}</p>
+<!-- endblock content -->
+{% endblock content %}

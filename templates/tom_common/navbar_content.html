@@ -38,10 +38,21 @@ The following nav-item list elements (li) are included in the tom_common/base.ht
 </li>
 
 <li class="nav-item {% if 'user' in request.resolver_match.url_name %}active{% endif %}">
-    <a class="nav-link" href="{% url 'targeted_calibrations:nres_index' %}">NRES</a>
+    <a class="nav-link" href="{% url 'targeted_calibrations:instrument_type_list' %}">NRES</a>
 </li>
 
 <li class="nav-item {% if 'user' in request.resolver_match.url_name %}active{% endif %}">
-    <a class="nav-link" href="{% url 'targeted_calibrations:imager_index' %}">Imager</a>
+    <a class="nav-link" href="{% url 'targeted_calibrations:instrument_type_list' %}">Imager</a>
 </li>
+
+<li class="nav-item {% if 'user' in request.resolver_match.url_name %}active{% endif %}">
+    <a class="nav-link" href="{% url 'calibrations:bias_home' %}">Bias</a>
+</li>
+<li class="nav-item {% if 'user' in request.resolver_match.url_name %}active{% endif %}">
+    <a class="nav-link" href="{% url 'calibrations:dark_home' %}">Dark</a>
+</li>
+<li class="nav-item {% if 'user' in request.resolver_match.url_name %}active{% endif %}">
+    <a class="nav-link" href="{% url 'calibrations:flat_home' %}">Flat</a>
+</li>
+
 

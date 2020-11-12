@@ -3,7 +3,7 @@
 {% block content %}
 <!-- block content -->
   {% block breadcrumbs %}
-  <a href="{% url 'targeted_calibrations:targeted_calibrations_index' %}">Targeted Calibrations Home</a>
+  <a href="{% url 'targeted_calibrations:instrument_type_list' %}">Targeted Calibrations Home</a>
   <!-- endblock breadcrumbs -->
   {% endblock breadcrumbs %}
 
@@ -11,9 +11,11 @@
 {% comment %}
 TODO: this should loop through a context or queryset supplied list of instrument types
 and link to a ListView of Instruments for that InstrumentType
-{% endcomment %}
-<a href="{% url 'targeted_calibrations:nres_instrument_list' %}">NRES Instrument List (instrument_type to be listed)</a>
+TODO: this is
+<a href="{% url 'targeted_calibrations:instrument_type_list' %}">Instrument Type List (instrument_type to be listed)</a>
 <p/>
-<a href="{% url 'targeted_calibrations:imager_instrument_list' %}">Imager Instrument List (instrument_type to be listed)</a>
+<a href="{% url 'targeted_calibrations:instrument_type_list' %}">Instrument List (instrument_type to be listed)</a>
+{% endcomment %}
+
 <!-- endblock content -->
 {% endblock content %}

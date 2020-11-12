@@ -4,7 +4,7 @@
 <!-- block content -->
 {% block breadcrumbs %}
     {{ block.super }} &raquo;
-    <a href="{% url 'targeted_calibrations:nres_target_detail' 'asdf' 1 %}">Target Detail</a>
+    <a href="{% url 'targeted_calibrations:instrument_target_detail' instrument_type instruemtent_code target_id %}">Target Detail</a>
 {% endblock breadcrumbs%}
 <h1>NRES Calibrations Target Detail Page</h1>
 <p>get_context_data kwargs: {{ kwargs }}</p>

@@ -4,16 +4,44 @@
 <!-- block content -->
 {% block breadcrumbs %}
     {{ block.super }} &raquo;
-    <a href="{% url 'targeted_calibrations:instrument_target_list' 'instrument_type' 'instrument_code' %}">Instrument Detail</a>
+    <a href="{% url 'targeted_calibrations:instrument_target_list' instrument_type instrument_code %}">Instrument Target List</a>
 {% endblock breadcrumbs%}
 
-<h1>{{ instrument_code }} Calibrations Target List Page</h1>
+<h1>{{ instrument_code }} Target List</h1>
+    <div>
+        <table class='table table-striped'>
+            <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Name</th>
+                <th scope="col">Target Type</th>
+                <th scope="col">Target Active</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for target in object_list %}
+            <tr>
+                <td>
+                    <a href="{% url 'targeted_calibrations:instrument_target_detail' instrument_type instrument_code target.id %}">{{target.id}}</a>
+                </td>
+                <td>
+                {{target.name}}
+                </td>
+                <td>
+                {{target.type}}
+                </td>
+                <td>
+                {{target.active}}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+<hr/>
 
-<div class="">
-{% for target in targets %}
-<p><a href="{% url 'targeted_calibrations:instrument_target_detail' instrument_type instrument_code target.id %}">{{target.name}}</a></p>
-{% endfor %}
-</div>
+
+<h3>debug data:</h3>
 <p>get_context_data kwargs: {{ kwargs }}</p>
 
 <!-- endblock content -->

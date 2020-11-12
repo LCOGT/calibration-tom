@@ -7,11 +7,32 @@
     <a href="{% url 'targeted_calibrations:instrument_list' instrument_type %}">{{ instrument_type }} Instrument List</a>
 {% endblock breadcrumbs%}
 
-<h1>{{ instrument_type }} Calibrations Instrument List Page</h1>
+<h1>{{ instrument_type }} Instrument List</h1>
+    <div>
+        <table class='table table-striped'>
+            <thead>
+            <tr>
+                <th scope="col">Instrument Code</th>
+                <th scope="col">Instrument State</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for instrument in object_list %}
+            <tr>
+                <td>
+                    <a href="{% url 'targeted_calibrations:instrument_target_list' instrument_type instrument.code %}">{{instrument.code}}</a>
+                </td>
+                <td>
+                {{instrument.state}}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+<hr/>
 
-{% for instrument in object_list %}
-<p><a href="{% url 'targeted_calibrations:instrument_target_list' instrument_type instrument.code %}">{{instrument.code}}</a></p>
-{% endfor %}
+
 
 <p>get_context_data kwargs: {{ kwargs }}</p>
 

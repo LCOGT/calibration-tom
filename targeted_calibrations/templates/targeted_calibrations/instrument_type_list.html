@@ -4,28 +4,33 @@
 <!-- block content -->
 {% block breadcrumbs %}
     {{ block.super }} &raquo;
-    <a href="{% url 'targeted_calibrations:instrument_type_list' %}">Instrument Type List View</a>
+    <a href="{% url 'targeted_calibrations:instrument_type_list' %}">Instrument Types</a>
 {% endblock breadcrumbs%}
 
-<h1>Instrument Type List View Page</h1>
+<h1>Instrument Types</h1>
     <div>
         <table class='table table-striped'>
             <thead>
             <tr>
-                <th scope="col">Instrument Type</th>
+                <th scope="col">Instrument Type Code</th>
+                <th scope="col">Instrument Type Name</th>
             </tr>
             </thead>
             <tbody>
-            {% for instrument in object_list %}
+            {% for instrument_type in object_list %}
             <tr>
-              <td>
-                <a href="{% url 'targeted_calibrations:instrument_list' instrument.code %}">{{instrument.code}}</a></li>
-              </td>
+                <td>
+                    <a href="{% url 'targeted_calibrations:instrument_list' instrument_type.code %}">{{instrument_type.code}}</a>
+                </td>
+                <td>
+                {{instrument_type.name}}
+                </td>
             </tr>
             {% endfor %}
             </tbody>
         </table>
     </div>
+<hr/>
 
 
 <p>get_context_data kwargs: {{ kwargs }}</p>

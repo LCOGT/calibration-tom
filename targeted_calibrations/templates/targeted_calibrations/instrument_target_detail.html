@@ -1,0 +1,22 @@
+{% extends 'targeted_calibrations/instrument_target_list.html' %}
+<!-- targeted_calibrations/instrument_target_detail.html -->
+{% load targets_extras %}
+{% block content %}
+<!-- block content -->
+{% block breadcrumbs %}
+    {{ block.super }} &raquo;
+    <a href="{% url 'targeted_calibrations:instrument_target_detail' instrument_type instrument_code target_id %}">{{ target.name }} Target Detail</a>
+{% endblock breadcrumbs%}
+
+<h1>{{ target.name }} Target Detail Page</h1>
+{% target_data object %}
+
+<hl/>
+<h3>debug data:</h3>
+<p>get_context_data kwargs: {{ kwargs }}</p>
+<p>get_context_data template_name: {{ template_name }}</p>
+<p>get_context_data instrument_type: {{ instrument_type }}</p>
+<p>get_context_data instrument_code: {{ instrument_code }}</p>
+
+<!-- endblock content -->
+{% endblock content %}

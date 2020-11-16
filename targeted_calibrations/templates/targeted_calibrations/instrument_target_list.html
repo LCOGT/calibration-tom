@@ -4,7 +4,7 @@
 <!-- block content -->
 {% block breadcrumbs %}
     {{ block.super }} &raquo;
-    <a href="{% url 'targeted_calibrations:instrument_target_list' instrument_type instrument_code %}">Instrument Target List</a>
+    <a href="{% url 'targeted_calibrations:instrument_target_list' instrument_type instrument_code %}">{{ instrument_code }} Instrument Target List</a>
 {% endblock breadcrumbs%}
 
 <h1>{{ instrument_code }} Target List</h1>

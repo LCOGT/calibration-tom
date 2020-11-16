@@ -22,8 +22,7 @@ class InstrumentTypeListView(ListView):
         return context
 
     def get_queryset(self):
-        #        self.queryset = super().get_queryset()
-        print(f'queryset: {self.queryset}')
+        print(f'queryset: {self.queryset}')  # TODO: remove after debugging
         if self.queryset is None:
             pass
         queryset = [
@@ -64,8 +63,7 @@ class InstrumentListView(ListView):
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
-        #        self.queryset = super().get_queryset()
-        print(f'queryset: {self.queryset}')
+        print(f'queryset: {self.queryset}')  # TODO: remove after debugging
         if self.queryset is None:
             pass
         queryset = [

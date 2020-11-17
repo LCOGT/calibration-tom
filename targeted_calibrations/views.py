@@ -4,12 +4,12 @@ import logging
 from django.views.generic import ListView, DetailView
 from tom_targets.models import Target
 
-from calibration_tom.settings import CONFIGDB_URL, EXTRA_FIELDS
+from django.conf import settings
 from configdb.configdb_connections import ConfigDBInterface
 
 logger = logging.getLogger(__name__)
 
-configdb = ConfigDBInterface(CONFIGDB_URL)  # TODO: rethink how we store this property
+configdb = ConfigDBInterface(settings.CONFIGDB_URL)  # TODO: rethink how we store this property
 
 
 class InstrumentTypeListView(ListView):

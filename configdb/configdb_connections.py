@@ -65,7 +65,7 @@ class ConfigDBInterface(object):
 
         return json_results['results']
 
-    def get_active_telescopes_info(self, site_code='all'):
+    def get_active_telescopes_info(self, site_code='all'):  # noqa
         """ Returns set of telescopes that are currently active """
         active_telescopes = {}
         for site in ConfigDBInterface.site_info:
@@ -85,6 +85,23 @@ class ConfigDBInterface(object):
                                     'ha_limit_pos': telescope['ha_limit_pos']
                                 }
         return active_telescopes
+
+    def get_instruments_types(self, site_code: str = 'all') -> list:  # noqa
+        """Returns a list of InstrumentType dictionaries
+        """
+        # TODO: define an site.InstrumentType class
+        instrument_types: dict = {}  # use a dict to keep values unique; avoiding duplicates
+
+        for site in ConfigDBInterface.site_info:
+            if site['code'] == site_code or site_code == 'all':
+                for enclosure in site['enclosure_set']:
+                    for telescope in enclosure['telescope_set']:
+                        for instrument in telescope['instrument_set']:
+                            instrument_types[instrument['instrument_type']['code']] = {
+                                'code': instrument['instrument_type']['code'],
+                                'name': instrument['instrument_type']['name'],
+                                }
+        return list(instrument_types.values())  # just return the list of values
 
     @staticmethod
     def should_include_instrument(state: InstrumentState, everything: bool, commissioning: bool) -> bool:

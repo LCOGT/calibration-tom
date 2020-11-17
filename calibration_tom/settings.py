@@ -60,7 +60,6 @@ INSTALLED_APPS = [
     'tom_publications',
     'targeted_calibrations',
     'calibrations',
-    #'nres_calibrations',
 ]
 
 SITE_ID = 1
@@ -278,6 +277,8 @@ AUTO_THUMBNAILS = False
 THUMBNAIL_MAX_SIZE = (0, 0)
 
 THUMBNAIL_DEFAULT_SIZE = (200, 200)
+
+CONFIGDB_URL = os.getenv('CONFIGDB_URL', 'http://configdb-dev.lco.gtn')
 
 try:
     from local_settings import *  # noqa

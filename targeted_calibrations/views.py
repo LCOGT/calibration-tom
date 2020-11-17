@@ -4,7 +4,7 @@ import logging
 from django.views.generic import ListView, DetailView
 from tom_targets.models import Target
 
-from calibration_tom.settings import CONFIGDB_URL
+from calibration_tom.settings import CONFIGDB_URL, EXTRA_FIELDS
 from configdb.configdb_connections import ConfigDBInterface
 
 logger = logging.getLogger(__name__)
@@ -124,8 +124,13 @@ class InstrumentTargetDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
         # add to the context here
+
+        # target = kwargs['object']
+        # extras = {key['name']: target.extra_fields.get(key['name'], '') for key in EXTRA_FIELDS if
+        #           not key.get('hidden')}
+        # context['extras'] = extras
+        # context['target'] = target
 
         # insert url parameter(s) into the context
         context['instrument_type'] = self.kwargs.get('instrument_type', '')

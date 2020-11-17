@@ -1,7 +1,15 @@
 # from django.shortcuts import render
+import logging
 
-from tom_targets.models import Target
 from django.views.generic import ListView, DetailView
+from tom_targets.models import Target
+
+from calibration_tom.settings import CONFIGDB_URL
+from configdb.configdb_connections import ConfigDBInterface
+
+logger = logging.getLogger(__name__)
+
+configdb = ConfigDBInterface(CONFIGDB_URL)  # TODO: rethink how we store this property
 
 
 class InstrumentTypeListView(ListView):
@@ -21,24 +29,18 @@ class InstrumentTypeListView(ListView):
 
         return context
 
-    def get_queryset(self):
-        print(f'queryset: {self.queryset}')  # TODO: remove after debugging
-        if self.queryset is None:
-            pass
-        queryset = [
-            {'code': '1M0-SCICAM-SINISTRO',
-             'name': '1m0-SciCam-Sinistro'},
-            {'code': '2M0-SCICAM-SPECTRAL',
-             'name': '2.0 meter Spectral'},
-            {'code': '0M4-SCICAM-SBIG',
-             'name': '0.4 meter SBIG'},
-            {'code': '2M0-FLOYDS-SCICAM',
-             'name': '2.0 meter FLOYDS'},
-            {'code': '1M0-NRES-SCICAM',
-             'name': '1.0 meter NRES'},
-        ]
+    def get_queryset(self) -> list:
+        """
+        Extract the a list of instrument_type dictionaries from configdb.
+        Dictionary list elements should have 'code' and 'name' keys.
 
-        return queryset
+        :return: [{'name': "NAME", 'code': "code"}, ... ]
+        """
+        queryset = configdb.get_instruments_types('all')
+
+        # process queryset here before returning
+
+        return sorted(queryset, key=lambda item: item['code'])
 
 
 class InstrumentListView(ListView):
@@ -57,27 +59,28 @@ class InstrumentListView(ListView):
 
         return context
 
-    def get(self, request, *args, **kwargs):  # TODO: remove after debugging
-        print(f'get args {args}')
-        print(f'get kwargs {kwargs}')  # this is where the url params are
-        return super().get(request, *args, **kwargs)
-
     def get_queryset(self):
-        print(f'queryset: {self.queryset}')  # TODO: remove after debugging
-        if self.queryset is None:
-            pass
-        queryset = [
-            {'code': 'nres01',
-             'state': 'MANUAL'},
-            {'code': 'nres02',
-             'state': 'MANUAL'},
-            {'code': 'nres03',
-             'state': 'STANDBY'},
-            {'code': 'nres04',
-             'state': 'MANUAL'},
-        ]
+        """
+        Construct queryset from configdb.
+        :return:
+        """
+        instrument_type = self.kwargs['instrument_type']  # from URL via instance kwargs
+        instrument_infos = configdb.get_active_instruments_info(instrument_type=instrument_type)
 
-        return queryset
+        queryset = []
+        for instrument_info in instrument_infos.values():
+            if len(instrument_info) != 1:
+                logger.warning(f'configdb instrument_info has more than one list element: {instrument_info}')
+            instrument_info = instrument_info[0]  # NOTE: I'm not sure why there is a 1-element list in instrument_info
+            queryset.append({
+                'code': instrument_info['code'],
+                'site': instrument_info['site'],
+                'enclosure': instrument_info['observatory'],  # this is really enclosure
+                'telescope': instrument_info['telescope'],
+                'state': instrument_info['state'],
+            })
+
+        return sorted(queryset, key=lambda item: item['code'])
 
 
 class InstrumentTargetListView(ListView):
@@ -97,31 +100,19 @@ class InstrumentTargetListView(ListView):
 
         return context
 
-    def _get_target_list_for_instrument(self):
-        target_list = [
-            {'id': 0,
-             'name': 'target00',
-             'active': False,
-             'type': 'RV',
-             },
-            {'id': 1,
-             'name': 'target01',
-             'active': True,
-             'type': 'RV',
-             },
-            {'id': 2,
-             'name': 'target02',
-             'active': False,
-             'type': 'FLUX',
-             },
-        ]
-        return target_list
+    def _get_target_list_for_instrument(self):  # noqa
+        """
+        Return the Targets for the given instrument.
+        (instrument_type and instrument_code available in instance self.kwargs).
+        :return:
+        """
+        return Target.objects.all()  # noqa
 
     def get_queryset(self):
-        target_list = self._get_target_list_for_instrument()
+        targets = self._get_target_list_for_instrument()
 
         # here, convert the target list in to a sane queryset
-        queryset = target_list  # the degenerate case
+        queryset = targets  # the degenerate case
 
         return queryset
 

@@ -1,6 +1,6 @@
 {% extends 'targeted_calibrations/instrument_list.html' %}
 <!-- targeted_calibrations/instrument_target_list.html -->
-{% load targets_extras %}
+{% load calibrations_extras %}
 {% block content %}
 <!-- block content -->
 {% block breadcrumbs %}
@@ -14,8 +14,10 @@
             <thead>
             <tr>
                 <th scope="col">Name</th>
-                <th scope="col">Target Type</th>
+                <th scope="col">Standard Type</th>
                 <th scope="col">Target Active</th>
+                <th scope="col">Seasonal Start</th>
+                <th scope="col">Seasonal End</th>
             </tr>
             </thead>
             <tbody>
@@ -24,39 +26,16 @@
                 <td>
                     <a href="{% url 'targeted_calibrations:instrument_target_detail' instrument_type instrument_code target.id %}">{{target.name}}</a>
                 </td>
-                <td>
-                {{target.type}}
-                </td>
-                <td>
-                {{target.standard_type}}
-                </td>
+                <td>{{ target.extra_fields.standard_type }}</td>
+                <td>{{target.extra_fields.nres_active_target}}</td>
+                <td>{% display_seasonal_start_or_end target.extra_fields.seasonal_start %}</td>
+                <td>{% display_seasonal_start_or_end target.extra_fields.seasonal_end %}</td>
             </tr>
             {% endfor %}
             </tbody>
         </table>
     </div>
 <hr/>
-
-
-<h3>debug data:</h3>
-<p>get_context_data kwargs: {{ kwargs }}</p>
-<hr/>
-{% for target in object_list %}
-  {% for key, value in target.as_dict.items %}
-    <p>{{ key }}: {{value}} </p>
-  {% endfor %}
-<h4>tags</h4>
-  {% for key, value in target.tags.items %}
-    <p>{{ key }}: {{value}} </p>
-  {% endfor %}
-<hr/>
-{% endfor %}
-<hr/><hr/>
-{% for key, value in target.extra_fields.items %}
-  <dt class="col-sm-6">{{ key }}</dt>
-  <dd class="col-sm-6">{{ value }}</dd>
-{% endfor %}
-
 
 <!-- endblock content -->
 {% endblock content %}

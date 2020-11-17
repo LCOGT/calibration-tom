@@ -108,6 +108,7 @@ class InstrumentTargetListView(ListView):
         """
         return Target.objects.all()  # noqa
 
+    # TODO: specify model = Target ; this override is unnecessary
     def get_queryset(self):
         targets = self._get_target_list_for_instrument()
 

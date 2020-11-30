@@ -122,8 +122,10 @@ class ConfigDbInterfaceTests(unittest.TestCase):
 
     @responses.activate
     def test_get_instruments_types(self):
-        """
+        """assert various properties of the return value
 
+        * return value should be a list of dictionaries, with 'code' and 'name' keys
+        * the list of instrument codes should be unique (i.e. the list of code values should not contain duplicates)
         """
         # mock the call to configdb
         config_db_url = 'http://some-url'
@@ -139,6 +141,6 @@ class ConfigDbInterfaceTests(unittest.TestCase):
         self.assertTrue(instrument_types[0].keys().__contains__('code'))
         self.assertTrue(instrument_types[0].keys().__contains__('name'))
 
-        # the codes should be unique (the list of code values should not contain duplicates
+        # the codes should be unique (the list of code values should not contain duplicates)
         instrument_codes = [instrument_type['code'] for instrument_type in instrument_types]
         self.assertEqual(len(instrument_codes), len(set(instrument_codes)))

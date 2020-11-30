@@ -119,3 +119,26 @@ class ConfigDbInterfaceTests(unittest.TestCase):
 
         include_instrument = ConfigDBInterface.should_include_instrument(InstrumentState.STANDBY, False, False)
         self.assertTrue(include_instrument)
+
+    @responses.activate
+    def test_get_instruments_types(self):
+        """
+
+        """
+        # mock the call to configdb
+        config_db_url = 'http://some-url'
+        responses.add(responses.GET, f'{config_db_url}/sites/', json=sites, status=HTTPStatus.OK)
+        config_db = ConfigDBInterface(config_db_url)
+
+        # call the method under test
+        instrument_types = config_db.get_instruments_types()  # the method under test
+
+        # the return value should be a list of dictionaries, with 'code' and 'name' keys
+        self.assertIsInstance(instrument_types, list)
+        self.assertIsInstance(instrument_types[0], dict)
+        self.assertTrue(instrument_types[0].keys().__contains__('code'))
+        self.assertTrue(instrument_types[0].keys().__contains__('name'))
+
+        # the codes should be unique (the list of code values should not contain duplicates
+        instrument_codes = [instrument_type['code'] for instrument_type in instrument_types]
+        self.assertEqual(len(instrument_codes), len(set(instrument_codes)))

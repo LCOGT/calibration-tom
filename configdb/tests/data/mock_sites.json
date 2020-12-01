@@ -1,0 +1,97 @@
+{
+    "count": 3,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "code": "bpl",
+            "long": -119.8630833,
+            "active": true,
+            "lat": 34.43314722,
+            "enclosure_set": [
+                {
+                    "code": "doma",
+                    "telescope_set": [
+                        {
+                            "code": "1m0a",
+                            "active": true,
+                            "ha_limit_pos": 4.6,
+                            "horizon": 15.0,
+                            "ha_limit_neg": -4.6
+                        }
+                    ],
+                    "active": true,
+                    "id": 1
+                }
+            ],
+            "restart": "19:00:00",
+            "tz": "US/Pacific"
+        },
+        {
+            "code": "coj",
+            "long": 149.070648,
+            "active": true,
+            "lat": -31.272932,
+            "enclosure_set": [
+                {
+                    "code": "clma",
+                    "telescope_set": [
+                        {
+                            "code": "0m4a",
+                            "active": true,
+                            "ha_limit_pos": 4.4666667,
+                            "horizon": 25.0,
+                            "ha_limit_neg": -4.533333
+                        },
+                        {
+                            "code": "0m4b",
+                            "active": false,
+                            "ha_limit_pos": 4.4666667,
+                            "horizon": 25.0,
+                            "ha_limit_neg": -4.533333
+                        }
+                    ],
+                    "active": true,
+                    "id": 3
+                },
+                {
+                    "code": "doma",
+                    "telescope_set": [
+                        {
+                            "code": "1m0a",
+                            "active": true,
+                            "ha_limit_pos": 4.6,
+                            "horizon": 15.0,
+                            "ha_limit_neg": -4.6
+                        }
+                    ],
+                    "active": false
+                }
+            ],
+            "restart": "02:00:00",
+            "tz": "Australia/Sydney"
+        },
+        {
+            "code": "wtf",
+            "long": -119.8630833,
+            "active": false,
+            "lat": 34.43314722,
+            "enclosure_set": [
+                {
+                    "code": "doma",
+                    "telescope_set": [
+                        {
+                            "code": "1m0a",
+                            "active": true,
+                            "ha_limit_pos": 4.6,
+                            "horizon": 15.0,
+                            "ha_limit_neg": -4.6
+                        }
+                    ],
+                    "active": true,
+                    "id": 1
+                }
+            ]
+        }
+    ]
+}

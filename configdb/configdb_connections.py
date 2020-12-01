@@ -3,6 +3,8 @@ from http import HTTPStatus
 from typing import List, Dict, Any, FrozenSet, Union
 import requests
 
+# from django.core.cache import cache
+
 from configdb.state import InstrumentState
 from configdb.site import SiteCode, Instrument, Readout, Location, Overheads, InstrumentInfo
 
@@ -33,6 +35,20 @@ class ConfigDBInterface(object):
         self.update_site_info()
 
     # FIXME: Retry connecting to configdb if it fails
+    # FIXME: Alternatively, cache the response and attempt to load from cache first
+    # def update_site_info(self):
+    #     cached_site_info = cache.get('configdb_sites')
+
+    #     if not cached_site_info:
+    #         try:
+    #             cached_site_info = self._get_all_sites()
+    #             ConfigDBInterface.site_info = cached_site_info
+    #             cache.set('configdb_sites', cached_site_info)
+    #         except ConfigDBException as e:
+    #             logger.warning('update_site_info error {}. Reusing previous site info'.format(repr(e)))
+    #     else:
+    #         ConfigDBInterface.site_info = cached_site_info
+
     def update_site_info(self):
         try:
             new_site_info = self._get_all_sites()

@@ -1,5 +1,6 @@
 import json
 import os
+from requests.exceptions import RequestException
 import unittest
 from http import HTTPStatus
 
@@ -9,15 +10,14 @@ from configdb.configdb_connections import ConfigDBInterface, ConfigDBException, 
     InstrumentNotFoundException  # the module under test
 from configdb.state import InstrumentState
 
-# TODO: timestamp the configdb json dump so we know how old it is.
-# TODO: update data/sites.json with latest configdb data.
-_configdb_sites = os.path.join(os.path.dirname(__file__), 'data/sites.json')
+_configdb_sites = os.path.join(os.path.dirname(__file__), 'data/sites_2020-11-30.json')
 
 f = open(_configdb_sites, 'r')
 sites = json.load(f)
 f.close()
 
 
+# TODO: This should be broken up into more classes, probably one per method.
 class ConfigDbInterfaceTests(unittest.TestCase):
 
     def setUp(self):
@@ -26,16 +26,55 @@ class ConfigDbInterfaceTests(unittest.TestCase):
         responses.start()
         responses.add(responses.GET, f'{self.config_db_url}/sites/', json=sites, status=HTTPStatus.OK)
 
-    def testDown(self):  # noqa
+    def tearDown(self):  # noqa
         responses.stop()
         responses.reset()
 
-    @unittest.skip
     def test_update_site_info_exception(self):
-        print(responses.mock._matches)
+        """Test that an exception in _get_all_sites raises the correct exception and message."""
+        self.config_db.site_info = ['test_site_info_value']
+
         responses.replace(responses.GET, f'{self.config_db_url}/sites/', status=HTTPStatus.NOT_FOUND)
-        with self.assertRaises(ConfigDBException):
+        self.config_db.update_site_info()
+        with self.assertLogs('configdb.configdb_connections', level='WARNING') as logs:
             self.config_db.update_site_info()
+            # FIXME: How to properly format this for flake8?
+            self.assertIn(
+                f'WARNING:configdb.configdb_connections:update_site_info error ConfigDBException(\'get_all_sites failed: ConfigDB status code {HTTPStatus.NOT_FOUND}\'). Reusing previous site info',
+                logs.output)
+        self.assertEqual(self.config_db.site_info, ['test_site_info_value'])
+
+    def test_get_all_sites(self):
+        results = self.config_db._get_all_sites()
+
+        self.assertDictContainsSubset({'code': 'bpl'}, results[0])
+
+    def test_get_all_sites_request_exception(self):
+        """Test that an exception in a request raises the correct exception and message."""
+        responses.replace(responses.GET, f'{self.config_db_url}/sites/', body=RequestException())
+
+        with self.assertRaises(ConfigDBException) as cm:
+            self.config_db._get_all_sites()
+
+        self.assertEqual(cm.exception.args[0], 'RequestException: get_all_sites failed: ConfigDB connection down')
+
+    def test_get_all_sites_bad_http_response(self):
+        """Test that a response other than 200 raises the correct exception and message."""
+        responses.replace(responses.GET, f'{self.config_db_url}/sites/', status=HTTPStatus.NOT_FOUND)
+
+        with self.assertRaises(ConfigDBException) as cm:
+            self.config_db._get_all_sites()
+
+        self.assertEqual(cm.exception.args[0], f'get_all_sites failed: ConfigDB status code {HTTPStatus.NOT_FOUND}')
+
+    def test_get_all_sites_invalid_response(self):
+        """Test that an unexpected response from ConfigDB raises the correct exception and message."""
+        responses.replace(responses.GET, f'{self.config_db_url}/sites/', body='{"invalid": "response"}')
+
+        with self.assertRaises(ConfigDBException) as cm:
+            self.config_db._get_all_sites()
+
+        self.assertEqual(cm.exception.args[0], 'get_all_sites failed: ConfigDB returned no results')
 
     def test_should_not_contain_disabled_instruments(self):
         """TODO: document me
@@ -165,3 +204,38 @@ class ConfigDbInterfaceTests(unittest.TestCase):
         # now ask for an non-existent instrument
         with self.assertRaises(InstrumentNotFoundException):
             _ = self.config_db.get_matching_instrument(site='ogg', observatory='doma')  # OGG has no doma
+
+
+class TestGetActiveTelescopesInfo(unittest.TestCase):
+    # NOTE: This is in its own class because it uses a modified data set to test inactive telescopes/enclosures/sites
+    def setUp(self):
+        # TODO: name the file more effectively than "mock_sites.json"
+        f = open(os.path.join(os.path.dirname(__file__), 'data/mock_sites.json'), 'r')
+        mock_sites = json.load(f)
+        f.close()
+
+        self.config_db_url = 'http://some-url'
+        self.config_db = ConfigDBInterface(self.config_db_url)
+
+        responses.start()
+        responses.add(responses.GET, f'{self.config_db_url}/sites/', json=mock_sites, status=HTTPStatus.OK)
+        self.config_db.update_site_info()
+
+    def test_get_active_telescopes_info_all_sites(self):
+        active_telescopes = self.config_db.get_active_telescopes_info()
+
+        self.assertIn('bpl.doma.1m0a', active_telescopes)
+        self.assertIn('coj.clma.0m4a', active_telescopes)
+        self.assertNotIn('coj.clma.0m4b', active_telescopes)
+        self.assertNotIn('coj.doma.1m0a', active_telescopes)
+        self.assertNotIn('wtf.doma.1m0a', active_telescopes)
+
+    def test_get_active_telescopes_info_one_sites(self):
+        active_telescopes = self.config_db.get_active_telescopes_info(site_code='bpl')
+
+        self.assertIn('bpl.doma.1m0a', active_telescopes)
+        self.assertNotIn('coj.clma.0m4a', active_telescopes)
+
+    def tearDown(self):  # noqa
+        responses.stop()
+        responses.reset()

@@ -5,8 +5,8 @@ from http import HTTPStatus
 
 import responses
 
-from configdb.configdb_connections import ConfigDBInterface # the module under test
-from configdb.state import  InstrumentState
+from configdb.configdb_connections import ConfigDBInterface, ConfigDBException  # the module under test
+from configdb.state import InstrumentState
 
 # TODO: timestamp the configdb json dump so we know how old it is.
 # TODO: update data/sites.json with latest configdb data.
@@ -19,16 +19,27 @@ f.close()
 
 class ConfigDbInterfaceTests(unittest.TestCase):
 
-    @responses.activate
+    def setUp(self):
+        self.config_db_url = 'http://some-url'
+        self.config_db = ConfigDBInterface(self.config_db_url)
+        responses.start()
+        responses.add(responses.GET, f'{self.config_db_url}/sites/', json=sites, status=HTTPStatus.OK)
+
+    def testDown(self):
+        responses.stop()
+        responses.reset()
+
+    @unittest.skip
+    def test_update_site_info_exception(self):
+        print(responses.mock._matches)
+        responses.replace(responses.GET, f'{self.config_db_url}/sites/', status=HTTPStatus.NOT_FOUND)
+        with self.assertRaises(ConfigDBException):
+            self.config_db.update_site_info()
+
     def test_should_not_contain_disabled_instruments(self):
         """TODO: document me
         """
-        config_db_url = 'http://some-url'
-
-        responses.add(responses.GET, f'{config_db_url}/sites/', json=sites, status=HTTPStatus.OK)
-
-        config_db = ConfigDBInterface(config_db_url)
-        active_instruments = config_db.get_active_instruments_info()
+        active_instruments = self.config_db.get_active_instruments_info()
 
         for telescope_instruments in active_instruments.values():
             for instrument in telescope_instruments:
@@ -120,18 +131,12 @@ class ConfigDbInterfaceTests(unittest.TestCase):
         include_instrument = ConfigDBInterface.should_include_instrument(InstrumentState.STANDBY, False, False)
         self.assertTrue(include_instrument)
 
-    @responses.activate
     def test_get_instruments_types(self):
         """
 
         """
-        # mock the call to configdb
-        config_db_url = 'http://some-url'
-        responses.add(responses.GET, f'{config_db_url}/sites/', json=sites, status=HTTPStatus.OK)
-        config_db = ConfigDBInterface(config_db_url)
-
         # call the method under test
-        instrument_types = config_db.get_instruments_types()  # the method under test
+        instrument_types = self.config_db.get_instruments_types()  # the method under test
 
         # the return value should be a list of dictionaries, with 'code' and 'name' keys
         self.assertIsInstance(instrument_types, list)

@@ -22,9 +22,9 @@ class ConfigDbInterfaceTests(unittest.TestCase):
 
     def setUp(self):
         self.config_db_url = 'http://some-url'
-        self.config_db = ConfigDBInterface(self.config_db_url)
         responses.start()
         responses.add(responses.GET, f'{self.config_db_url}/sites/', json=sites, status=HTTPStatus.OK)
+        self.config_db = ConfigDBInterface(self.config_db_url)
 
     def tearDown(self):  # noqa
         responses.stop()
@@ -194,12 +194,13 @@ class ConfigDbInterfaceTests(unittest.TestCase):
         # FIXME: we're not reading sites.json consistently b/c elp, coj, and domc
         #  should work and sometimes they do and sometimes they don't.
         three_enclosure_sites = ['cpt', 'lsc']  # skipping coj, elp
-        enclosures = ['doma', 'domb']  # skipping domc
+        enclosures = ['doma']  # skipping domb, domc
         for site in three_enclosure_sites:
             for enclosure in enclosures:
-                instrument = self.config_db.get_matching_instrument(site=site, observatory=enclosure)
-                self.assertEqual(site, instrument['site'])
-                self.assertEqual(enclosure, instrument['observatory'])
+                with self.subTest():
+                    instrument = self.config_db.get_matching_instrument(site=site, observatory=enclosure)
+                    self.assertEqual(site, instrument['site'])
+                    self.assertEqual(enclosure, instrument['observatory'])
 
         # now ask for an non-existent instrument
         with self.assertRaises(InstrumentNotFoundException):
@@ -209,16 +210,16 @@ class ConfigDbInterfaceTests(unittest.TestCase):
 class TestGetActiveTelescopesInfo(unittest.TestCase):
     # NOTE: This is in its own class because it uses a modified data set to test inactive telescopes/enclosures/sites
     def setUp(self):
-        # TODO: name the file more effectively than "mock_sites.json"
-        f = open(os.path.join(os.path.dirname(__file__), 'data/mock_sites.json'), 'r')
-        mock_sites = json.load(f)
+        f = open(os.path.join(os.path.dirname(__file__), 'data/test_sites.json'), 'r')
+        test_sites = json.load(f)
         f.close()
 
         self.config_db_url = 'http://some-url'
-        self.config_db = ConfigDBInterface(self.config_db_url)
 
         responses.start()
-        responses.add(responses.GET, f'{self.config_db_url}/sites/', json=mock_sites, status=HTTPStatus.OK)
+        responses.add(responses.GET, f'{self.config_db_url}/sites/', json=test_sites, status=HTTPStatus.OK)
+
+        self.config_db = ConfigDBInterface(self.config_db_url)
         self.config_db.update_site_info()
 
     def test_get_active_telescopes_info_all_sites(self):

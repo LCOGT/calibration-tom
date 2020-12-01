@@ -149,3 +149,15 @@ class ConfigDbInterfaceTests(unittest.TestCase):
         # the codes should be unique (the list of code values should not contain duplicates)
         instrument_codes = [instrument_type['code'] for instrument_type in instrument_types]
         self.assertEqual(len(instrument_codes), len(set(instrument_codes)))
+
+    def test_get_matching_instruments(self):
+        three_enclosure_sites = ['coj', 'cpt', 'lsc', 'elp', ]
+        enclosures = ['doma', 'domb', 'domc']
+        for site in three_enclosure_sites:
+            for enclosure in enclosures:
+                instrument = self.config_db.get_matching_instrument(site=site, observatory=enclosure)
+                self.assertEqual(site, instrument['site'])
+                self.assertEqual(enclosure, instrument['observatory'])
+                self.assertEqual('SCHEDULABLE', instrument['state'])
+
+

@@ -1,11 +1,14 @@
 from datetime import datetime, timedelta
 from dateutil.parser import parse
+import logging
 
 from django import forms
 from django.core.exceptions import ValidationError
 
 from tom_observations.facilities.lco import LCOBaseObservationForm, LCOFacility
 from tom_targets.models import Target
+
+logger = logging.getLogger(__name__)
 
 
 class NRESCalibrationForm(LCOBaseObservationForm):
@@ -58,6 +61,13 @@ class NRESCalibrationForm(LCOBaseObservationForm):
         location = super()._build_location()
         location['site'] = self.cleaned_data['site']
         return location
+
+    def is_valid(self):
+        super().is_valid()
+        self.validate_at_facility()
+        if self._errors:
+            logging.log(msg=f'Observation submission errors: {self._errors}', level=logging.WARNING)
+        return not self._errors
 
     def clean(self):
         cleaned_data = super().clean()

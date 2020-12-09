@@ -38,6 +38,9 @@ spec:
                 - updatestatus
               env:
                 {{- include "calibration-tom.backendEnv" . | nindent 16 }}
+              envFrom:
+                - secretRef:
+                    name: calibration-tom
               resources:
                 {{- toYaml .Values.updatestatus.resources | nindent 16 }}
               volumeMounts:

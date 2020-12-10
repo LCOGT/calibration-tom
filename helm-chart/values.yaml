@@ -13,6 +13,12 @@ crontrigger:
   schedule: "*/11 * * * *"
   resources: {}
 
+updatestatus:
+  enabled: true
+  schedule: "*/11 * * * *"  # 'every 11th minute'
+  resources: {}
+
+
 runcadencestrategies:
   enabled: true
   schedule: "25 * * * *"  # 'every hour at 25 minutes past the hour'

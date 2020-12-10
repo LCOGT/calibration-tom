@@ -14,6 +14,9 @@
             <tr>
                 <th scope="col">Instrument Code</th>
                 <th scope="col">Instrument State</th>
+                <th scope="col">Site</th>
+                <th scope="col">Enclosure</th>
+                <th scope="col">Telescope</th>
             </tr>
             </thead>
             <tbody>
@@ -22,9 +25,10 @@
                 <td>
                     <a href="{% url 'targeted_calibrations:instrument_target_list' instrument_type instrument.code %}">{{instrument.code}}</a>
                 </td>
-                <td>
-                {{instrument.state}}
-                </td>
+                <td>{{instrument.state}}</td>
+                <td>{{instrument.site}}</td>
+                <td>{{instrument.enclosure}}</td>
+                <td>{{instrument.telescope}}</td>
             </tr>
             {% endfor %}
             </tbody>
@@ -32,9 +36,13 @@
     </div>
 <hr/>
 
-
-
+{% comment %}
+<h3>debug info:</h3>
 <p>get_context_data kwargs: {{ kwargs }}</p>
+<p>object_list: {{ object_list }}</p>
+<p>instrument_type: {{ instrument_type }}</p>
+<p>instrument_code: {{ instrument_code }}</p>
+{% endcomment %}
 
 <!-- endblock content -->
 {% endblock content %}

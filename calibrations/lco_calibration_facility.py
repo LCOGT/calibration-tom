@@ -1,11 +1,14 @@
 from datetime import datetime, timedelta
 from dateutil.parser import parse
+import logging
 
 from django import forms
 from django.core.exceptions import ValidationError
 
 from tom_observations.facilities.lco import LCOBaseObservationForm, LCOFacility
 from tom_targets.models import Target
+
+logger = logging.getLogger(__name__)
 
 
 class NRESCalibrationForm(LCOBaseObservationForm):
@@ -38,6 +41,7 @@ class NRESCalibrationForm(LCOBaseObservationForm):
         self.fields['max_airmass'].initial = 3
         self.fields['start'].initial = datetime.now()
         self.fields['end'].widget = forms.HiddenInput()
+        self.fields['end'].required = False  # Not required on the form, but must be submitted to LCO
 
         for field_name in ['period', 'jitter']:
             self.fields.pop(field_name)
@@ -58,6 +62,18 @@ class NRESCalibrationForm(LCOBaseObservationForm):
         location = super()._build_location()
         location['site'] = self.cleaned_data['site']
         return location
+
+    # def is_valid(self):
+    #     super().is_valid()
+    #     self.validate_at_facility()
+    #     if self._errors:  # TODO: This should migrate up into tom_base
+    #         logging.log(msg=f'Observation submission errors: {self._errors}', level=logging.WARNING)
+    #     return not self._errors
+
+    # In order to prevent the superclass' clean_end from being called, we override it and return the submitted value.
+    # The end field is hidden and is not set by the form.
+    def clean_end(self):
+        return self.cleaned_data.get('end')
 
     def clean(self):
         cleaned_data = super().clean()

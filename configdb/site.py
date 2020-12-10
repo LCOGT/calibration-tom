@@ -77,8 +77,8 @@ class Location(object):
 
 class InstrumentInfo(object):
     # TODO: Create a Readouts class to store the default Readout with the others
-    def __init__(self, code: str, camera_codes: list, ag_code: str, instrument_type: str, default_readout: Union[Readout, None],
-                 readouts: FrozenSet[Readout]) -> None:
+    def __init__(self, code: str, camera_codes: list, ag_code: str, instrument_type: str,
+                 default_readout: Union[Readout, None], readouts: FrozenSet[Readout]) -> None:
         self.code = code
         self.camera_codes = camera_codes
         self.ag_code = ag_code

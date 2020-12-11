@@ -38,7 +38,7 @@ class NRESCalibrationForm(LCOBaseObservationForm):
         self.fields['filter'].initial = 'air'
         self.fields['exposure_time'].initial = target.targetextra_set.filter(key='exp_time').first().value
         self.fields['exposure_count'].initial = target.targetextra_set.filter(key='exp_count').first().value
-        self.fields['max_airmass'].initial = 3
+        self.fields['max_airmass'].initial = 2
         self.fields['start'].initial = datetime.now()
         self.fields['end'].widget = forms.HiddenInput()
         self.fields['end'].required = False  # Not required on the form, but must be submitted to LCO

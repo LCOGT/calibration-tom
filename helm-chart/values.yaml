@@ -89,6 +89,10 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
+lcoServices:
+  configdbURL: "http://configdb-dev.lco.gtn"
+  observationPortalURL: "http://observation-portal-dev.lco.gtn"
+
 # Settings for the PostgreSQL database
 applyDatabaseMigrations: true
 useDockerizedDatabase: true

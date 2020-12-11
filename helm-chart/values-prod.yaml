@@ -21,6 +21,10 @@ crontrigger:
 
 djangoDebug: false
 
+lcoServices:
+  configdbURL: "http://configdb.lco.gtn"
+  observationPortalURL: "http://observe.lco.global"
+
 resources:
   requests:
     cpu: 50m

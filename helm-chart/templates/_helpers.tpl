@@ -78,6 +78,10 @@ build it here and use it everywhere.
   value: "/tmp"
 - name: DEBUG
   value: {{ .Values.djangoDebug | toString | lower | title | quote }}
+- name: CONFIGDB_URL
+  value: {{ .Values.lcoServices.configdbURL | toString | lower | title | quote }}
+- name: OBSERVATION_PORTAL_URL
+  value: {{ .Values.lcoServices.observationPortalURL | toString | lower | title | quote }}
 {{/*
 Define shared database environment variables
 */}}

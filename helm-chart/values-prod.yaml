@@ -23,7 +23,7 @@ djangoDebug: false
 
 lcoServices:
   configdbURL: "http://configdb.lco.gtn"
-  observationPortalURL: "http://observe.lco.global"
+  observationPortalURL: "https://observe.lco.global"
 
 resources:
   requests:

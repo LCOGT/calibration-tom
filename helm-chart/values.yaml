@@ -13,6 +13,12 @@ crontrigger:
   schedule: "*/11 * * * *"
   resources: {}
 
+updatestatus:
+  enabled: true
+  schedule: "*/11 * * * *"  # 'every 11th minute'
+  resources: {}
+
+
 runcadencestrategies:
   enabled: true
   schedule: "25 * * * *"  # 'every hour at 25 minutes past the hour'
@@ -82,6 +88,10 @@ resources: {}
   # requests:
   #   cpu: 100m
   #   memory: 128Mi
+
+lcoServices:
+  configdbURL: "http://configdb-dev.lco.gtn"
+  observationPortalURL: "http://observation-portal-dev.lco.gtn"
 
 # Settings for the PostgreSQL database
 applyDatabaseMigrations: true

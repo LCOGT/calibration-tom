@@ -5,6 +5,9 @@
 # which need to be customized for the Development Environment.
 
 djangoDebug: true
+lcoServices:
+  configdbURL: "http://configdb-dev.lco.gtn"
+  observationPortalURL: "http://observation-portal-dev.lco.gtn"
 
 replicaCount: 1
 

@@ -213,6 +213,7 @@ FACILITIES = {
 # Define the valid data product types for your TOM. Be careful when removing items, as previously valid types will no
 # longer be valid, and may cause issues unless the offending records are modified.
 DATA_PRODUCT_TYPES = {
+    'nres_rv': ('nres_rv', 'NRES RV'),
     'photometry': ('photometry', 'Photometry'),
     'fits_file': ('fits_file', 'FITS File'),
     'spectroscopy': ('spectroscopy', 'Spectroscopy'),
@@ -220,6 +221,7 @@ DATA_PRODUCT_TYPES = {
 }
 
 DATA_PROCESSORS = {
+    'nres_rv': 'calibrations.processors.NRESRVDataProcessor',
     'photometry': 'tom_dataproducts.processors.photometry_processor.PhotometryProcessor',
     'spectroscopy': 'tom_dataproducts.processors.spectroscopy_processor.SpectroscopyProcessor',
 }

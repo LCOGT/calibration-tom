@@ -1,15 +1,32 @@
 {% extends 'targeted_calibrations/instrument_target_list.html' %}
 <!-- targeted_calibrations/instrument_target_detail.html -->
-{% load targets_extras %}
+{% load targets_extras observation_extras calibrations_extras targeted_calibrations_extras %}
 {% block content %}
 <!-- block content -->
-{% block breadcrumbs %}
-    {{ block.super }} &raquo;
-    <a href="{% url 'targeted_calibrations:instrument_target_detail' instrument_type instrument_code target_id %}">{{ target.name }} Target Detail</a>
-{% endblock breadcrumbs%}
+<p>
+    {% block breadcrumbs %}
+        {{ block.super }} &raquo;
+        <a href="{% url 'targeted_calibrations:instrument_target_detail' instrument_type instrument_code target_id %}">{{ target.name }} Target Detail</a>
+    {% endblock breadcrumbs%}
+</p>
 
-<h1>{{ target.name }} Target Detail Page</h1>
+<div style="display: inline;">
+    <h3>{{ target.name }}</h3><h5>{% standard_type target %}{% sitecode_tag instrument_code %}</h5>
+</div>
+<div class="row">
+    <div class="col-md-6">Last observed: {% last_observation_date target %}</div>
+    <div class="col-md-6">RV scatter = X m/s PLACEHOLDER</div>
+</div>
+<div class="row">
+    <div class="col-md-6">Next scheduled: {% next_observation_date target %}</div>
+    <div class="col-md-6">Number of observations: 42 PLACEHOLDER</div>
+</div>
 <hr/>
+
+{% rv_plot target %}
+
+{% observation_plan target 'LCO' length=3 airmass_limit=2 %}
+
 {% target_data object %}
 
 <hr/>

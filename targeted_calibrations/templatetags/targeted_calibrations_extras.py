@@ -1,18 +1,35 @@
 import json
+from datetime import datetime
 
 from django import template
 from django.conf import settings
-from datetime import datetime
 from guardian.shortcuts import get_objects_for_user
-
 from plotly import offline
 import plotly.graph_objs as go
 
+from configdb.configdb_connections import ConfigDBInterface
 from tom_dataproducts.models import DataProduct, ReducedDatum
 from tom_observations.models import ObservationRecord
 from tom_targets.models import Target
 
+
 register = template.Library()
+
+
+@register.inclusion_tag('targeted_calibrations/partials/rv_plot.html')
+def rv_plot(target):
+    rv_data = [[], []]
+
+    datums = ReducedDatum.objects.filter(target=target, data_type=settings.DATA_PRODUCT_TYPES['nres_rv'][0])
+
+    for datum in datums:
+        rv = json.loads(datum.value)
+        rv_data[0].append(datum.timestamp)
+        rv_data[1].append(rv['radial_velocity'])
+
+    plot_data = go.Scatter(x=rv_data[0], y=rv_data[1], mode='markers')
+    layout = go.Layout(xaxis={'title': 'Date'}, yaxis={'title': 'RV (m/s)'})
+    return {'rv_plot': offline.plot(go.Figure(data=plot_data, layout=layout), output_type='div', show_link=False)}
 
 
 @register.inclusion_tag('targeted_calibrations/partials/scalar_timeseries_for_target.html', takes_context=True)

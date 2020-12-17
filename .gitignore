@@ -4,6 +4,10 @@ __pycache__
 db.sqlite3
 .DS_Store
 
+# Media
+media/
+data/
+
 # virtural envioronments
 *env/
 

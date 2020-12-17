@@ -162,7 +162,7 @@ class ConfigDBInterface(object):
                                         'ha_limit_pos': telescope['ha_limit_pos'],
                                         'instrument_type': instrument['instrument_type']['code'].upper(),
                                         'code': instrument['code'],
-                                        'camera_codes': [science_camera['code'] for science_camera in instrument['science_cameras']],
+                                        'camera_codes': [sci_cam['code'] for sci_cam in instrument['science_cameras']],
                                         'ag_camera_type': instrument['autoguider_camera']['camera_type'][
                                             'code'].upper(),
                                         'ag_code': instrument['autoguider_camera']['code'],
@@ -175,7 +175,8 @@ class ConfigDBInterface(object):
                                             'front_padding': instrument['instrument_type']['front_padding'],
                                             'filter_change_time': oeg_change_time,
                                             'config_change_time': instrument['instrument_type']['config_change_time'],
-                                            'acquire_exposure_time': instrument['instrument_type']['acquire_exposure_time']
+                                            'acquire_exposure_time': instrument['instrument_type'][
+                                                'acquire_exposure_time']
                                         }
                                     })
         return active_instruments

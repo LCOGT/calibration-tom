@@ -12,12 +12,12 @@ class NRESRVDataProcessor(DataProcessor):
 
     def process_data(self, data_product: DataProduct):
         # pull LCO-specific DATE_OBS from FITS file
-        fits_date_obs = fits.getval(data_product.data.path, 'DATE_OBS')
+        fits_date_obs = fits.getval(data_product.data.path, 'DATE-OBS')
         data_timestamp = Time(fits_date_obs).to_datetime()
 
         # pull the RV out of the FITS file
         radial_velocity = fits.getval(data_product.data.path, 'RADVEL')
-        return [(data_timestamp, radial_velocity)]
+        return [(data_timestamp, {'radial_velocity': radial_velocity})]
 
 
 

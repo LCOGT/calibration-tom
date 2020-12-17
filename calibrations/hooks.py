@@ -16,7 +16,7 @@ def observation_change_state(observation: ObservationRecord, previous_state):
 
     if observation.status == 'COMPLETED':
         # the LCO facility knows about the data associated with this observation
-        facility_class = get_service_class(observation.facility)
+        facility_class = get_service_class(observation.facility)()
         # ask the facility for the data
         data_products = facility_class.save_data_products(observation_record=observation)
 

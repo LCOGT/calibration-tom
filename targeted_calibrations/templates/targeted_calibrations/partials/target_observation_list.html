@@ -1,0 +1,19 @@
+<h5>Observations</h5>
+<table class="table table-striped">
+    <thead><tr><th>Date</th><th>RV</th><th>RV Error</th></tr></thead>
+    <tbody>
+    {% for observation in observations %}
+      <tr>
+        <td>{{ observation.date }}</td>
+        <td>{{ observation.rv }}</td>
+        <td>{{ observation.rv_error }}</td>
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="6">
+          No observations yet for this target.
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+  

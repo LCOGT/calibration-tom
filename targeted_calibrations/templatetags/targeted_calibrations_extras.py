@@ -16,6 +16,25 @@ from tom_targets.models import Target
 register = template.Library()
 
 
+@register.inclusion_tag('targeted_calibrations/partials/target_observation_list.html')
+def target_observation_list(target):
+    observation_records = ObservationRecord.objects.filter(target=target, status='COMPLETED')
+    observations = []
+    for obsr in observation_records:
+        # TODO: how to handle multiple data products/datums?
+        dp = obsr.dataproduct_set.first()
+        if dp:
+            rd = dp.reduceddatum_set.first()
+            if rd:
+                rd_value = json.loads(rd.value)
+                observations.append({
+                    'date': obsr.scheduled_start,
+                    'rv': rd_value.get('radial_velocity'),
+                    'rv_error': rd_value.get('rv_error')
+                })
+
+    return {'observations': observations}
+
 @register.inclusion_tag('targeted_calibrations/partials/rv_plot.html')
 def rv_plot(target):
     rv_data = [[], []]
@@ -30,7 +49,6 @@ def rv_plot(target):
     plot_data = go.Scatter(x=rv_data[0], y=rv_data[1], mode='markers')
     layout = go.Layout(xaxis={'title': 'Date'}, yaxis={'title': 'RV (m/s)'})
     return {'rv_plot': offline.plot(go.Figure(data=plot_data, layout=layout), output_type='div', show_link=False)}
-
 
 @register.inclusion_tag('targeted_calibrations/partials/scalar_timeseries_for_target.html', takes_context=True)
 def scalar_timeseries_for_target(context, target):

@@ -23,6 +23,15 @@ def display_seasonal_start_or_end(month):
     return datetime(year=datetime.now().year, month=int(month), day=1).strftime('%B')
 
 
+@register.simple_tag
+def observation_count(target, observation_status):
+    """
+    Displays the number of observations of a particular status.
+    """
+    # TODO: Should this behavior be different?
+    return target.observationrecord_set.filter(status=observation_status).count()
+
+
 @register.inclusion_tag('calibrations/partials/sitecode_tag.html')
 def sitecode_tag(instrument_code):
     configdb = ConfigDBInterface(settings.CONFIGDB_URL)

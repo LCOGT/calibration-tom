@@ -21,7 +21,6 @@ class Command(BaseCommand):
         parser.add_argument('--num_records', help='Number of observation records to generate')
 
     def handle(self, *args, **options):
-        print(options)
         t = Target.objects.get(pk=options['target_id'][0])
         test_file = options['test_file'][0]
         num_records = options['num_records'] if options['num_records'] else 9

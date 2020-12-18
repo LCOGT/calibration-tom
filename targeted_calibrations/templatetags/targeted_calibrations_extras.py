@@ -37,6 +37,7 @@ def target_observation_list(target):
 
 @register.inclusion_tag('targeted_calibrations/partials/rv_plot.html')
 def rv_plot(target):
+    # TODO: Ensure that this works when there isn't data
     rv_data = [[], []]
 
     datums = ReducedDatum.objects.filter(target=target, data_type=settings.DATA_PRODUCT_TYPES['nres_rv'][0])
@@ -54,7 +55,10 @@ def rv_plot(target):
 @register.simple_tag
 def rv_average(target):
     rd_values = [json.loads(rd.value)['radial_velocity'] for rd in ReducedDatum.objects.filter(target=target)]
-    return f'{truncate_number(statistics.mean(rd_values))} m/s'
+    if len(rd_values) > 0:
+        return f'{truncate_number(statistics.mean(rd_values))} m/s'
+    else:
+        return 'No data yet'
 
 
 @register.inclusion_tag('targeted_calibrations/partials/scalar_timeseries_for_target.html', takes_context=True)

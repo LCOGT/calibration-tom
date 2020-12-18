@@ -44,7 +44,8 @@ def last_observation_date(context, target):
                    .filter(target=target, status='COMPLETED')
                    .order_by(F('scheduled_start').desc(nulls_last=True))
                    .first())
-    return {'last_obs_date': observation.scheduled_start}  # TODO: this field needs to come from updatestatus
+    last_obs_date = observation.scheduled_start if observation else 'None'
+    return {'last_obs_date': last_obs_date}
 
 
 @register.inclusion_tag('calibrations/partials/next_obs.html', takes_context=True)
@@ -53,4 +54,7 @@ def next_observation_date(context, target):
                    .filter(target=target, status='PENDING')
                    .order_by(F('scheduled_start').asc(nulls_last=True))
                    .first())
-    return {'next_obs_date': observation.scheduled_start}  # TODO: this field needs to come from updatestatus
+    next_obs_date = observation.scheduled_start if observation else None
+    if not next_obs_date:
+        next_obs_date = 'Pending but unscheduled'
+    return {'next_obs_date': next_obs_date}

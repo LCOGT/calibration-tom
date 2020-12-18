@@ -1,3 +1,4 @@
+import json
 import logging
 from astropy.io import fits
 from astropy.time import Time
@@ -31,4 +32,4 @@ class NRESRVDataProcessor(DataProcessor):
 
         # pull the RV out of the FITS file
         radial_velocity = header.get('RADVEL')
-        return [(data_timestamp, {'radial_velocity': radial_velocity})]
+        return [(data_timestamp, json.dumps({'radial_velocity': radial_velocity}))]

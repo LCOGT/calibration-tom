@@ -1,3 +1,4 @@
+{% load tom_common_extras %}
 <h5>Observations</h5>
 <table class="table table-striped">
     <thead><tr><th>Date</th><th>RV</th><th>RV Error</th></tr></thead>
@@ -5,7 +6,7 @@
     {% for observation in observations %}
       <tr>
         <td>{{ observation.date }}</td>
-        <td>{{ observation.rv }}</td>
+        <td>{{ observation.rv | truncate_number }}</td>
         <td>{{ observation.rv_error }}</td>
       </tr>
     {% empty %}

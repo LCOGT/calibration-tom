@@ -1,6 +1,6 @@
 {% extends 'targeted_calibrations/instrument_target_list.html' %}
 <!-- targeted_calibrations/instrument_target_detail.html -->
-{% load targets_extras observation_extras calibrations_extras targeted_calibrations_extras %}
+{% load tom_common_extras targets_extras observation_extras calibrations_extras targeted_calibrations_extras %}
 {% block content %}
 <!-- block content -->
 <p>
@@ -15,7 +15,7 @@
 </div>
 <div class="row">
     <div class="col-md-6">Last observed: {% last_observation_date target %}</div>
-    <div class="col-md-6">RV scatter = X m/s PLACEHOLDER</div>
+    <div class="col-md-6">RV scatter = {% rv_average target %}</div>
 </div>
 <div class="row">
     <div class="col-md-6">Next scheduled: {% next_observation_date target %}</div>

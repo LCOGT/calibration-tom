@@ -28,7 +28,7 @@ def observation_count(target, observation_status):
     """
     Displays the number of observations of a particular status.
     """
-    # TODO: Should this behavior be different?
+    # TODO: Should this behavior be different--should it return all observations instead of just one status?
     return target.observationrecord_set.filter(status=observation_status).count()
 
 
@@ -64,6 +64,6 @@ def next_observation_date(context, target):
                    .order_by(F('scheduled_start').asc(nulls_last=True))
                    .first())
     next_obs_date = observation.scheduled_start if observation else None
-    if not next_obs_date:
+    if observation and not next_obs_date:
         next_obs_date = 'Pending but unscheduled'
     return {'next_obs_date': next_obs_date}

@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+import statistics
 
 from django import template
 from django.conf import settings
@@ -7,17 +7,37 @@ from guardian.shortcuts import get_objects_for_user
 from plotly import offline
 import plotly.graph_objs as go
 
-from configdb.configdb_connections import ConfigDBInterface
-from tom_dataproducts.models import DataProduct, ReducedDatum
+from tom_common.templatetags.tom_common_extras import truncate_number
+from tom_dataproducts.models import ReducedDatum
 from tom_observations.models import ObservationRecord
-from tom_targets.models import Target
 
 
 register = template.Library()
 
 
+@register.inclusion_tag('targeted_calibrations/partials/target_observation_list.html')
+def target_observation_list(target):
+    observation_records = ObservationRecord.objects.filter(target=target, status='COMPLETED')
+    observations = []
+    for obsr in observation_records:
+        # TODO: how to handle multiple data products/datums?
+        dp = obsr.dataproduct_set.first()
+        if dp:
+            rd = dp.reduceddatum_set.first()
+            if rd:
+                rd_value = json.loads(rd.value)
+                observations.append({
+                    'date': obsr.scheduled_start,
+                    'rv': rd_value.get('radial_velocity'),
+                    'rv_error': rd_value.get('rv_error')
+                })
+
+    return {'observations': observations}
+
+
 @register.inclusion_tag('targeted_calibrations/partials/rv_plot.html')
 def rv_plot(target):
+    # TODO: Ensure that this works when there isn't data
     rv_data = [[], []]
 
     datums = ReducedDatum.objects.filter(target=target, data_type=settings.DATA_PRODUCT_TYPES['nres_rv'][0])
@@ -30,6 +50,15 @@ def rv_plot(target):
     plot_data = go.Scatter(x=rv_data[0], y=rv_data[1], mode='markers')
     layout = go.Layout(xaxis={'title': 'Date'}, yaxis={'title': 'RV (m/s)'})
     return {'rv_plot': offline.plot(go.Figure(data=plot_data, layout=layout), output_type='div', show_link=False)}
+
+
+@register.simple_tag
+def rv_average(target):
+    rd_values = [json.loads(rd.value)['radial_velocity'] for rd in ReducedDatum.objects.filter(target=target)]
+    if len(rd_values) > 0:
+        return f'{truncate_number(statistics.mean(rd_values))} m/s'
+    else:
+        return 'No data yet'
 
 
 @register.inclusion_tag('targeted_calibrations/partials/scalar_timeseries_for_target.html', takes_context=True)

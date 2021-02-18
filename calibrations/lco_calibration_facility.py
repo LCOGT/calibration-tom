@@ -105,3 +105,18 @@ class LCOCalibrationFacility(LCOFacility):
     observation_forms = {
         'NRES': NRESCalibrationForm
     }
+    EXCLUDED_FRAME_SUFFIXES = (
+        'e91',  # e91 frames are NRES Autoguider images and are not desirable to download
+    )
+
+    def data_products(self, observation_id, product_id=None):
+        products = []
+        for frame in self._archive_frames(observation_id, product_id):
+            if all(suffix for suffix in self.EXCLUDED_FRAME_SUFFIXES) not in frame['filename']:
+                products.append({
+                    'id': frame['id'],
+                    'filename': frame['filename'],
+                    'created': parse(frame['DATE_OBS']),
+                    'url': frame['url']
+                })
+        return products

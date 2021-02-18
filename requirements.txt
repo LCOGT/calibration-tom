@@ -1,5 +1,5 @@
 # TODO: switch to setup.py so test requirements can be separated
-tomtoolkit==2.0.0
+tomtoolkit>=2.5.1
 psycopg2===2.8.4
 gunicorn[gevent]==20.0.4
 whitenoise==5.2.0

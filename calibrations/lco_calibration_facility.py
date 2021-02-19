@@ -10,6 +10,8 @@ from tom_targets.models import Target
 
 logger = logging.getLogger(__name__)
 
+NRES_SITES = ('cpt', 'tlv', 'lsc', 'elp')
+
 
 class NRESCalibrationForm(LCOBaseObservationForm):
     VALID_INSTRUMENT_CODES = ['1M0-NRES-SCICAM']

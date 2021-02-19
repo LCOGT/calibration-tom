@@ -9,10 +9,23 @@ import plotly.graph_objs as go
 
 from tom_common.templatetags.tom_common_extras import truncate_number
 from tom_dataproducts.models import ReducedDatum
-from tom_observations.models import ObservationRecord
+from tom_observations.models import DynamicCadence, ObservationRecord
+from tom_targets.models import Target
 
 
 register = template.Library()
+
+
+@register.inclusion_tag('targeted_calibrations/partials/nres_targets_list.html')
+def nres_targets_list():
+    nres_targets = Target.objects.all()
+    return {'nres_targets': nres_targets}
+
+
+@register.inclusion_tag('targeted_calibrations/partials/nres_cadence_list.html')
+def nres_cadence_list():
+    nres_cadences = DynamicCadence.objects.filter(cadence_strategy='NRESCadenceStrategy')
+    return {'nres_cadences': nres_cadences}
 
 
 @register.inclusion_tag('targeted_calibrations/partials/target_observation_list.html')

@@ -1,0 +1,9 @@
+{% extends 'targeted_calibrations/index.html' %}
+{% load targeted_calibrations_extras %}
+{% block content %}
+{% nres_cadence_list %}
+{% nres_targets_list %}
+<p></p>
+    <a class="btn btn-primary" href="{% url 'targeted_calibrations:instrument_type_list' %}">View ConfigDB Instruments -></a>
+</p>
+{% endblock content %}

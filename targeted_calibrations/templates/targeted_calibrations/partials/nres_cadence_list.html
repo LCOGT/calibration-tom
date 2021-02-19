@@ -1,0 +1,18 @@
+<h5>NRES Cadences</h5>
+<table class="table table-striped">
+    <thead><tr><th>Site</th><th>Latest Observation</th><th>Next Observation</th></tr></thead>
+    <tbody>
+    {% for nres_cadence in nres_cadences %}
+    <tr>
+        <td>{{ nres_cadence.cadence_parameters.site }}</td>
+        <td>{{ nres_cadence.observation_group.observation_records.first }}</td>
+        <td>{{ nres_cadence.observation_group.observation_records.last }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="6">
+            No NRES targets available.
+        </td>
+    </tr>
+    {% endfor %}
+</table>

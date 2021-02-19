@@ -1,0 +1,18 @@
+<h5>NRES Targets</h5>
+<table class="table table-striped">
+    <thead><tr><th>Target Name</th><th>Latest Observation</th><th>Next Observation</th></tr></thead>
+    <tbody>
+    {% for nres_target in nres_targets %}
+    <tr>
+        <td>{{ nres_target.name }}</td>
+        <td>{{ nres_target.observationrecord_set.first }}</td>
+        <td>{{ nres_target.observationrecord_set.last }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="6">
+            No NRES targets available.
+        </td>
+    </tr>
+    {% endfor %}
+</table>

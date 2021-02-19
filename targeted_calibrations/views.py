@@ -1,7 +1,7 @@
 # from django.shortcuts import render
 import logging
 
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, TemplateView
 from tom_targets.models import Target
 
 from django.conf import settings
@@ -142,3 +142,10 @@ class InstrumentTargetDetailView(DetailView):
         context['template_name'] = self.template_name  # TODO: remove after debugging
 
         return context
+
+
+class NRESCalibrationsView(TemplateView):
+    template_name = 'targeted_calibrations/nres_calibrations_view.html'
+
+    def get_context_data(self, **kwargs):
+        pass

@@ -1,11 +1,17 @@
-# from django.shortcuts import render
 import logging
 
-from django.views.generic import ListView, DetailView, TemplateView
-from tom_targets.models import Target
-
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import ButtonHolder, Column, Layout, Row, Submit
+from django import forms
 from django.conf import settings
+from django.contrib import messages
+from django.urls import reverse, reverse_lazy
+from django.views.generic import DetailView, ListView, TemplateView
+from django.views.generic.edit import FormView
+
 from configdb.configdb_connections import ConfigDBInterface
+from tom_observations.models import DynamicCadence
+from tom_targets.models import Target
 
 logger = logging.getLogger(__name__)
 
@@ -149,3 +155,77 @@ class NRESCalibrationsView(TemplateView):
 
     def get_context_data(self, **kwargs):
         pass
+
+
+# TODO: move this to a more appropriate class
+class NRESCalibrationSubmissionForm(forms.Form):
+    # site = forms.ChoiceField(choices=[('all', 'All'), ('cpt', 'cpt')])  # TODO: should be a ChoiceField
+    frequency = forms.IntegerField(label=False, widget=forms.NumberInput(attrs={'placeholder': 'Frequency (hours)'}))
+    target = forms.ChoiceField(  # Display standard type alongside target name
+        choices=[(target.id,
+                  f"{target.name} ({target.targetextra_set.filter(key='standard_type').first().value})")
+                 for target in Target.objects.all()],
+        label=False
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        self.helper.form_action = reverse('targeted_calibrations:nres_submission')
+        self.helper.layout = Layout(
+            Row(
+                Column('frequency'),
+                Column('target'),
+                Column(
+                    ButtonHolder(
+                        Submit('submit', 'Update or Create Cadence')
+                    )
+                )
+            )
+        )
+
+
+class NRESCalibrationSubmissionView(FormView):
+    form_class = NRESCalibrationSubmissionForm
+    success_url = reverse_lazy('targeted_calibrations:nres_home')
+
+    def form_invalid(self, form):
+        messages.error(request, f'The form is invalid: {form.errors}.')
+        logger.error(request, f'Invalid form submission for NRES cadence submission: {form.errors}.')
+        return super().form_invalid(form)
+
+    def form_valid(self, form):
+        cadence_frequency = form.cleaned_data['frequency']
+        target_id = form.cleaned_data['target']
+        target = Target.objects.get(pk=target_id)
+        standard_type = target.targetextra_set.filter(key='standard_type').first().value  # Get standard type of this dynamic cadence
+        dynamic_cadences = DynamicCadence.objects.filter(  # Get DynamicCadences that match the standard type
+            cadence_parameters__target_id__in=Target.objects.filter(targetextra__key='standard_type', targetextra__value=standard_type)  # TODO: get all dynamic cadences with targets of the matching standard type
+        )
+        for site in settings.NRES_SITES:  # TODO: exclude inactive configdb instruments (.get_active_nres_sites())
+            dynamic_cadences_for_site = dynamic_cadences.filter(cadence_parameters__site=site)
+            # if dynamic_cadences_for_site.count() == 0:
+            #     # TODO: submit observation to get an ObservationRecord to start the cadence
+            #     og = ObservationGroup.objects.create(name=f'Cadenced NRES {standard_type} calibrations for {site}')
+            #     DynamicCadence.objects.create(
+            #         cadence_strategy='NRESCadenceStrategy',
+            #         cadence_parameters={
+            #             'target_id': target_id,
+            #             'cadence_frequency': cadence_frequency,
+            #             'site': site
+            #         },
+            #         observation_group=og,
+            #         active=True
+            #     )
+            for dc in dynamic_cadences_for_site:
+                dc.cadence_parameters['target_id'] = target.id
+                dc.cadence_parameters['cadence_frequency'] = cadence_frequency
+                dc.save()
+
+    # site, target standard_type
+
+    # def post(self, request, *args, **kwargs):
+    #     # update or submit cadence
+    #     messages.success(request, 'POSTed successfully!')
+    #     return super().post(request, args, kwargs)

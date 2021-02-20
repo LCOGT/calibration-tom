@@ -1,0 +1,6 @@
+{% load bootstrap4 crispy_forms_tags %}
+<h4>Update NRES Cadences</h4>
+<div>
+  {% csrf_token %}
+  {% crispy nres_cadence_form %}
+</div>

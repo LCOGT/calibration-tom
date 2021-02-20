@@ -1,10 +1,20 @@
 <h5>NRES Cadences</h5>
 <table class="table table-striped">
-    <thead><tr><th>Site</th><th>Latest Observation</th><th>Next Observation</th></tr></thead>
+    <thead>
+        <tr>
+            <th>Site</th>
+            <th>Calibration Type</th>
+            <th>Frequency</th>
+            <th>Latest Calibration</th>
+            <th>Next Calibration</th>
+        </tr>
+    </thead>
     <tbody>
     {% for nres_cadence in nres_cadences %}
     <tr>
         <td>{{ nres_cadence.cadence_parameters.site }}</td>
+        <td>TBD</td>
+        <td>{{ nres_cadence.cadence_parameters.cadence_frequency }}</td>
         <td>{{ nres_cadence.observation_group.observation_records.first }}</td>
         <td>{{ nres_cadence.observation_group.observation_records.last }}</td>
     </tr>

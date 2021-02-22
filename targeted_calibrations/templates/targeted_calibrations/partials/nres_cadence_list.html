@@ -15,8 +15,17 @@
         <td>{{ nres_cadence.cadence_parameters.site }}</td>
         <td>TBD</td>
         <td>{{ nres_cadence.cadence_parameters.cadence_frequency }}</td>
-        <td>{{ nres_cadence.observation_group.observation_records.first }}</td>
-        <td>{{ nres_cadence.observation_group.observation_records.last }}</td>
+        {% if nres_cadence.observation_group.observation_records.all|length_is:"0" %}
+        <td>None</td>
+        <td>None</td>
+        {% else %}
+            <td>
+                <a href="{% url 'observations:detail' nres_cadence.observation_group.observation_records.first.id %}">{{ nres_cadence.observation_group.observation_records.first }}</a>
+            </td>
+            <td>
+                <a href="{% url 'observations:detail' nres_cadence.observation_group.observation_records.last.id %}">{{ nres_cadence.observation_group.observation_records.last }}</a>
+            </td>
+        {% endif %}
     </tr>
     {% empty %}
     <tr>

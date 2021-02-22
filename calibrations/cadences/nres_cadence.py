@@ -1,3 +1,5 @@
+from datetime import datetime
+from dateutil.parser import parse
 import logging
 
 from crispy_forms.layout import Column, Div, HTML, Layout, Row
@@ -6,9 +8,7 @@ from django.conf import settings
 
 from tom_observations.cadence import BaseCadenceForm
 from tom_observations.cadences.resume_cadence_after_failure import ResumeCadenceAfterFailureStrategy
-# TODO: Creates a circular import
-# from tom_observations.calibrations.lco_calibration_facility import NRESCalibrationForm
-
+from tom_observations.facility import get_service_class
 
 logger = logging.getLogger(__name__)
 
@@ -63,17 +63,18 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
             last_obs.refresh_from_db()  # Gets the record updates
             observation_payload = last_obs.parameters
         else:
-            # TODO: Creates a circular import
-            # form = NRESCalibrationForm(data={
-            #     'cadence_frequency': self.dynamic_cadence.cadence_parameters['cadence_frequency'],
-            #     'site': self.dynamic_cadence.cadence_parameters['site'],
-            #     'target_id': self.dynamic_cadence.cadence_parameters['target_id'],
-            # })
-            # if form.is_valid():
-            #     observation_payload = form.cleaned_data
-            # else:
-            logger.error(f'Unable to submit initial calibration for cadence {self.dc.id}')
-            raise forms.ValidationError(f'Unable to submit initial calibration for cadence {self.dc}')
+            # We need to create an observation for the new cadence, as we do not have a previous one to use
+            form_class = get_service_class('LCO Calibrations')().observation_forms['NRES']
+            form = form_class(data={
+                'cadence_frequency': self.dynamic_cadence.cadence_parameters['cadence_frequency'],
+                'site': self.dynamic_cadence.cadence_parameters['site'],
+                'target_id': self.dynamic_cadence.cadence_parameters['target_id'],
+            })
+            if form.is_valid():
+                observation_payload = form.cleaned_data
+            else:
+                logger.error(f'Unable to submit initial calibration for cadence {self.dc.id}')
+                raise forms.ValidationError(f'Unable to submit initial calibration for cadence {self.dc}')
 
         # Boilerplate to get necessary properties for future calls
         start_keyword, end_keyword = facility.get_start_end_keywords()

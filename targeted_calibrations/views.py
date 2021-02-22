@@ -200,9 +200,12 @@ class NRESCalibrationSubmissionView(FormView):
         target_id = form.cleaned_data['target']
         target = Target.objects.get(pk=target_id)
         standard_type = target.targetextra_set.filter(key='standard_type').first().value  # Get standard type of this dynamic cadence
-        dynamic_cadences = DynamicCadence.objects.filter(  # Get DynamicCadences that match the standard type
-            cadence_parameters__target_id__in=Target.objects.filter(targetextra__key='standard_type', targetextra__value=standard_type)  # TODO: get all dynamic cadences with targets of the matching standard type
-        )
+        targets = Target.objects.filter(targetextra__key='standard_type', targetextra__value=standard_type)
+        dynamic_cadences = DynamicCadence.objects.annotate(target_id=Cast(KeyTextTransform('target_id', 'cadence_parameters'), models.IntegerField()))
+        dynamic_cadences.filter(target_id__in=targets)
+        # dynamic_cadences = DynamicCadence.objects.filter(  # Get DynamicCadences that match the standard type
+        #     cadence_parameters__target_id__in=Target.objects.filter(targetextra__key='standard_type', targetextra__value=standard_type)  # TODO: get all dynamic cadences with targets of the matching standard type
+        # )
         for site in settings.NRES_SITES:  # TODO: exclude inactive configdb instruments (.get_active_nres_sites())
             dynamic_cadences_for_site = dynamic_cadences.filter(cadence_parameters__site=site)
             # if dynamic_cadences_for_site.count() == 0:

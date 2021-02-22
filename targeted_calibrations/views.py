@@ -191,8 +191,8 @@ class NRESCalibrationSubmissionView(FormView):
     success_url = reverse_lazy('targeted_calibrations:nres_home')
 
     def form_invalid(self, form):
-        messages.error(request, f'The form is invalid: {form.errors}.')
-        logger.error(request, f'Invalid form submission for NRES cadence submission: {form.errors}.')
+        messages.error(self.request, f'The form is invalid: {form.errors}.')
+        logger.error(self.request, f'Invalid form submission for NRES cadence submission: {form.errors}.')
         return super().form_invalid(form)
 
     def form_valid(self, form):

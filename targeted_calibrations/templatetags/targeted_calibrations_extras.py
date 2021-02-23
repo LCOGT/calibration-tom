@@ -32,7 +32,8 @@ def nres_cadence_list():
     nres_cadences = (DynamicCadence.objects.filter(cadence_strategy='NRESCadenceStrategy')
                      .annotate(site=Cast(KeyTextTransform('site', 'cadence_parameters'), models.TextField()))
                      .annotate(standard_type=Cast(KeyTextTransform('standard_type', 'cadence_parameters'),
-                                                     models.TextField()))  # TODO: This should be the standard type
+                                                  models.TextField()))  # TODO: This should be the standard type
+                     .order_by('-created')
                      .order_by('site'))
     return {'nres_cadences': nres_cadences}
 

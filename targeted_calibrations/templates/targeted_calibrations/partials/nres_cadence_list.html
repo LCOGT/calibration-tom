@@ -33,9 +33,12 @@
             </td>
         {% endif %}
         <td>
-            <a href="{% url 'targeted_calibrations:cadence_play_pause' nres_cadence.id %}?active=True" class="btn btn-success">></a>
+        {% if nres_cadence.active %}
             <a href="{% url 'targeted_calibrations:cadence_play_pause' nres_cadence.id %}?active=False" class="btn btn-warning">||</a>
-            <a href="" class="btn btn-danger">X</a>
+        {% else %}
+            <a href="{% url 'targeted_calibrations:cadence_play_pause' nres_cadence.id %}?active=True" class="btn btn-success">></a>
+        {% endif %}
+            <a href="{% url 'targeted_calibrations:cadence_delete' nres_cadence.id %}" class="btn btn-danger">X</a>
         </td>
     </tr>
     {% empty %}

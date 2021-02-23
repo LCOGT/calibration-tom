@@ -1,13 +1,12 @@
 import logging
 
-from django import forms
 from django.conf import settings
 from django.contrib import messages
 from django.db import models
 from django.db.models.fields.json import KeyTextTransform
 from django.db.models.functions import Cast
-from django.urls import reverse, reverse_lazy
-from django.views.generic import DetailView, ListView, RedirectView, TemplateView
+from django.urls import reverse_lazy
+from django.views.generic import DeleteView, DetailView, ListView, RedirectView, TemplateView
 from django.views.generic.edit import FormView
 
 from configdb.configdb_connections import ConfigDBInterface
@@ -225,3 +224,9 @@ class NRESCadencePlayPauseView(RedirectView):
             dc.save()
             messages.success(self.request, f'Cadence {dc} {"resumed" if dc.active == True else "paused"}.')
         return super().get_redirect_url(*args, **kwargs)
+
+
+class NRESCadenceDeleteView(DeleteView):
+    model = DynamicCadence
+    success_url = reverse_lazy('targeted_calibrations:nres_home')
+    template_name = 'targeted_calibrations/dynamiccadence_confirm_delete.html'

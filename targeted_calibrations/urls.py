@@ -5,7 +5,7 @@ from targeted_calibrations.views import InstrumentListView
 from targeted_calibrations.views import InstrumentTargetDetailView
 from targeted_calibrations.views import InstrumentTargetListView
 from targeted_calibrations.views import InstrumentTypeListView
-from targeted_calibrations.views import NRESCadencePlayPauseView
+from targeted_calibrations.views import NRESCadencePlayPauseView, NRESCadenceDeleteView
 
 # app_name is required in order to specify a namespace in include()
 app_name = 'targeted_calibrations'
@@ -20,5 +20,6 @@ urlpatterns = [
          name='instrument_target_list'),
     path('instruments/<str:instrument_type>/<str:instrument_code>/<int:pk>/', InstrumentTargetDetailView.as_view(),
          name='instrument_target_detail'),
-    path('cadence-play-pause/<int:pk>/', NRESCadencePlayPauseView.as_view(), name='cadence_play_pause'), 
+    path('cadence-play-pause/<int:pk>/', NRESCadencePlayPauseView.as_view(), name='cadence_play_pause'),
+    path('cadence-delete/<int:pk>/', NRESCadenceDeleteView.as_view(), name='cadence_delete')
 ]

@@ -5,6 +5,9 @@ from crispy_forms.layout import ButtonHolder, Column, Layout, Row, Submit
 from django import forms
 from django.conf import settings
 from django.contrib import messages
+from django.db import models
+from django.db.models.fields.json import KeyTextTransform
+from django.db.models.functions import Cast
 from django.urls import reverse, reverse_lazy
 from django.views.generic import DetailView, ListView, TemplateView
 from django.views.generic.edit import FormView
@@ -196,16 +199,27 @@ class NRESCalibrationSubmissionView(FormView):
         return super().form_invalid(form)
 
     def form_valid(self, form):
+        """For each (configdb-approved) site, find the DynamicCadences that have the same
+        target standard_type as the new (form-given) target and update them.
+        """
         cadence_frequency = form.cleaned_data['frequency']
         target_id = form.cleaned_data['target']
         target = Target.objects.get(pk=target_id)
-        standard_type = target.targetextra_set.filter(key='standard_type').first().value  # Get standard type of this dynamic cadence
-        targets = Target.objects.filter(targetextra__key='standard_type', targetextra__value=standard_type)
+
+        # Get standard type of this dynamic cadence
+        standard_type = target.targetextra_set.filter(key='standard_type').first().value
+        targets_for_standard_type = Target.objects.filter(targetextra__key='standard_type', targetextra__value=standard_type)
+
+        # annotate the all the cadences with the target.id of their targets...
         dynamic_cadences = DynamicCadence.objects.annotate(target_id=Cast(KeyTextTransform('target_id', 'cadence_parameters'), models.IntegerField()))
-        dynamic_cadences.filter(target_id__in=targets)
+        # ... so we can filter them (the dynamic cadences) down to the ones that match the standard_type
+        dynamic_cadences.filter(target_id__in=targets_for_standard_type)
+
+        # TODO: remove
         # dynamic_cadences = DynamicCadence.objects.filter(  # Get DynamicCadences that match the standard type
         #     cadence_parameters__target_id__in=Target.objects.filter(targetextra__key='standard_type', targetextra__value=standard_type)  # TODO: get all dynamic cadences with targets of the matching standard type
         # )
+
         for site in settings.NRES_SITES:  # TODO: exclude inactive configdb instruments (.get_active_nres_sites())
             dynamic_cadences_for_site = dynamic_cadences.filter(cadence_parameters__site=site)
             # if dynamic_cadences_for_site.count() == 0:

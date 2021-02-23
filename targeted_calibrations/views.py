@@ -13,7 +13,7 @@ from django.views.generic import DetailView, ListView, TemplateView
 from django.views.generic.edit import FormView
 
 from configdb.configdb_connections import ConfigDBInterface
-from tom_observations.models import DynamicCadence
+from tom_observations.models import DynamicCadence, ObservationGroup
 from tom_targets.models import Target
 
 logger = logging.getLogger(__name__)
@@ -215,34 +215,29 @@ class NRESCalibrationSubmissionView(FormView):
         # ... so we can filter them (the dynamic cadences) down to the ones that match the standard_type
         dynamic_cadences.filter(target_id__in=targets_for_standard_type)
 
-        # TODO: remove
-        # dynamic_cadences = DynamicCadence.objects.filter(  # Get DynamicCadences that match the standard type
-        #     cadence_parameters__target_id__in=Target.objects.filter(targetextra__key='standard_type', targetextra__value=standard_type)  # TODO: get all dynamic cadences with targets of the matching standard type
-        # )
-
         for site in settings.NRES_SITES:  # TODO: exclude inactive configdb instruments (.get_active_nres_sites())
             dynamic_cadences_for_site = dynamic_cadences.filter(cadence_parameters__site=site)
-            # if dynamic_cadences_for_site.count() == 0:
-            #     # TODO: submit observation to get an ObservationRecord to start the cadence
-            #     og = ObservationGroup.objects.create(name=f'Cadenced NRES {standard_type} calibrations for {site}')
-            #     DynamicCadence.objects.create(
-            #         cadence_strategy='NRESCadenceStrategy',
-            #         cadence_parameters={
-            #             'target_id': target_id,
-            #             'cadence_frequency': cadence_frequency,
-            #             'site': site
-            #         },
-            #         observation_group=og,
-            #         active=True
-            #     )
+            if dynamic_cadences_for_site.count() == 0:
+                og = ObservationGroup.objects.create(name=f'Cadenced NRES {standard_type} calibrations for {site}')
+                DynamicCadence.objects.create(
+                    cadence_strategy='NRESCadenceStrategy',
+                    cadence_parameters={
+                        'target_id': target_id,
+                        'cadence_frequency': cadence_frequency,
+                        'site': site
+                    },
+                    observation_group=og,
+                    active=True
+                )
             for dc in dynamic_cadences_for_site:
                 dc.cadence_parameters['target_id'] = target.id
                 dc.cadence_parameters['cadence_frequency'] = cadence_frequency
                 dc.save()
+            # TODO: Should the next observation be cancelled and replaced?
 
-    # site, target standard_type
+        messages.success(
+            self.request,
+            f'Successfully created/updated cadences with target {target} and frequency {cadence_frequency}.'
+        )
 
-    # def post(self, request, *args, **kwargs):
-    #     # update or submit cadence
-    #     messages.success(request, 'POSTed successfully!')
-    #     return super().post(request, args, kwargs)
+        return super().form_valid(form)

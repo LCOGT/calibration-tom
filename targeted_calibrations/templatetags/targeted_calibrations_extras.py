@@ -4,7 +4,7 @@ import statistics
 from django import template
 from django.conf import settings
 from django.db import models
-from django.db.models.fields.json import KeyTransform, KeyTextTransform
+from django.db.models.fields.json import KeyTextTransform
 from django.db.models.functions import Cast
 from guardian.shortcuts import get_objects_for_user
 from plotly import offline

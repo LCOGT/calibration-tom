@@ -9,6 +9,7 @@ from django.conf import settings
 from tom_observations.cadence import BaseCadenceForm
 from tom_observations.cadences.resume_cadence_after_failure import ResumeCadenceAfterFailureStrategy
 from tom_observations.facility import get_service_class
+from tom_observations.models import ObservationRecord
 
 logger = logging.getLogger(__name__)
 
@@ -99,6 +100,7 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
         # Submission of the new observation to the facility
         obs_type = last_obs.parameters.get('observation_type')
         form = facility.get_form(obs_type)(observation_payload)
+        logger.info(msg=f'Observation form data to be submitted for {self.dynamic_cadence.id}: {observation_payload}')
         if form.is_valid():
             observation_ids = facility.submit_observation(form.observation_payload())
         else:

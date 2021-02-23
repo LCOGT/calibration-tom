@@ -29,6 +29,14 @@ def prev_observation(observations):
     return observations.filter(status='COMPLETED').order_by('-scheduled_end').first()
 
 
+# TODO: generalize this method in tom_base
+@register.filter
+def prop_from_model(model, prop):
+    model_prop = model.__getattribute__(prop)
+    if model_prop is not None:
+        return model_prop
+
+
 @register.filter
 def prev_observation_id(observations):
     """

@@ -1,4 +1,4 @@
-{% load calibrations_extras %}
+{% load calibrations_extras targeted_calibrations_extras %}
 <h5>NRES Targets</h5>
 <table class="table table-striped">
     <thead>
@@ -25,11 +25,19 @@
             <td>None</td>
         {% else %}
             <td>
-                <a href="{% url 'observations:detail' nres_target.observationrecord_set.first.id %}">{{ nres_target.observationrecord_set.first }}</a>
+                <a href="{% url 'observations:detail' nres_target.observationrecord_set|prev_observation_id %}">
+                    {{ nres_target.observationrecord_set|prev_observation }}
+                </a>
             </td>
+            {% if not nres_target.observationrecord_set|next_observation %}
+            <td>None</td>
+            {% else %}
             <td>
-                <a href="{% url 'observations:detail' nres_target.observationrecord_set.last.id %}">{{ nres_target.observationrecord_set.last }}</a>
+                <a href="{% url 'observations:detail' nres_target.observationrecord_set|next_observation_id %}">
+                    {{ nres_target.observationrecord_set|next_observation }}
+                </a>
             </td>
+            {% endif %}
         {% endif %}
         <td>{% display_seasonal_start_or_end nres_target.extra_fields.seasonal_start %}</td>
         <td>{% display_seasonal_start_or_end nres_target.extra_fields.seasonal_end %}</td>

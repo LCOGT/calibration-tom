@@ -4,6 +4,9 @@ __pycache__
 db.sqlite3
 .DS_Store
 
+# pg_dump of sample data
+calibration-tom.db
+
 # Media
 media/
 data/

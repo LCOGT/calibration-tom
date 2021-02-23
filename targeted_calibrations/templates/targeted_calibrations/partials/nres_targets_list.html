@@ -1,0 +1,44 @@
+{% load calibrations_extras %}
+<h5>NRES Targets</h5>
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th scope="col">Name</th>
+        <th scope="col">Type</th>
+        <th scope="col">Active</th>
+        <th scope="col">Last Observation</th>
+        <th scope="col">Next Observation</th>
+        <th scope="col">Seasonal Start</th>
+        <th scope="col">Seasonal End</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for nres_target in nres_targets %}
+    <tr>
+        <td>
+            <a href="{% url 'targets:detail' nres_target.id %}">{{ nres_target.name }}</a>
+        </td>
+        <td>{{ nres_target.extra_fields.standard_type }}</td>
+        <td>{{ nres_target.extra_fields.nres_active_target}}</td>
+        {% if nres_target.observationrecord_set.all|length_is:"0" %}
+            <td>None</td>
+            <td>None</td>
+        {% else %}
+            <td>
+                <a href="{% url 'observations:detail' nres_target.observationrecord_set.first.id %}">{{ nres_target.observationrecord_set.first }}</a>
+            </td>
+            <td>
+                <a href="{% url 'observations:detail' nres_target.observationrecord_set.last.id %}">{{ nres_target.observationrecord_set.last }}</a>
+            </td>
+        {% endif %}
+        <td>{% display_seasonal_start_or_end nres_target.extra_fields.seasonal_start %}</td>
+        <td>{% display_seasonal_start_or_end nres_target.extra_fields.seasonal_end %}</td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="6">
+            No NRES targets available.
+        </td>
+    </tr>
+    {% endfor %}
+</table>

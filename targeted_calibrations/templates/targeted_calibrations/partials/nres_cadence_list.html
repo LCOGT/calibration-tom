@@ -1,0 +1,51 @@
+{% load bootstrap4 %}
+<h5>NRES Cadences</h5>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Site</th>
+            <th>Calibration Type</th>
+            <th>Frequency</th>
+            <th>Latest Calibration</th>
+            <th>Next Calibration</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for nres_cadence in nres_cadences %}
+    <tr>
+        <td>{{ nres_cadence.cadence_parameters.site }}</td>
+        <td>TBD</td>
+        <td>{{ nres_cadence.cadence_parameters.cadence_frequency }}</td>
+        {% if nres_cadence.observation_group.observation_records.all|length_is:"0" %}
+        <td>None</td>
+        <td>None</td>
+        {% else %}
+            <td>
+                <a href="{% url 'observations:detail' nres_cadence.observation_group.observation_records.first.id %}">{{ nres_cadence.observation_group.observation_records.last.target }} at {{ nres_cadence.observation_group.observation_records.first.scheduled_start }}</a>
+            </td>
+            <td>
+                {% if nres_cadence.observation_group.observation_records.last.scheduled_start %}
+                <a href="{% url 'observations:detail' nres_cadence.observation_group.observation_records.last.id %}">{{ nres_cadence.observation_group.observation_records.last.target }} at {{ nres_cadence.observation_group.observation_records.last.scheduled_start }}</a>
+                {% else %}
+                <a href="{% url 'observations:detail' nres_cadence.observation_group.observation_records.last.id %}">{{ nres_cadence.observation_group.observation_records.last.target }}, not scheduled</a>
+                {% endif %}
+            </td>
+        {% endif %}
+        <td>
+        {% if nres_cadence.active %}
+            <a href="{% url 'targeted_calibrations:cadence_play_pause' nres_cadence.id %}?active=False" class="btn btn-warning">||</a>
+        {% else %}
+            <a href="{% url 'targeted_calibrations:cadence_play_pause' nres_cadence.id %}?active=True" class="btn btn-success">></a>
+        {% endif %}
+            <a href="{% url 'targeted_calibrations:cadence_delete' nres_cadence.id %}" class="btn btn-danger">X</a>
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="6">
+            No NRES targets available.
+        </td>
+    </tr>
+    {% endfor %}
+</table>

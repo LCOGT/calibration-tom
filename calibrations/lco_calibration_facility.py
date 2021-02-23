@@ -12,8 +12,8 @@ logger = logging.getLogger(__name__)
 
 
 class NRESCalibrationForm(LCOBaseObservationForm):
-    VALID_INSTRUMENT_CODES = ['1M0-NRES-SCICAM']
-    VALID_PROPOSAL_CODES = ['ENG2017AB-001']
+    VALID_INSTRUMENT_CODES = ['1M0-NRES-SCICAM']  # TODO: Should this be in settings.py?
+    VALID_PROPOSAL_CODES = ['ENG2017AB-001']  # TODO: Should this be in settings.py?
     # This needs to exist on both the NRESCalibrationForm and the NRESCadenceForm
     site = forms.CharField(widget=forms.HiddenInput())
 

@@ -3,16 +3,45 @@ import statistics
 
 from django import template
 from django.conf import settings
+from django.db import models
+from django.db.models.fields.json import KeyTextTransform
+from django.db.models.functions import Cast
 from guardian.shortcuts import get_objects_for_user
 from plotly import offline
 import plotly.graph_objs as go
 
+from targeted_calibrations.views import NRESCalibrationSubmissionForm
 from tom_common.templatetags.tom_common_extras import truncate_number
 from tom_dataproducts.models import ReducedDatum
-from tom_observations.models import ObservationRecord
+from tom_observations.models import DynamicCadence, ObservationRecord
+from tom_targets.models import Target
 
 
 register = template.Library()
+
+
+@register.inclusion_tag('targeted_calibrations/partials/nres_targets_list.html')
+def nres_targets_list():
+    nres_targets = Target.objects.all()
+    return {'nres_targets': nres_targets}
+
+
+@register.inclusion_tag('targeted_calibrations/partials/nres_cadence_list.html')
+def nres_cadence_list():
+    # Annotate Dynamic Cadences with site and calibration type in order to sort by JSONField values
+    nres_cadences = (DynamicCadence.objects.filter(cadence_strategy='NRESCadenceStrategy')
+                     .annotate(site=Cast(KeyTextTransform('site', 'cadence_parameters'), models.TextField()))
+                     .annotate(standard_type=Cast(KeyTextTransform('standard_type', 'cadence_parameters'),
+                                                  models.TextField()))  # TODO: This should be the standard type
+                     .order_by('-created')
+                     .order_by('site'))
+    return {'nres_cadences': nres_cadences}
+
+
+@register.inclusion_tag('targeted_calibrations/partials/nres_submission_form.html')
+def nres_submission_form():
+    nres_cadence_form = NRESCalibrationSubmissionForm()
+    return {'nres_cadence_form': nres_cadence_form}
 
 
 @register.inclusion_tag('targeted_calibrations/partials/target_observation_list.html')

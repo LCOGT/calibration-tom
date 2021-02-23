@@ -1,7 +1,5 @@
 import logging
 
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import ButtonHolder, Column, Layout, Row, Submit
 from django import forms
 from django.conf import settings
 from django.contrib import messages
@@ -9,10 +7,11 @@ from django.db import models
 from django.db.models.fields.json import KeyTextTransform
 from django.db.models.functions import Cast
 from django.urls import reverse, reverse_lazy
-from django.views.generic import DetailView, ListView, TemplateView
+from django.views.generic import DetailView, ListView, RedirectView, TemplateView
 from django.views.generic.edit import FormView
 
 from configdb.configdb_connections import ConfigDBInterface
+from targeted_calibrations.forms import NRESCalibrationSubmissionForm
 from tom_observations.models import DynamicCadence, ObservationGroup
 from tom_targets.models import Target
 
@@ -160,35 +159,6 @@ class NRESCalibrationsView(TemplateView):
         pass
 
 
-# TODO: move this to a more appropriate class
-class NRESCalibrationSubmissionForm(forms.Form):
-    # site = forms.ChoiceField(choices=[('all', 'All'), ('cpt', 'cpt')])  # TODO: should be a ChoiceField
-    frequency = forms.IntegerField(label=False, widget=forms.NumberInput(attrs={'placeholder': 'Frequency (hours)'}))
-    target = forms.ChoiceField(  # Display standard type alongside target name
-        choices=[(target.id,
-                  f"{target.name} ({target.targetextra_set.filter(key='standard_type').first().value})")
-                 for target in Target.objects.all()],
-        label=False
-    )
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        self.helper.form_method = 'post'
-        self.helper.form_action = reverse('targeted_calibrations:nres_submission')
-        self.helper.layout = Layout(
-            Row(
-                Column('frequency'),
-                Column('target'),
-                Column(
-                    ButtonHolder(
-                        Submit('submit', 'Update or Create Cadence')
-                    )
-                )
-            )
-        )
-
-
 class NRESCalibrationSubmissionView(FormView):
     form_class = NRESCalibrationSubmissionForm
     success_url = reverse_lazy('targeted_calibrations:nres_home')
@@ -241,3 +211,17 @@ class NRESCalibrationSubmissionView(FormView):
         )
 
         return super().form_valid(form)
+
+
+class NRESCadencePlayPauseView(RedirectView):
+    pattern_name = 'targeted_calibrations:nres_home'
+
+    def get_redirect_url(self, *args, **kwargs):
+        cadence_id = kwargs.pop('pk', None)
+        active = self.request.GET.get('active', None)
+        if active is not None:
+            dc = DynamicCadence.objects.get(pk=cadence_id)
+            dc.active = active
+            dc.save()
+            messages.success(self.request, f'Cadence {dc} {"resumed" if dc.active == True else "paused"}.')
+        return super().get_redirect_url(*args, **kwargs)

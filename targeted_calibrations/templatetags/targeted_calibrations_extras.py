@@ -30,11 +30,13 @@ def prev_observation(observations):
 
 
 # TODO: generalize this method in tom_base
+# TODO: nres_cadence_list table should be managed by a templatetag
 @register.filter
 def prop_from_model(model, prop):
-    model_prop = model.__getattribute__(prop)
-    if model_prop is not None:
-        return model_prop
+    if model is not None:
+        model_prop = model.__getattribute__(prop)
+        if model_prop is not None:
+            return model_prop
 
 
 @register.filter

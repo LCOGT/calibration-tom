@@ -25,7 +25,7 @@
             <td>None</td>
         {% else %}
             <td>
-                <a href="{% url 'observations:detail' nres_target.observationrecord_set|prev_observation_id %}">
+                <a href="{% url 'observations:detail' nres_target.observationrecord_set|prev_observation|prop_from_model:'id' %}">
                     {{ nres_target.observationrecord_set|prev_observation }}
                 </a>
             </td>
@@ -33,7 +33,7 @@
             <td>None</td>
             {% else %}
             <td>
-                <a href="{% url 'observations:detail' nres_target.observationrecord_set|next_observation_id %}">
+                <a href="{% url 'observations:detail' nres_target.observationrecord_set|next_observation|prop_from_model:'id' %}">
                     {{ nres_target.observationrecord_set|next_observation }}
                 </a>
             </td>

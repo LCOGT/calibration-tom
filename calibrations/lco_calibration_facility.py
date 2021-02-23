@@ -111,12 +111,13 @@ class LCOCalibrationFacility(LCOFacility):
 
     def data_products(self, observation_id, product_id=None):
         products = []
-        for frame in self._archive_frames(observation_id, product_id):
-            if all(suffix for suffix in self.EXCLUDED_FRAME_SUFFIXES) not in frame['filename']:
-                products.append({
-                    'id': frame['id'],
-                    'filename': frame['filename'],
-                    'created': parse(frame['DATE_OBS']),
-                    'url': frame['url']
-                })
+        # TODO: fix how data products are handled
+        # for frame in self._archive_frames(observation_id, product_id):
+        #     if all(suffix for suffix in self.EXCLUDED_FRAME_SUFFIXES) not in frame['filename']:
+        #         products.append({
+        #             'id': frame['id'],
+        #             'filename': frame['filename'],
+        #             'created': parse(frame['DATE_OBS']),
+        #             'url': frame['url']
+        #         })
         return products

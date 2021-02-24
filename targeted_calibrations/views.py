@@ -222,7 +222,6 @@ class NRESCadencePlayPauseView(RedirectView):
             dc = DynamicCadence.objects.get(pk=cadence_id)
             dc.active = active
             dc.save()
-            messages.success(self.request, f'Cadence {dc} {"resumed" if dc.active == True else "paused"}.')
         return super().get_redirect_url(*args, **kwargs)
 
 

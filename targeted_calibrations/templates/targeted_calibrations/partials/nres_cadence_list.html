@@ -40,7 +40,7 @@
             </td>
         {% else %}
             <td>
-                <a href="http://logs.lco.gtn/app/kibana#/discover?_g=(refreshInterval:(display:Off,pause:!f,value:0),time:(from:now-24h,mode:quick,to:now))&_a=(columns:!(_source),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'logstash-*',key:kubernetes.container_name,negate:!f,type:phrase,value:calibration-tom),query:(match:(kubernetes.container_name:(query:calibration-tom,type:phrase)))),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'logstash-*',key:kubernetes.pod_name,negate:!f,type:phrase,value:runcadencestrategies),query:(match:(kubernetes.pod_name:(query:runcadencestrategies,type:phrase))))),index:'logstash-*',interval:auto,query:(match_all:()),sort:!('@timestamp',desc))">
+                <a href="http://logs.lco.gtn/app/kibana#/discover?_g=(refreshInterval:(display:Off,pause:!f,value:0),time:(from:now-24h,mode:quick,to:now))&_a=(columns:!(target,message),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'logstash-*',key:kubernetes.container_name,negate:!f,type:phrase,value:calibration-tom),query:(match:(kubernetes.container_name:(query:calibration-tom,type:phrase)))),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'logstash-*',key:kubernetes.pod_name,negate:!f,type:phrase,value:runcadencestrategies),query:(match:(kubernetes.pod_name:(query:runcadencestrategies,type:phrase))))),index:'logstash-*',interval:auto,query:(match_all:()),sort:!('@timestamp',desc))">
                     Observation not submitted
                 </a>
             </td>

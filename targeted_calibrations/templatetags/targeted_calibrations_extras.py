@@ -20,53 +20,6 @@ from tom_targets.models import Target
 register = template.Library()
 
 
-@register.filter
-def prev_observation(observations):
-    """
-    :param observations: an Observation QuerySet
-    """
-    # TODO: remove COMPLETED which is a magic number
-    return observations.filter(status='COMPLETED').order_by('-scheduled_end').first()
-
-
-# TODO: generalize this method in tom_base
-# TODO: nres_cadence_list table should be managed by a templatetag
-@register.filter
-def prop_from_model(model, prop):
-    if model is not None:
-        model_prop = model.__getattribute__(prop)
-        if model_prop is not None:
-            return model_prop
-
-
-@register.filter
-def prev_observation_id(observations):
-    """
-    :param observations: an Observation QuerySet
-    """
-    # TODO: remove COMPLETED which is a magic number
-    return observations.filter(status='COMPLETED').order_by('-scheduled_end').first().id
-
-
-@register.filter
-def next_observation(observations):
-    """
-    :param observations: an Observation QuerySet
-    """
-    # TODO: remove PENDING which is a magic number
-    return observations.filter(status='PENDING').order_by('scheduled_start').first()
-
-
-@register.filter
-def next_observation_id(observations):
-    """
-    :param observations: an Observation QuerySet
-    """
-    # TODO: remove PENDING which is a magic number
-    # TODO: this is unsafe if the filter result is NoneType
-    return observations.filter(status='PENDING').order_by('scheduled_start').first().id
-
-
 @register.inclusion_tag('targeted_calibrations/partials/nres_targets_list.html')
 def nres_targets_list():
     nres_targets = Target.objects.all()
@@ -74,7 +27,11 @@ def nres_targets_list():
     # determine "next" observation
     # annotate target with the observation
     # then, in the template extract these annotation for display in list
-    context = {'nres_targets': nres_targets}
+    context = {'targets_data': [{
+        'target': nres_target,
+        'prev_obs': nres_target.observationrecord_set.filter(status='COMPLETED').order_by('-scheduled_end').first(),
+        'next_obs': nres_target.observationrecord_set.filter(status='PENDING').order_by('scheduled_start').first()
+    } for nres_target in nres_targets]}
     return context
 
 
@@ -87,7 +44,12 @@ def nres_cadence_list():
                                                   models.TextField()))  # TODO: This should be the standard type
                      .order_by('-created')
                      .order_by('site'))
-    return {'nres_cadences': nres_cadences}
+    context = {'cadences_data': [{
+        'cadence': cadence,
+        'prev_obs': cadence.observation_group.observation_records.filter(status='COMPLETED').order_by('-scheduled_end').first(),
+        'next_obs': cadence.observation_group.observation_records.filter(status='PENDING').order_by('scheduled_start').first()
+    } for cadence in nres_cadences]}
+    return context
 
 
 @register.inclusion_tag('targeted_calibrations/partials/nres_submission_form.html')

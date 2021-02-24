@@ -74,7 +74,11 @@ def nres_targets_list():
     # determine "next" observation
     # annotate target with the observation
     # then, in the template extract these annotation for display in list
-    context = {'nres_targets': nres_targets}
+    context = {'nres_targets_data': [{
+        'target': nres_target,
+        'prev_obs': nres_target.observationrecord_set.filter(status='COMPLETED').order_by('-scheduled_end').first(),
+        'next_obs': nres_target.observationrecord_set.filter(status='PENDING').order_by('-scheduled_end').first()
+    } for nres_target in nres_targets]}
     return context
 
 

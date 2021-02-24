@@ -12,45 +12,46 @@
         </tr>
     </thead>
     <tbody>
-    {% for nres_cadence in nres_cadences %}
+    {% for cadence_data in cadences_data %}
     <tr>
-        <td>{{ nres_cadence.cadence_parameters.site }}</td>
+        <td>{{ cadence_data.cadence.cadence_parameters.site }}</td>
         <td>TBD</td>
-        <td>{{ nres_cadence.cadence_parameters.cadence_frequency }}</td>
-        {% if nres_cadence.observation_group.observation_records.all|length_is:"0" %}
-        <td>None</td>
-        <td>None</td>
-        {% else %}
+        <td>{{ cadence_data.cadence.cadence_parameters.cadence_frequency }}</td>
+        {% if cadence_data.prev_obs %}
             <td>
-                <a href="{% url 'observations:detail' nres_cadence.observation_group.observation_records|prev_observation|prop_from_model:'id' %}">
-                    {{ nres_cadence.observation_group.observation_records|prev_observation|prop_from_model:"target" }} at {{ nres_cadence.observation_group.observation_records|prev_observation|prop_from_model:"scheduled_start" }}
+                <a href="{% url 'observations:detail' cadence_data.prev_obs.id %}">
+                    {{ cadence_data.prev_obs.target }} at {{ cadence_data.prev_obs.scheduled_start }}
                 </a>
             </td>
+        {% else %}
+            <td>None</td>
+        {% endif %}
+        {% if cadence_data.next_obs %}
             <td>
-                {% if nres_cadence.observation_group.observation_records|next_observation %}
-                    {% if nres_cadence.observation_group.observation_records|next_observation|prop_from_model:"scheduled_start" %}
-                    <a href="{% url 'observations:detail' nres_cadence.observation_group.observation_records|next_observation|prop_from_model:'id' %}">
-                        {{ nres_cadence.observation_group.observation_records|next_observation|prop_from_model:"target" }} at {{ nres_cadence.observation_group.observation_records|next_observation|prop_from_model:"scheduled_start" }}
-                    </a>
-                    {% else %}
-                    <a href="{% url 'observations:detail' nres_cadence.observation_group.observation_records|next_observation|prop_from_model:'id' %}">
-                        {{ nres_cadence.observation_group.observation_records|next_observation|prop_from_model:"target" }}, not scheduled
-                    </a>
-                    {% endif %}
+                {% if cadence_data.next_obs.scheduled_start %}
+                <a href="{% url 'observations:detail' cadence_data.next_obs.id %}">
+                    {{ cadence_data.next_obs.target }} at {{ cadence_data.next_obs.scheduled_start }}
+                </a>
                 {% else %}
-                    <a href="http://logs.lco.gtn/app/kibana#/discover?_g=(refreshInterval:(display:Off,pause:!f,value:0),time:(from:now-24h,mode:quick,to:now))&_a=(columns:!(_source),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'logstash-*',key:kubernetes.container_name,negate:!f,type:phrase,value:calibration-tom),query:(match:(kubernetes.container_name:(query:calibration-tom,type:phrase)))),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'logstash-*',key:kubernetes.pod_name,negate:!f,type:phrase,value:runcadencestrategies),query:(match:(kubernetes.pod_name:(query:runcadencestrategies,type:phrase))))),index:'logstash-*',interval:auto,query:(match_all:()),sort:!('@timestamp',desc))">
-                        Observation not submitted
-                    </a>
+                <a href="{% url 'observations:detail' cadence_data.next_obs.id %}">
+                    {{ cadence_data.next_obs.target }}, not scheduled
+                </a>
                 {% endif %}
+            </td>
+        {% else %}
+            <td>
+                <a href="http://logs.lco.gtn/app/kibana#/discover?_g=(refreshInterval:(display:Off,pause:!f,value:0),time:(from:now-24h,mode:quick,to:now))&_a=(columns:!(_source),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'logstash-*',key:kubernetes.container_name,negate:!f,type:phrase,value:calibration-tom),query:(match:(kubernetes.container_name:(query:calibration-tom,type:phrase)))),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'logstash-*',key:kubernetes.pod_name,negate:!f,type:phrase,value:runcadencestrategies),query:(match:(kubernetes.pod_name:(query:runcadencestrategies,type:phrase))))),index:'logstash-*',interval:auto,query:(match_all:()),sort:!('@timestamp',desc))">
+                    Observation not submitted
+                </a>
             </td>
         {% endif %}
         <td>
-        {% if nres_cadence.active %}
-            <a href="{% url 'targeted_calibrations:cadence_play_pause' nres_cadence.id %}?active=False" class="btn btn-warning">||</a>
+        {% if cadence_data.cadence.active %}
+            <a href="{% url 'targeted_calibrations:cadence_play_pause' cadence_data.cadence.id %}?active=False" class="btn btn-warning">||</a>
         {% else %}
-            <a href="{% url 'targeted_calibrations:cadence_play_pause' nres_cadence.id %}?active=True" class="btn btn-success">></a>
+            <a href="{% url 'targeted_calibrations:cadence_play_pause' cadence_data.cadence.id %}?active=True" class="btn btn-success">></a>
         {% endif %}
-            <a href="{% url 'targeted_calibrations:cadence_delete' nres_cadence.id %}" class="btn btn-danger">X</a>
+            <a href="{% url 'targeted_calibrations:cadence_delete' cadence_data.cadence.id %}" class="btn btn-danger">X</a>
         </td>
     </tr>
     {% empty %}

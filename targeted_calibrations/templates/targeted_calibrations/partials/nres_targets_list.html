@@ -5,7 +5,6 @@
     <tr>
         <th scope="col">Name</th>
         <th scope="col">Type</th>
-        <th scope="col">Active</th>
         <th scope="col">Last Observation</th>
         <th scope="col">Next Observation</th>
         <th scope="col">Seasonal Start</th>
@@ -13,33 +12,32 @@
     </tr>
     </thead>
     <tbody>
-    {% for nres_target_data in nres_targets_data %}
+    {% for target_data in targets_data %}
     <tr>
         <td>
-            <a href="{% url 'targets:detail' nres_target_data.target.id %}">{{ nres_target_data.target.name }}</a>
+            <a href="{% url 'targets:detail' target_data.target.id %}">{{ target_data.target.name }}</a>
         </td>
-        <td>{{ nres_target_data.target.extra_fields.standard_type }}</td>
-        <td>{{ nres_target_data.target.extra_fields.nres_active_target}}</td>
-        {% if not nres_target_data.prev_obs %}
+        <td>{{ target_data.target.extra_fields.standard_type }}</td>
+        {% if not target_data.prev_obs %}
             <td>None</td>
         {% else %}
             <td>
-                <a href="{% url 'observations:detail' nres_target_data.prev_obs.id %}">
-                    {{ nres_target_data.prev_obs }}
+                <a href="{% url 'observations:detail' target_data.prev_obs.id %}">
+                    {{ target_data.prev_obs }}
                 </a>
             </td>
         {% endif %}
-        {% if not nres_target_data.next_obs %}
+        {% if not target_data.next_obs %}
             <td>None</td>
         {% else %}
             <td>
-                <a href="{% url 'observations:detail' nres_target_data.next_obs.id %}">
-                    {{ nres_target_data.next_observation }}
+                <a href="{% url 'observations:detail' target_data.next_obs.id %}">
+                    {{ target_data.next_observation }}
                 </a>
             </td>
         {% endif %}
-        <td>{% display_seasonal_start_or_end nres_target_data.target.extra_fields.seasonal_start %}</td>
-        <td>{% display_seasonal_start_or_end nres_target_data.target.extra_fields.seasonal_end %}</td>
+        <td>{% display_seasonal_start_or_end target_data.target.extra_fields.seasonal_start %}</td>
+        <td>{% display_seasonal_start_or_end target_data.target.extra_fields.seasonal_end %}</td>
     </tr>
     {% empty %}
     <tr>

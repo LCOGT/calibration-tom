@@ -105,7 +105,7 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
         form = facility.get_form(obs_type)(observation_payload)
         logger.info(f'Observation form data to be submitted for {self.dynamic_cadence.id}: {observation_payload}',
                     extra={'tags': {
-                        'dynamic_cadence_id': self.dc.id,
+                        'dynamic_cadence_id': self.dynamic_cadence.id,
                         'target': Target.objects.get(pk=self.dynamic_cadence.cadence_parameters['target_id'])
                     }})
         if form.is_valid():
@@ -113,7 +113,7 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
         else:
             logger.error(f'Unable to submit next cadenced observation: {form.errors}',
                          extra={'tags': {
-                            'dynamic_cadence_id': self.dc.id,
+                            'dynamic_cadence_id': self.dynamic_cadence.id,
                             'target': Target.objects.get(pk=self.dynamic_cadence.cadence_parameters['target_id'])
                          }})
             raise Exception(f'Unable to submit next cadenced observation: {form.errors}')

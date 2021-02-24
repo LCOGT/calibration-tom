@@ -10,6 +10,7 @@ from tom_observations.cadence import BaseCadenceForm
 from tom_observations.cadences.resume_cadence_after_failure import ResumeCadenceAfterFailureStrategy
 from tom_observations.facility import get_service_class
 from tom_observations.models import ObservationRecord
+from tom_targets.models import Target
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +75,9 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
             if form.is_valid():
                 observation_payload = form.cleaned_data
             else:
-                logger.error(f'Unable to submit initial calibration for cadence {self.dc.id}')
+                logger.error(f'Unable to submit initial calibration for cadence {self.dc.id}', extra={
+                    'tags': {'dynamic_cadence_id': self.dc.id}
+                })
                 raise forms.ValidationError(f'Unable to submit initial calibration for cadence {self.dc}')
 
         # Boilerplate to get necessary properties for future calls
@@ -100,11 +103,19 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
         # Submission of the new observation to the facility
         obs_type = last_obs.parameters.get('observation_type')
         form = facility.get_form(obs_type)(observation_payload)
-        logger.info(msg=f'Observation form data to be submitted for {self.dynamic_cadence.id}: {observation_payload}')
+        logger.info(f'Observation form data to be submitted for {self.dynamic_cadence.id}: {observation_payload}',
+                    extra={'tags': {
+                        'dynamic_cadence_id': self.dc.id,
+                        'target': Target.objects.get(pk=self.dynamic_cadence.cadence_parameters['target_id'])
+                    }})
         if form.is_valid():
             observation_ids = facility.submit_observation(form.observation_payload())
         else:
-            logger.error(msg=f'Unable to submit next cadenced observation: {form.errors}')
+            logger.error(f'Unable to submit next cadenced observation: {form.errors}',
+                         extra={'tags': {
+                            'dynamic_cadence_id': self.dc.id,
+                            'target': Target.objects.get(pk=self.dynamic_cadence.cadence_parameters['target_id'])
+                         }})
             raise Exception(f'Unable to submit next cadenced observation: {form.errors}')
 
         # Creation of corresponding ObservationRecord objects for the observations

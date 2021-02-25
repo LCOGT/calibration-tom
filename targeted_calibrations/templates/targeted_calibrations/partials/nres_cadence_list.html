@@ -15,7 +15,7 @@
     {% for cadence_data in cadences_data %}
     <tr>
         <td>{{ cadence_data.cadence.cadence_parameters.site }}</td>
-        <td>TBD</td>
+        <td>{{ cadence_data.standard_type }}</td>
         <td>{{ cadence_data.cadence.cadence_parameters.cadence_frequency }}</td>
         {% if cadence_data.prev_obs %}
             <td>

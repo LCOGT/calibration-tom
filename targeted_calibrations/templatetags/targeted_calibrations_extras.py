@@ -40,12 +40,12 @@ def nres_cadence_list():
     # Annotate Dynamic Cadences with site and calibration type in order to sort by JSONField values
     nres_cadences = (DynamicCadence.objects.filter(cadence_strategy='NRESCadenceStrategy')
                      .annotate(site=Cast(KeyTextTransform('site', 'cadence_parameters'), models.TextField()))
-                     .annotate(standard_type=Cast(KeyTextTransform('standard_type', 'cadence_parameters'),
-                                                  models.TextField()))  # TODO: This should be the standard type
+                     .annotate(target_id=Cast(KeyTextTransform('target_id', 'cadence_parameters'), models.TextField()))
                      .order_by('-created')
                      .order_by('site'))
     context = {'cadences_data': [{
         'cadence': cadence,
+        'standard_type': Target.objects.filter(pk=cadence.target_id).first().targetextra_set.filter(key='standard_type').first().value,
         'prev_obs': cadence.observation_group.observation_records.filter(status='COMPLETED').order_by('-scheduled_end').first(),
         'next_obs': cadence.observation_group.observation_records.filter(status='PENDING').order_by('scheduled_start').first()
     } for cadence in nres_cadences]}

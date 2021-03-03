@@ -46,8 +46,20 @@
                 </a>
             </td>
         {% endif %}
-        <td>{{ cadence_data.cadence.active }}</td>
+        <td class="col-md-1">{{ cadence_data.cadence.active }}</td>
+        {% comment %}
         <td>
+            <div class="form-check">
+
+                <input type="checkbox" class="form-check-input" id="cadenceActiveCheckbox"
+                       {% if cadence_data.cadence.active %}
+                         checked
+                       {% endif %}>
+                <label class="form-check-label" for="cadenceActiveCheckbox">{{ cadence_data.cadence.active }}</label>
+            </div>
+        </td>
+        {% endcomment %}
+        <td class="col-md-2">
         {% if cadence_data.cadence.active %}
             <a href="{% url 'targeted_calibrations:cadence_play_pause' cadence_data.cadence.id %}?active=False" class="btn btn-warning">||</a>
         {% else %}

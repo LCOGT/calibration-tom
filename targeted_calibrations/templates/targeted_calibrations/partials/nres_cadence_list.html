@@ -8,6 +8,7 @@
             <th>Frequency</th>
             <th>Latest Observation</th>
             <th>Next Observation</th>
+            <th>Active</th>
             <th></th>
         </tr>
     </thead>
@@ -45,6 +46,7 @@
                 </a>
             </td>
         {% endif %}
+        <td>{{ cadence_data.cadence.active }}</td>
         <td>
         {% if cadence_data.cadence.active %}
             <a href="{% url 'targeted_calibrations:cadence_play_pause' cadence_data.cadence.id %}?active=False" class="btn btn-warning">||</a>

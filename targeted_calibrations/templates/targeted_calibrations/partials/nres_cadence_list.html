@@ -1,4 +1,4 @@
-{% load bootstrap4 targeted_calibrations_extras %}
+{% load humanize bootstrap4 targeted_calibrations_extras %}
 <h4>NRES Cadences</h4>
 <table class="table table-striped">
     <thead>
@@ -11,6 +11,8 @@
             <th>Next Observation</th>
             <th>Active</th>
             <th></th>
+            <th></th>
+            <th>Modified</th>
         </tr>
     </thead>
     <tbody>
@@ -55,8 +57,11 @@
         {% else %}
             <a href="{% url 'targeted_calibrations:cadence_play_pause' cadence_data.cadence.id %}?active=True" class="btn btn-success">></a>
         {% endif %}
+        </td>
+        <td>
             <a href="{% url 'targeted_calibrations:cadence_delete' cadence_data.cadence.id %}" class="btn btn-danger">X</a>
         </td>
+        <td>{{ cadence_data.cadence.modified|naturaltime }}</td>
     </tr>
     {% empty %}
     <tr>

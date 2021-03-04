@@ -42,12 +42,17 @@ def nres_cadence_list():
                      .annotate(site=Cast(KeyTextTransform('site', 'cadence_parameters'), models.TextField()))
                      .annotate(target_id=Cast(KeyTextTransform('target_id', 'cadence_parameters'), models.TextField()))
                      .order_by('site', '-created'))
-    context = {'cadences_data': [{
-        'cadence': cadence,
-        'standard_type': Target.objects.filter(pk=cadence.target_id).first().targetextra_set.filter(key='standard_type').first().value,
-        'prev_obs': cadence.observation_group.observation_records.filter(status='COMPLETED').order_by('-scheduled_end').first(),
-        'next_obs': cadence.observation_group.observation_records.filter(status='PENDING').order_by('scheduled_start').first()
-    } for cadence in nres_cadences]}
+    cadences_data = []
+    for cadence in nres_cadences:
+        target = Target.objects.filter(pk=cadence.target_id).first()
+        cadences_data.append({
+            'cadence': cadence,
+            'target': target,
+            'standard_type': target.targetextra_set.filter(key='standard_type').first().value,
+            'prev_obs': cadence.observation_group.observation_records.filter(status='COMPLETED').order_by('-scheduled_end').first(),
+            'next_obs': cadence.observation_group.observation_records.filter(status='PENDING').order_by('scheduled_start').first()
+            })
+    context = {'cadences_data': cadences_data}
     return context
 
 

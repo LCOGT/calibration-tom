@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import ButtonHolder, Column, Layout, Row, Submit
 from django import forms
@@ -6,13 +8,25 @@ from django.urls import reverse
 from tom_targets.models import Target
 
 
+def target_is_in_season(self, query_date: datetime=datetime.utcnow()):
+    """"Returns True if query_date is between target's seasonal_start and seasonal_end
+    Note: seasonal_start and seasonal_end are month numbers (1=January, etc).
+
+    This method will be added to the Target class with setattr (that's why it has a self argument).
+    """
+    seasonal_start = int(self.targetextra_set.filter(key='seasonal_start').first().value)
+    seasonal_end = int(self.targetextra_set.filter(key='seasonal_end').first().value)
+
+    return seasonal_start <= query_date.month <= seasonal_end
+setattr(Target, 'target_is_in_season', target_is_in_season)  # noqa - add method to Target class
+
 class NRESCalibrationSubmissionForm(forms.Form):
     # site = forms.ChoiceField(choices=[('all', 'All'), ('cpt', 'cpt')])  # TODO: should be a ChoiceField
     frequency = forms.IntegerField(label=False, widget=forms.NumberInput(attrs={'placeholder': 'Frequency (hours)'}))
-    target = forms.ChoiceField(  # Display standard type alongside target name
+    target = forms.ChoiceField(  # Create choices for standard_types of targets currently in season
         choices=[(target.id,
-                  f"{target.name} ({target.targetextra_set.filter(key='standard_type').first().value})")
-                 for target in Target.objects.all()],
+                  f"{target.targetextra_set.filter(key='standard_type').first().value} (currently {target.name})")
+                 for target in Target.objects.all() if target.target_is_in_season()],
         label=False
     )
 

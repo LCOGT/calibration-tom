@@ -24,8 +24,12 @@ class NRESCalibrationSubmissionForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.form_method = 'post'
-        self.helper.form_action = reverse('targeted_calibrations:nres_submission')
+#        self.helper.form_method = 'post'
+#        self.helper.form_action = reverse('targeted_calibrations:nres_submission')
+        # TODO: remove when you want to re-enable the submit button
+        self.helper.form_method = 'get'
+        self.helper.form_action = ''  # no-op
+
         self.helper.layout = Layout(
             Row(
                 Column('site'),

@@ -3,6 +3,7 @@ from datetime import datetime
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import ButtonHolder, Column, Layout, Row, Submit
 from django import forms
+from django.conf import settings
 from django.urls import reverse
 
 from tom_targets.models import Target
@@ -20,8 +21,11 @@ def target_is_in_season(self, query_date: datetime=datetime.utcnow()):
     return seasonal_start <= query_date.month <= seasonal_end
 setattr(Target, 'target_is_in_season', target_is_in_season)  # noqa - add method to Target class
 
+
 class NRESCalibrationSubmissionForm(forms.Form):
-    # site = forms.ChoiceField(choices=[('all', 'All'), ('cpt', 'cpt')])  # TODO: should be a ChoiceField
+    site = forms.ChoiceField(required=True,
+                             choices=[('all', 'All Sites')] + [(site, site) for site in settings.NRES_SITES],
+                             label=False)
     frequency = forms.IntegerField(label=False, widget=forms.NumberInput(attrs={'placeholder': 'Frequency (hours)'}))
     target = forms.ChoiceField(  # Create choices for standard_types of targets currently in season
         choices=[(target.id,
@@ -37,6 +41,7 @@ class NRESCalibrationSubmissionForm(forms.Form):
         self.helper.form_action = reverse('targeted_calibrations:nres_submission')
         self.helper.layout = Layout(
             Row(
+                Column('site'),
                 Column('frequency'),
                 Column('target'),
                 Column(

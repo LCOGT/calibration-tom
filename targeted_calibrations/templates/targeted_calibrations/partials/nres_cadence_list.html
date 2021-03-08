@@ -6,8 +6,10 @@
             <th>Site</th>
             <th>Calibration Type</th>
             <th>Frequency</th>
+            <th>Target</th>
             <th>Latest Observation</th>
             <th>Next Observation</th>
+            <th>Active</th>
             <th></th>
         </tr>
     </thead>
@@ -17,6 +19,7 @@
         <td>{{ cadence_data.cadence.cadence_parameters.site }}</td>
         <td>{{ cadence_data.standard_type }}</td>
         <td>{{ cadence_data.cadence.cadence_parameters.cadence_frequency }}</td>
+        <td>{{ cadence_data.target.name }}</td>
         {% if cadence_data.prev_obs %}
             <td>
                 <a href="{% url 'observations:detail' cadence_data.prev_obs.id %}">
@@ -45,7 +48,8 @@
                 </a>
             </td>
         {% endif %}
-        <td>
+        <td class="col-md-1">{{ cadence_data.cadence.active|yesno:"Active,Inactive" }}</td>
+        <td class="col-md-2">
         {% if cadence_data.cadence.active %}
             <a href="{% url 'targeted_calibrations:cadence_play_pause' cadence_data.cadence.id %}?active=False" class="btn btn-warning">||</a>
         {% else %}

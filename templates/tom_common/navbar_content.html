@@ -54,9 +54,11 @@ The following nav-item list elements (li) are included in the tom_common/base.ht
 <li class="nav-item {% if 'user' in request.resolver_match.url_name %}active{% endif %}">
     <a class="nav-link" href="{% url 'calibrations:flat_home' %}">Flat</a>
 </li>
+
 <li class="nav-item {% if 'user' in request.resolver_match.url_name %}active{% endif %}">
-    <a class="nav-link" href="{% url 'calibrations:standard_home' %}">Standard</a>
+    <a class="nav-link" href="{% url 'targeted_calibrations:standards_home' %}">Standard</a>
 </li>
+
 <li class="nav-item dropdown">
     <a class="nav-link dropdown-toggle" data-toggle="dropdown">Documentation</a>
     <ul class="dropdown-menu">

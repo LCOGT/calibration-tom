@@ -157,6 +157,12 @@ class NRESCalibrationsView(TemplateView):
     def get_context_data(self, **kwargs):
         pass
 
+class StandardsCalibrationsView(TemplateView):
+    template_name = 'targeted_calibrations/standards_calibrations_view.html'
+
+    def get_context_data(self, **kwargs):
+        pass
+
 
 class NRESCalibrationSubmissionView(FormView):
     form_class = NRESCalibrationSubmissionForm

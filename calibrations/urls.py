@@ -9,4 +9,5 @@ urlpatterns = [
     path('bias/', TemplateView.as_view(template_name="calibrations/bias_stub.html"), name='bias_home'),
     path('dark/', TemplateView.as_view(template_name="calibrations/dark_stub.html"), name='dark_home'),
     path('flat/', TemplateView.as_view(template_name="calibrations/flat_stub.html"), name='flat_home'),
+    path('standard/', TemplateView.as_view(template_name="calibrations/standard_stub.html"), name='standard_home'),
 ]

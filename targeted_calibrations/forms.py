@@ -9,15 +9,16 @@ from tom_targets.models import Target
 class NRESCalibrationSubmissionForm(forms.Form):
     # site = forms.ChoiceField(choices=[('all', 'All'), ('cpt', 'cpt')])  # TODO: should be a ChoiceField
     frequency = forms.IntegerField(label=False, widget=forms.NumberInput(attrs={'placeholder': 'Frequency (hours)'}))
-    target = forms.ChoiceField(  # Display standard type alongside target name
-        choices=[(target.id,
-                  f"{target.name} ({target.targetextra_set.filter(key='standard_type').first().value})")
-                 for target in Target.objects.all()],
-        label=False
-    )
+    target = forms.ChoiceField(choices=[])  # Display standard type alongside target name
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['target'] = forms.ChoiceField(
+            choices=[(target.id,
+                      f"{target.name} ({target.targetextra_set.filter(key='standard_type').first().value})")
+                     for target in Target.objects.all()],
+            label=False
+        )
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         self.helper.form_action = reverse('targeted_calibrations:nres_submission')

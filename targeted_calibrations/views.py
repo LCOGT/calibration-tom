@@ -184,7 +184,9 @@ class NRESCalibrationSubmissionView(FormView):
         # ... so we can filter them (the dynamic cadences) down to the ones that match the standard_type
         dynamic_cadences.filter(target_id__in=targets_for_standard_type)
 
-        for site in settings.NRES_SITES:  # TODO: exclude inactive configdb instruments (.get_active_nres_sites())
+        #  for site in active_requested_nres_sites:
+        # TODO: re-invoke this loop when ready: Cadence updating is turned off right now
+        for site in []:  # TODO: exclude inactive configdb instruments (.get_active_nres_sites())
             dynamic_cadences_for_site = dynamic_cadences.filter(cadence_parameters__site=site)
             if dynamic_cadences_for_site.count() == 0:
                 og = ObservationGroup.objects.create(name=f'Cadenced NRES {standard_type} calibrations for {site}')

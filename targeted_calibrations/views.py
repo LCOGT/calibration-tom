@@ -167,13 +167,33 @@ class NRESCalibrationSubmissionView(FormView):
         logger.error(self.request, f'Invalid form submission for NRES cadence submission: {form.errors}.')
         return super().form_invalid(form)
 
+    def _get_active_requested_nres_sites(self, requested_sites):
+        """
+        :return: list of site-code strings which are both active (SCHEDULABLE or COMMISSIONING) and requested by the form.
+        """
+        active_nres_sites = []  # the sites with active (SCHEDULABLE or COMMISSIONING) NRES instruments
+        for telcode, instruments in configdb.get_active_instruments_info(
+                instrument_type=settings.NRES_INSTRUMENT_TYPE,
+                include_commissioning=True).items():
+            active_nres_sites.append(instruments[0]['site'])
+
+        active_requested_sites = [site for site in requested_sites if site in active_nres_sites]
+        print(f'active, requested NRES sites: {active_requested_sites}')
+        return active_requested_sites
+
     def form_valid(self, form):
         """For each (configdb-approved) site, find the DynamicCadences that have the same
         target standard_type as the new (form-given) target and update them.
         """
+        requested_site = form.cleaned_data['site']
         cadence_frequency = form.cleaned_data['frequency']
         target_id = form.cleaned_data['target']
         target = Target.objects.get(pk=target_id)
+
+        requested_sites = settings.NRES_SITES
+        if requested_site != 'all':
+            requested_sites = [requested_site]
+        active_requested_nres_sites = self._get_active_requested_nres_sites(requested_sites)
 
         # Get standard type of this dynamic cadence
         standard_type = target.targetextra_set.filter(key='standard_type').first().value
@@ -206,10 +226,17 @@ class NRESCalibrationSubmissionView(FormView):
                 dc.save()
             # TODO: Should the next observation be cancelled and replaced?
 
-        messages.success(
-            self.request,
-            f'Successfully created/updated cadences with target {target} and frequency {cadence_frequency}.'
-        )
+        if active_requested_nres_sites:
+            messages.success(
+                self.request,
+                f'Created/updated cadences at {active_requested_nres_sites} with target {target} and frequency {cadence_frequency}.'
+            )
+        else:
+            messages.warning(
+                self.request,
+                f'The requested site(s) ({requested_sites}) have no SCHEDULABLE or COMMISSIONING instruments.',
+            )
+
 
         return super().form_valid(form)
 

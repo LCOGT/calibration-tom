@@ -171,14 +171,13 @@ class NRESCalibrationSubmissionView(FormView):
         """
         :return: list of site-code strings which are both active (SCHEDULABLE or COMMISSIONING) and requested by the form.
         """
-        active_nres_sites = []  # the sites with active (SCHEDULABLE or COMMISSIONING) NRES instruments
+        active_sites = []  # the sites with active (SCHEDULABLE or COMMISSIONING) NRES instruments
         for telcode, instruments in configdb.get_active_instruments_info(
                 instrument_type=settings.NRES_INSTRUMENT_TYPE,
                 include_commissioning=True).items():
-            active_nres_sites.append(instruments[0]['site'])
+            active_sites.append(instruments[0]['site'])
 
-        active_requested_sites = [site for site in requested_sites if site in active_nres_sites]
-        print(f'active, requested NRES sites: {active_requested_sites}')
+        active_requested_sites = [site for site in requested_sites if site in active_sites]
         return active_requested_sites
 
     def form_valid(self, form):
@@ -190,26 +189,29 @@ class NRESCalibrationSubmissionView(FormView):
         target_id = form.cleaned_data['target']
         target = Target.objects.get(pk=target_id)
 
-        requested_sites = settings.NRES_SITES
+        # Sort out which sites are both requested and have scheduable/commissioning nres instruments
+        requested_sites = settings.NRES_SITES  # handles the 'all' case
         if requested_site != 'all':
             requested_sites = [requested_site]
         active_requested_nres_sites = self._get_active_requested_nres_sites(requested_sites)
 
         # Get standard type of this dynamic cadence
         standard_type = target.targetextra_set.filter(key='standard_type').first().value
-        targets_for_standard_type = Target.objects.filter(targetextra__key='standard_type', targetextra__value=standard_type)
+        # we have the target_id so we shouldn't need this
+        targets_for_standard_type = Target.objects.filter(targetextra__key='standard_type',
+                                                          targetextra__value=standard_type)
+        # TODO: the standard_type should become one of the (arbitrary JSON) cadence_parameters
 
         # annotate the all the cadences with the target.id of their targets...
-        dynamic_cadences = DynamicCadence.objects.annotate(target_id=Cast(KeyTextTransform('target_id', 'cadence_parameters'), models.IntegerField()))
+        dynamic_cadences = DynamicCadence.objects.annotate(
+            target_id=Cast(KeyTextTransform('target_id', 'cadence_parameters'), models.IntegerField()))
         # ... so we can filter them (the dynamic cadences) down to the ones that match the standard_type
-        dynamic_cadences.filter(target_id__in=targets_for_standard_type)
+        dynamic_cadences = dynamic_cadences.filter(target_id__in=targets_for_standard_type)
 
-        #  for site in active_requested_nres_sites:
-        # TODO: re-invoke this loop when ready: Cadence updating is turned off right now
-        for site in []:  # TODO: exclude inactive configdb instruments (.get_active_nres_sites())
-            dynamic_cadences_for_site = dynamic_cadences.filter(cadence_parameters__site=site)
+        for site in active_requested_nres_sites:
+            dynamic_cadences_for_site = dynamic_cadences.filter(cadence_parameters__site=site)  # TODO: must filter on standard_type also
             if dynamic_cadences_for_site.count() == 0:
-                og = ObservationGroup.objects.create(name=f'Cadenced NRES {standard_type} calibrations for {site}')
+                og = ObservationGroup.objects.create(name=f'NRES {standard_type} calibration for {site.upper()}')
                 DynamicCadence.objects.create(
                     cadence_strategy='NRESCadenceStrategy',
                     cadence_parameters={
@@ -226,6 +228,7 @@ class NRESCalibrationSubmissionView(FormView):
                 dc.save()
             # TODO: Should the next observation be cancelled and replaced?
 
+        # report back to the user
         if active_requested_nres_sites:
             messages.success(
                 self.request,

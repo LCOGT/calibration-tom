@@ -229,14 +229,12 @@ class NRESCalibrationSubmissionView(FormView):
         if active_requested_nres_sites:
             messages.success(
                 self.request,
-                f'Created/updated cadences at {active_requested_nres_sites} with target {target} and frequency {cadence_frequency}.'
-            )
+                (f'Created/updated {standard_type} cadences at {active_requested_nres_sites} '
+                 f'with target {target} and frequency {cadence_frequency}.'))
         else:
             messages.warning(
                 self.request,
-                f'The requested site(s) ({requested_sites}) have no SCHEDULABLE or COMMISSIONING instruments.',
-            )
-
+                f'The requested site(s) ({requested_sites}) have no SCHEDULABLE or COMMISSIONING instruments.',)
 
         return super().form_valid(form)
 

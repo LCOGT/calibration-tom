@@ -287,7 +287,7 @@ THUMBNAIL_DEFAULT_SIZE = (200, 200)
 CONFIGDB_URL = os.getenv('CONFIGDB_URL', 'http://configdb-dev.lco.gtn')
 
 NRES_SITES = ('cpt', 'tlv', 'lsc', 'elp')
-
+NRES_INSTRUMENT_TYPE = '1M0-NRES-SCICAM'
 try:
     from local_settings import *  # noqa
 except ImportError:

@@ -198,6 +198,7 @@ class NRESCalibrationSubmissionView(FormView):
         targets_for_standard_type = Target.objects.filter(targetextra__key='standard_type',
                                                           targetextra__value=standard_type)
         # TODO: the standard_type should become one of the (arbitrary JSON) cadence_parameters
+        # TODO: because (why?)
 
         # annotate the all the cadences with the target.id of their targets...
         dynamic_cadences = DynamicCadence.objects.annotate(
@@ -206,7 +207,7 @@ class NRESCalibrationSubmissionView(FormView):
         dynamic_cadences = dynamic_cadences.filter(target_id__in=targets_for_standard_type)
 
         for site in active_requested_nres_sites:
-            dynamic_cadences_for_site = dynamic_cadences.filter(cadence_parameters__site=site)  # TODO: must filter on standard_type also
+            dynamic_cadences_for_site = dynamic_cadences.filter(cadence_parameters__site=site)
             if dynamic_cadences_for_site.count() == 0:
                 og = ObservationGroup.objects.create(name=f'NRES {standard_type} calibration for {site.upper()}')
                 DynamicCadence.objects.create(

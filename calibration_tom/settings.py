@@ -259,7 +259,7 @@ EXTRA_FIELDS = [
     {'name': 'cadence_expiration_date', 'type': 'datetime'},  # The date the target is no longer valid for a cadence
     {'name': 'expected_rv', 'type': 'number'},
     {'name': 'standard_type', 'type': 'string'},  # Either FLUX or RV
-    # {'name': 'min_lunar_distance', 'type': 'number'}  # Min lunar distance value for obs portal submission
+    {'name': 'min_lunar_distance', 'type': 'number'}  # Min lunar distance value for obs portal submission
 ]
 
 # Authentication strategy can either be LOCKED (required login for all views)

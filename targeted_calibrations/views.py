@@ -242,16 +242,14 @@ class NRESCalibrationSubmissionView(FormView):
         return super().form_valid(form)
 
 
-class NRESCadencePlayPauseView(RedirectView):
+class NRESCadenceToggleView(RedirectView):
     pattern_name = 'targeted_calibrations:nres_home'
 
     def get_redirect_url(self, *args, **kwargs):
         cadence_id = kwargs.pop('pk', None)
-        active = self.request.GET.get('active', None)
-        if active is not None:
-            dc = DynamicCadence.objects.get(pk=cadence_id)
-            dc.active = active
-            dc.save()
+        dc = DynamicCadence.objects.get(pk=cadence_id)
+        dc.active = not dc.active
+        dc.save()
         return super().get_redirect_url(*args, **kwargs)
 
 

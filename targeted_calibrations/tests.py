@@ -1,32 +1,53 @@
 from unittest.mock import patch
+from unittest import skip
 
 from django.test import TestCase
 from django.urls import reverse
 
+from tom_targets.tests.factories import SiderealTargetFactory
+from tom_targets.models import TargetExtra
 # Create your tests here.
 
 
-class TestNRESCalibrationsView(TestCase):
+class NRESCalibrationsTestCase(TestCase):
+    """
+    Provide a setUp that other Test (sub)classes can inherit. (So we don't duplicate the setUp code).
+    """
     def setUp(self):
-        pass
+        # create some Targets and DynamicCadences
+        self.target = SiderealTargetFactory.create(ra=123.456, dec=-32.1)
+        # these targetextras are required!
+        TargetExtra.objects.create(target=self.target, key='standard_type', value='RV')
+        TargetExtra.objects.create(target=self.target, key='seasonal_start', value=1)
+        TargetExtra.objects.create(target=self.target, key='seasonal_end', value=4)
+
+
+class TestNRESCalibrationsView(NRESCalibrationsTestCase):
+    def setUp(self):
+        super().setUp()
+        # add your subclass extension (or delete this method)
 
     def test_nres_calibrations_view(self):
         response = self.client.get(reverse('targeted_calibrations:nres_home'))
         self.assertContains(response, self.target.id)
 
 
-class TestNRESCalibrationSubmissionView(TestCase):
+class TestNRESCalibrationSubmissionView(NRESCalibrationsTestCase):
     def setUp(self):
+        super().setUp()
+        # add your subclass extension (or delete this method)
         pass
 
     def test_submit_calibration_invalid(self):
-        response = self.client.post(reverse('targeted_calibrations:submit-cadence'),
+        response = self.client.post(reverse('targeted_calibrations:nres_submission'),
                                     data={'site': 'cpt', 'frequency': 24, 'target': self.target})
         self.assertContains(response, 'error message')
 
 
-class TestTargetedCalibrationsExtras(TestCase):
+class TestTargetedCalibrationsExtras(NRESCalibrationsTestCase):
     def setUp(self):
+        super().setUp()
+        # add your subclass extension (or delete this method)
         pass
 
     def test_nres_targets_list(self):

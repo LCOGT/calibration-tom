@@ -158,6 +158,9 @@ class NRESCalibrationsView(TemplateView):
 class NRESCalibrationSubmissionView(FormView):
     form_class = NRESCalibrationSubmissionForm
     success_url = reverse_lazy('targeted_calibrations:nres_home')
+    # TODO: make sure this template_name assignment makes sense
+    #  (it's required for tests.TestNRESCalibrationSubmissionView)
+    template_name = 'targeted_calibrations/nres_calibrations_view.html'
 
     def form_invalid(self, form):
         messages.error(self.request, f'The form is invalid: {form.errors}.')

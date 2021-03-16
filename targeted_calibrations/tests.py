@@ -21,6 +21,24 @@ class NRESCalibrationsTestCase(TestCase):
         TargetExtra.objects.create(target=self.target, key='seasonal_start', value=1)
         TargetExtra.objects.create(target=self.target, key='seasonal_end', value=4)
 
+        # a DynamicCadence needs an ObservationGroup
+        standard_type = 'RV'
+        site = 'tlv'
+        # save ObservationGroup name for testing later
+        self.observation_group_name = f'NRES {standard_type} calibration for {site.upper()}'
+        observation_group = ObservationGroup.objects.create(name=self.observation_group_name)
+
+        DynamicCadence.objects.create(
+            cadence_strategy='NRESCadenceStrategy',
+            cadence_parameters={
+                'target_id': self.target.id,
+                'cadence_frequency': -17,
+                'site': site
+            },
+            observation_group=observation_group,
+            active=True
+        )
+
 
 class TestNRESCalibrationsView(NRESCalibrationsTestCase):
     def setUp(self):

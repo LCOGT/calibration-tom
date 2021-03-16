@@ -137,11 +137,14 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
         for observation in new_observations:
             logger.info(f'Updating new cadence observation status for {observation}',
                         extra={'tags': {
-                            'dynameic_cadence_id': self.dynamic_cadence.id,
+                            'dynamic_cadence_id': self.dynamic_cadence.id,
                             'target': Target.objects.get(pk=self.dynamic_cadence.cadence_parameters['target_id']).name,
                             'observation_id': observation.observation_id,
                         }})
-            facility = get_service_class(observation.facility)()
-            facility.update_observation_status(observation.observation_id)
+            try:
+                facility = get_service_class(observation.facility)()
+                facility.update_observation_status(observation.observation_id)
+            except Exception as e:
+                logger.error(msg=f'Unable to update observation status for {observation}. Error: {e}')
 
         return new_observations

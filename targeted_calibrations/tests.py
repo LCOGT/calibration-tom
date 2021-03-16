@@ -54,13 +54,13 @@ class TestNRESCalibrationsView(NRESCalibrationsTestCase):
         self.assertContains(response, self.target.id)
 
 
-class TestNRESCalibrationSubmissionView(NRESCalibrationsTestCase):
+class TestNRESCalibrationsSubmissionView(NRESCalibrationsTestCase):
     def setUp(self):
         super().setUp()
         # add your subclass extension (or delete this method)
         pass
 
-    @skip
+    @skip("We have HTML validation on this form, so this test can wait.")
     def test_submit_calibration_invalid(self):
         invalid_form_data = {'site': 'cpt', 'target': self.target}
         response = self.client.post(reverse('targeted_calibrations:nres_submission'),

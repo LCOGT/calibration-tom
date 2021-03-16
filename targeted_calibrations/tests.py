@@ -29,13 +29,15 @@ class NRESCalibrationsTestCase(TestCase):
         self.observation_group_name = f'NRES {standard_type} calibration for {site.upper()}'
         observation_group = ObservationGroup.objects.create(name=self.observation_group_name)
 
+        # save cadence_parameters for testing later
+        self.original_cadence_parameters = {
+                'target_id': self.target.id,
+                'cadence_frequency': 1,
+                'site': site
+            }
         DynamicCadence.objects.create(
             cadence_strategy='NRESCadenceStrategy',
-            cadence_parameters={
-                'target_id': self.target.id,
-                'cadence_frequency': -17,
-                'site': site
-            },
+            cadence_parameters=self.original_cadence_parameters,
             observation_group=observation_group,
             active=True
         )

@@ -212,6 +212,7 @@ class NRESCalibrationSubmissionView(FormView):
         for site in active_requested_nres_sites:
             dynamic_cadences_for_site = dynamic_cadences.filter(cadence_parameters__site=site)
             if dynamic_cadences_for_site.count() == 0:
+                # we need to create the DynamicCadence here (for the site we're looping through)
                 og = ObservationGroup.objects.create(name=f'NRES {standard_type} calibration for {site.upper()}')
                 DynamicCadence.objects.create(
                     cadence_strategy='NRESCadenceStrategy',
@@ -223,6 +224,7 @@ class NRESCalibrationSubmissionView(FormView):
                     observation_group=og,
                     active=True
                 )
+            # here we don't create, but only  update the existing DynamicCadence (for the site)
             for dc in dynamic_cadences_for_site:
                 dc.cadence_parameters['target_id'] = target.id
                 dc.cadence_parameters['cadence_frequency'] = cadence_frequency

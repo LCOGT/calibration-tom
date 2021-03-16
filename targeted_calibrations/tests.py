@@ -88,6 +88,12 @@ class TestNRESCalibrationsSubmissionView(NRESCalibrationsTestCase):
         self.assertEqual(new_form_data['cadence_frequency'],
                          dc.cadence_parameters['cadence_frequency'])
 
+    def test_all_sites(self):
+        pass
+
+    def test_create_cadence_for_new_site(self):
+        pass
+
 
 class TestTargetedCalibrationsExtras(NRESCalibrationsTestCase):
     def setUp(self):

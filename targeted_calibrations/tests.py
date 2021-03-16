@@ -6,6 +6,7 @@ from django.urls import reverse
 
 from tom_targets.tests.factories import SiderealTargetFactory
 from tom_targets.models import TargetExtra
+from tom_observations.models import DynamicCadence, ObservationGroup
 # Create your tests here.
 
 
@@ -44,6 +45,7 @@ class TestNRESCalibrationsView(NRESCalibrationsTestCase):
     def setUp(self):
         super().setUp()
         # add your subclass extension (or delete this method)
+        pass
 
     def test_nres_calibrations_view(self):
         response = self.client.get(reverse('targeted_calibrations:nres_home'))
@@ -56,9 +58,12 @@ class TestNRESCalibrationSubmissionView(NRESCalibrationsTestCase):
         # add your subclass extension (or delete this method)
         pass
 
+    @skip
     def test_submit_calibration_invalid(self):
+        invalid_form_data = {'site': 'cpt', 'target': self.target}
         response = self.client.post(reverse('targeted_calibrations:nres_submission'),
-                                    data={'site': 'cpt', 'frequency': 24, 'target': self.target})
+                                    data=invalid_form_data)
+        # TODO: how is this supposed to work???
         self.assertContains(response, 'error message')
 
 
@@ -69,10 +74,16 @@ class TestTargetedCalibrationsExtras(NRESCalibrationsTestCase):
         pass
 
     def test_nres_targets_list(self):
-        pass
+        """Test that the nres_home target list contains the NRES calibration targets
+        """
+        response = self.client.get(reverse('targeted_calibrations:nres_home'))
+        self.assertContains(response, self.target.id)
 
     def test_nres_cadence_list(self):
-        pass
+        """Test that the NRES Cadence list contains the ObservationGroup name of the DynamicCadence
+        """
+        response = self.client.get(reverse('targeted_calibrations:nres_home'))
+        self.assertContains(response, self.observation_group_name)  # should appear in History column
 
-    def test_nres_submission_form(self):
-        pass  # This test may not be necessary
+
+

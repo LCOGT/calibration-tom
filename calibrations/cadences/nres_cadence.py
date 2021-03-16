@@ -134,8 +134,14 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
             new_observations.append(record)
 
         # Update the status of the ObservationRecords in the DB
-        for obsr in new_observations:
-            facility = get_service_class(obsr.facility)()
-            facility.update_observation_status(obsr.observation_id)
+        for observation in new_observations:
+            logger.info(f'Updating new cadence observation status for {observation}',
+                        extra={'tags': {
+                            'dynameic_cadence_id': self.dynamic_cadence.id,
+                            'target': Target.objects.get(pk=self.dynamic_cadence.cadence_parameters['target_id']).name,
+                            'observation_id': observation.observation_id,
+                        }})
+            facility = get_service_class(observation.facility)()
+            facility.update_observation_status(observation.observation_id)
 
         return new_observations

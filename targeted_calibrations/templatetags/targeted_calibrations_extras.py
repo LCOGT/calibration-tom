@@ -41,7 +41,7 @@ def nres_cadence_list():
     nres_cadences = (DynamicCadence.objects.filter(cadence_strategy='NRESCadenceStrategy')
                      .annotate(site=Cast(KeyTextTransform('site', 'cadence_parameters'), models.TextField()))
                      .annotate(target_id=Cast(KeyTextTransform('target_id', 'cadence_parameters'), models.TextField()))
-                     .order_by('site', '-created'))
+                     .order_by('site', '-target_id'))
     cadences_data = []
     for cadence in nres_cadences:
         target = Target.objects.filter(pk=cadence.target_id).first()

@@ -5,3 +5,4 @@ gunicorn[gevent]==20.0.4
 whitenoise==5.2.0
 lcogt-logging==0.3.2
 responses==0.12.1
+factory_boy

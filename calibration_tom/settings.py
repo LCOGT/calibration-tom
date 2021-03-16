@@ -258,7 +258,8 @@ EXTRA_FIELDS = [
     {'name': 'nres_active_target', 'type': 'boolean', 'default': False},
     {'name': 'cadence_expiration_date', 'type': 'datetime'},  # The date the target is no longer valid for a cadence
     {'name': 'expected_rv', 'type': 'number'},
-    {'name': 'standard_type', 'type': 'string'}  # Either FLUX or RV
+    {'name': 'standard_type', 'type': 'string'},  # Either FLUX or RV
+    {'name': 'min_lunar_distance', 'type': 'number'}  # Min lunar distance value for obs portal submission
 ]
 
 # Authentication strategy can either be LOCKED (required login for all views)
@@ -287,7 +288,7 @@ THUMBNAIL_DEFAULT_SIZE = (200, 200)
 CONFIGDB_URL = os.getenv('CONFIGDB_URL', 'http://configdb-dev.lco.gtn')
 
 NRES_SITES = ('cpt', 'tlv', 'lsc', 'elp')
-
+NRES_INSTRUMENT_TYPE = '1M0-NRES-SCICAM'
 try:
     from local_settings import *  # noqa
 except ImportError:

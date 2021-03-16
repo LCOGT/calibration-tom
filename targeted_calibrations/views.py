@@ -164,7 +164,7 @@ class NRESCalibrationSubmissionView(FormView):
 
     def form_invalid(self, form):
         messages.error(self.request, f'The form is invalid: {form.errors}.')
-        logger.error(self.request, f'Invalid form submission for NRES cadence submission: {form.errors}.')
+        logger.error(f'Invalid form submission for NRES cadence submission: {form.errors}.')
         return super().form_invalid(form)
 
     def _get_active_requested_nres_sites(self, requested_sites):

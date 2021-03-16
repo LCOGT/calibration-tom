@@ -185,8 +185,8 @@ class NRESCalibrationSubmissionView(FormView):
         target standard_type as the new (form-given) target and update them.
         """
         requested_site = form.cleaned_data['site']
-        cadence_frequency = form.cleaned_data['frequency']
-        target_id = form.cleaned_data['target']
+        cadence_frequency = form.cleaned_data['cadence_frequency']
+        target_id = form.cleaned_data['target_id']
         target = Target.objects.get(pk=target_id)
 
         # Sort out which sites are both requested and have scheduable/commissioning nres instruments

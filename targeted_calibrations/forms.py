@@ -13,12 +13,13 @@ class NRESCalibrationSubmissionForm(forms.Form):
     site = forms.ChoiceField(required=True,
                              choices=[('all', 'All Sites')] + [(site, site) for site in settings.NRES_SITES],
                              label=False)
-    frequency = forms.IntegerField(label=False, widget=forms.NumberInput(attrs={'placeholder': 'Frequency (hours)'}))
-    target = forms.ChoiceField(choices=[])  # Display standard type alongside target name
+    cadence_frequency = forms.IntegerField(label=False, min_value=1,
+                                   widget=forms.NumberInput(attrs={'placeholder': 'Frequency (hours)'}))
+    target_id = forms.ChoiceField(choices=[])  # Display standard type alongside target name
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['target'] = forms.ChoiceField(  # Create choices for standard_types of targets currently in season
+        self.fields['target_id'] = forms.ChoiceField(  # Create choices for standard_types of targets currently in season
             choices=[(target.id,
                       f"{target.targetextra_set.filter(key='standard_type').first().value} (currently {target.name})")
                      for target in Target.objects.all() if target.target_is_in_season()],
@@ -31,8 +32,8 @@ class NRESCalibrationSubmissionForm(forms.Form):
         self.helper.layout = Layout(
             Row(
                 Column('site'),
-                Column('frequency'),
-                Column('target'),
+                Column('cadence_frequency'),
+                Column('target_id'),
                 Column(
                     ButtonHolder(
                         Submit('submit', 'Update or Create Cadence')

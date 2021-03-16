@@ -68,6 +68,26 @@ class TestNRESCalibrationsSubmissionView(NRESCalibrationsTestCase):
         # TODO: how is this supposed to work???
         self.assertContains(response, 'error message')
 
+    def test_submit_calibration_valid(self):
+        """Test
+        """
+        new_form_data = {
+            'site': 'tlv',
+            'cadence_frequency': 2,  # new cadence_frequency
+            'target_id': self.target.id
+        }
+        response = self.client.post(reverse('targeted_calibrations:nres_submission'),
+                                    data=new_form_data)
+        # get updated cadence from db
+        dc = DynamicCadence.objects.all().first()
+
+        # the cadence_frequency should have changed from the original
+        self.assertNotEqual(self.original_cadence_parameters['cadence_frequency'],
+                            dc.cadence_parameters['cadence_frequency'])
+        # the cadence_frequency should be what we set in new_form_data
+        self.assertEqual(new_form_data['cadence_frequency'],
+                         dc.cadence_parameters['cadence_frequency'])
+
 
 class TestTargetedCalibrationsExtras(NRESCalibrationsTestCase):
     def setUp(self):

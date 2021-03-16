@@ -86,4 +86,27 @@ class TestTargetedCalibrationsExtras(NRESCalibrationsTestCase):
         self.assertContains(response, self.observation_group_name)  # should appear in History column
 
 
+class TestNRESCadenceToggleView(NRESCalibrationsTestCase):
+    def test_toggle_play(self):
+        dc = DynamicCadence.objects.first()
+        dc.active = False
+        dc.save()
 
+        self.client.get(reverse('targeted_calibrations:cadence_toggle', kwargs={'pk': dc.id}))
+        dc.refresh_from_db()
+        self.assertTrue(dc.active)
+
+    def test_toggle_pause(self):
+        dc = DynamicCadence.objects.first()
+
+        self.client.get(reverse('targeted_calibrations:cadence_toggle', kwargs={'pk': dc.id}))
+        dc.refresh_from_db()
+        self.assertFalse(dc.active)
+
+
+class TestNRESCadenceDeleteView(NRESCalibrationsTestCase):
+    def test_cadence_delete(self):
+        dc = DynamicCadence.objects.first()
+
+        self.client.post(reverse('targeted_calibrations:cadence_delete', kwargs={'pk': dc.id}))
+        self.assertFalse(DynamicCadence.objects.filter(pk=dc.id).exists())

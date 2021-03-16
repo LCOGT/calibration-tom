@@ -69,7 +69,7 @@ class TestNRESCalibrationsSubmissionView(NRESCalibrationsTestCase):
         self.assertContains(response, 'error message')
 
     def test_submit_calibration_valid(self):
-        """Test
+        """Test updating a cadence_frequency for an existing cadence
         """
         new_form_data = {
             'site': 'tlv',
@@ -88,11 +88,20 @@ class TestNRESCalibrationsSubmissionView(NRESCalibrationsTestCase):
         self.assertEqual(new_form_data['cadence_frequency'],
                          dc.cadence_parameters['cadence_frequency'])
 
-    def test_all_sites(self):
-        pass
-
     def test_create_cadence_for_new_site(self):
-        pass
+        """Test that a new DynamicCadence is created by form submission
+        """
+        new_form_data = {
+            'site': 'cpt',
+            'cadence_frequency': 10,
+            'target_id': self.target.id
+        }
+        original_dc_count = DynamicCadence.objects.all().count()
+        response = self.client.post(reverse('targeted_calibrations:nres_submission'),
+                                    data=new_form_data)
+        new_dc_count = DynamicCadence.objects.all().count()
+        # there should be one more DynamicCadence than before
+        self.assertEqual(new_dc_count, original_dc_count+1)
 
 
 class TestTargetedCalibrationsExtras(NRESCalibrationsTestCase):

@@ -67,7 +67,8 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
         else:
             # We need to create an observation for the new cadence, as we do not have a previous one to use
             # TODO: this should be its own method, put a bunch of defaults into lco_calibration_facility.py
-            form_class = get_service_class('LCO Calibrations')().observation_forms['NRES']
+            facility = get_service_class('LCO Calibrations')()
+            form_class = facility.observation_forms['NRES']
             target = Target.objects.get(pk=self.dynamic_cadence.cadence_parameters['target_id'])
             standard_type = target.targetextra_set.filter(key='standard_type').first().value
             site = self.dynamic_cadence.cadence_parameters['site']

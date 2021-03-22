@@ -66,12 +66,34 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
             observation_payload = last_obs.parameters
         else:
             # We need to create an observation for the new cadence, as we do not have a previous one to use
+            # TODO: this should be its own method, put a bunch of defaults into lco_calibration_facility.py
             form_class = get_service_class('LCO Calibrations')().observation_forms['NRES']
-            form = form_class(data={
+            target = Target.objects.get(pk=self.dynamic_cadence.cadence_parameters['target_id'])
+            standard_type = target.targetextra_set.filter(key='standard_type').first().value
+            site = self.dynamic_cadence.cadence_parameters['site']
+
+            form_data = {
+                'name': f'NRES {standard_type} calibration for {site.upper()}',
+                'observation_type': 'NRES',
+                'observation_mode': 'NORMAL',
+                'instrument_type': '1M0-NRES-SCICAM',
                 'cadence_frequency': self.dynamic_cadence.cadence_parameters['cadence_frequency'],
-                'site': self.dynamic_cadence.cadence_parameters['site'],
+                'site': site,
                 'target_id': self.dynamic_cadence.cadence_parameters['target_id'],
-            })
+                'facility': 'LCO Calibrations',
+                'proposal': 'ENG2017AB-001',
+                'ipp_value': 1.05,
+                'filter': 'air',
+                'exposure_time': target.targetextra_set.filter(key='exp_time').first().value,
+                'exposure_count': target.targetextra_set.filter(key='exp_count').first().value,
+                'max_airmass': 2,
+                'start': datetime.now()
+            }
+            min_lunar_distance = target.targetextra_set.filter(key='min_lunar_distance').first()
+            if min_lunar_distance is not None:
+                form_data['min_lunar_distance'] = min_lunar_distance.value
+
+            form = form_class(data=form_data)
             if form.is_valid():
                 observation_payload = form.cleaned_data
             else:

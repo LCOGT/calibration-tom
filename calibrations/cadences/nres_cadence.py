@@ -108,9 +108,9 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
 
         # Cadence logic
         # If the observation hasn't finished, do nothing
-        if not last_obs.terminal:
+        if last_obs is not None and not last_obs.terminal:
             return
-        elif last_obs.failed:  # If the observation failed
+        elif last_obs is not None and last_obs.failed:  # If the observation failed
             # Submit next observation to be taken as soon as possible with the same window length
             window_length = parse(observation_payload[end_keyword]) - parse(observation_payload[start_keyword])
             observation_payload[start_keyword] = datetime.now().isoformat()
@@ -124,8 +124,9 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
         observation_payload = self.update_observation_payload(observation_payload)
 
         # Submission of the new observation to the facility
-        obs_type = last_obs.parameters.get('observation_type')
-        form = facility.get_form(obs_type)(observation_payload)
+        # obs_type = last_obs.parameters.get('observation_type')
+        # form = facility.get_form(obs_type)(observation_payload)
+        form = facility.get_form('NRES')(observation_payload)
         logger.info(f'Observation form data to be submitted for {self.dynamic_cadence.id}: {observation_payload}',
                     extra={'tags': {
                         'dynamic_cadence_id': self.dynamic_cadence.id,

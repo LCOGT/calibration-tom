@@ -57,6 +57,7 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
     def run(self):
         # gets the most recent observation because the next observation is just going to modify these parameters
         last_obs = self.dynamic_cadence.observation_group.observation_records.order_by('-created').first()
+        target = Target.objects.get(pk=self.dynamic_cadence.cadence_parameters['target_id'])
 
         if last_obs is not None:
             # Make a call to the facility to get the current status of the observation
@@ -66,17 +67,39 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
             observation_payload = last_obs.parameters
         else:
             # We need to create an observation for the new cadence, as we do not have a previous one to use
-            form_class = get_service_class('LCO Calibrations')().observation_forms['NRES']
-            form = form_class(data={
+            # TODO: this should be its own method, put a bunch of defaults into lco_calibration_facility.py
+            facility = get_service_class('LCO Calibrations')()
+            form_class = facility.observation_forms['NRES']
+            standard_type = target.targetextra_set.filter(key='standard_type').first().value
+            site = self.dynamic_cadence.cadence_parameters['site']
+
+            form_data = {
+                'name': f'NRES {standard_type} calibration for {site.upper()}',
+                'observation_type': 'NRES',
+                'observation_mode': 'NORMAL',
+                'instrument_type': '1M0-NRES-SCICAM',
                 'cadence_frequency': self.dynamic_cadence.cadence_parameters['cadence_frequency'],
-                'site': self.dynamic_cadence.cadence_parameters['site'],
+                'site': site,
                 'target_id': self.dynamic_cadence.cadence_parameters['target_id'],
-            })
+                'facility': 'LCO Calibrations',
+                'proposal': 'ENG2017AB-001',
+                'ipp_value': 1.05,
+                'filter': 'air',
+                'exposure_time': target.targetextra_set.filter(key='exp_time').first().value,
+                'exposure_count': target.targetextra_set.filter(key='exp_count').first().value,
+                'max_airmass': 2,
+                'start': datetime.now()
+            }
+            min_lunar_distance = target.targetextra_set.filter(key='min_lunar_distance').first()
+            if min_lunar_distance is not None:
+                form_data['min_lunar_distance'] = min_lunar_distance.value
+
+            form = form_class(data=form_data)
             if form.is_valid():
                 observation_payload = form.cleaned_data
             else:
                 logger.error(f'Unable to submit initial calibration for cadence {self.dc.id}', extra={
-                    'tags': {'dynamic_cadence_id': self.dc.id}
+                    'tags': {'dynamic_cadence_id': self.dc.id, 'target': target.name}
                 })
                 raise forms.ValidationError(f'Unable to submit initial calibration for cadence {self.dc}')
 
@@ -85,9 +108,9 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
 
         # Cadence logic
         # If the observation hasn't finished, do nothing
-        if not last_obs.terminal:
+        if last_obs is not None and not last_obs.terminal:
             return
-        elif last_obs.failed:  # If the observation failed
+        elif last_obs is not None and last_obs.failed:  # If the observation failed
             # Submit next observation to be taken as soon as possible with the same window length
             window_length = parse(observation_payload[end_keyword]) - parse(observation_payload[start_keyword])
             observation_payload[start_keyword] = datetime.now().isoformat()
@@ -101,12 +124,13 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
         observation_payload = self.update_observation_payload(observation_payload)
 
         # Submission of the new observation to the facility
-        obs_type = last_obs.parameters.get('observation_type')
-        form = facility.get_form(obs_type)(observation_payload)
+        # obs_type = last_obs.parameters.get('observation_type')
+        # form = facility.get_form(obs_type)(observation_payload)
+        form = facility.get_form('NRES')(observation_payload)
         logger.info(f'Observation form data to be submitted for {self.dynamic_cadence.id}: {observation_payload}',
                     extra={'tags': {
                         'dynamic_cadence_id': self.dynamic_cadence.id,
-                        'target': Target.objects.get(pk=self.dynamic_cadence.cadence_parameters['target_id']).name
+                        'target': target.name
                     }})
         if form.is_valid():
             observation_ids = facility.submit_observation(form.observation_payload())
@@ -114,7 +138,7 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
             logger.error(f'Unable to submit next cadenced observation: {form.errors}',
                          extra={'tags': {
                             'dynamic_cadence_id': self.dynamic_cadence.id,
-                            'target': Target.objects.get(pk=self.dynamic_cadence.cadence_parameters['target_id']).name
+                            'target': target.name
                          }})
             raise Exception(f'Unable to submit next cadenced observation: {form.errors}')
 
@@ -123,7 +147,7 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
         for observation_id in observation_ids:
             # Create Observation record
             record = ObservationRecord.objects.create(
-                target=last_obs.target,
+                target=target,
                 facility=facility.name,
                 parameters=observation_payload,
                 observation_id=observation_id
@@ -138,7 +162,7 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
             logger.info(f'Updating new cadence observation status for {observation}',
                         extra={'tags': {
                             'dynamic_cadence_id': self.dynamic_cadence.id,
-                            'target': Target.objects.get(pk=self.dynamic_cadence.cadence_parameters['target_id']).name,
+                            'target': target.name,
                             'observation_id': observation.observation_id,
                         }})
             try:

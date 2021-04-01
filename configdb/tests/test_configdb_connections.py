@@ -10,7 +10,7 @@ from configdb.configdb_connections import ConfigDBInterface, ConfigDBException, 
     InstrumentNotFoundException  # the module under test
 from configdb.state import InstrumentState
 
-_configdb_sites = os.path.join(os.path.dirname(__file__), 'data/sites_2020-11-30.json')
+_configdb_sites = os.path.join(os.path.dirname(__file__), 'data/sites_2021-03-31.json')
 
 f = open(_configdb_sites, 'r')
 sites = json.load(f)

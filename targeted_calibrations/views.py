@@ -154,40 +154,66 @@ class InstrumentTargetDetailView(DetailView):
 class NRESCalibrationsView(TemplateView):
     template_name = 'targeted_calibrations/nres_calibrations_view.html'
 
-    def get_context_data(self, **kwargs):
-        pass
-
 
 class NRESCalibrationSubmissionView(FormView):
     form_class = NRESCalibrationSubmissionForm
     success_url = reverse_lazy('targeted_calibrations:nres_home')
+    # TODO: make sure this template_name assignment makes sense
+    #  (it's required for tests.TestNRESCalibrationSubmissionView)
+    template_name = 'targeted_calibrations/nres_calibrations_view.html'
 
     def form_invalid(self, form):
         messages.error(self.request, f'The form is invalid: {form.errors}.')
-        logger.error(self.request, f'Invalid form submission for NRES cadence submission: {form.errors}.')
+        logger.error(f'Invalid form submission for NRES cadence submission: {form.errors}.')
         return super().form_invalid(form)
+
+    def _get_active_requested_nres_sites(self, requested_sites):
+        """
+        :return: list of site-code strings which are both active (SCHEDULABLE or COMMISSIONING) and requested by the form.
+        """
+        active_sites = []  # the sites with active (SCHEDULABLE or COMMISSIONING) NRES instruments
+        for telcode, instruments in configdb.get_active_instruments_info(
+                instrument_type=settings.NRES_INSTRUMENT_TYPE,
+                include_commissioning=True).items():
+            active_sites.append(instruments[0]['site'])
+
+        active_requested_sites = [site for site in requested_sites if site in active_sites]
+        return active_requested_sites
 
     def form_valid(self, form):
         """For each (configdb-approved) site, find the DynamicCadences that have the same
         target standard_type as the new (form-given) target and update them.
         """
-        cadence_frequency = form.cleaned_data['frequency']
-        target_id = form.cleaned_data['target']
+        requested_site = form.cleaned_data['site']
+        cadence_frequency = form.cleaned_data['cadence_frequency']
+        target_id = form.cleaned_data['target_id']
         target = Target.objects.get(pk=target_id)
+
+        # Sort out which sites are both requested and have scheduable/commissioning nres instruments
+        requested_sites = settings.NRES_SITES  # handles the 'all' case
+        if requested_site != 'all':
+            requested_sites = [requested_site]
+        active_requested_nres_sites = self._get_active_requested_nres_sites(requested_sites)
 
         # Get standard type of this dynamic cadence
         standard_type = target.targetextra_set.filter(key='standard_type').first().value
-        targets_for_standard_type = Target.objects.filter(targetextra__key='standard_type', targetextra__value=standard_type)
+        # we have the target_id so we shouldn't need this
+        targets_for_standard_type = Target.objects.filter(targetextra__key='standard_type',
+                                                          targetextra__value=standard_type)
+        # TODO: the standard_type should become one of the (arbitrary JSON) cadence_parameters
+        # TODO: because (why?)
 
         # annotate the all the cadences with the target.id of their targets...
-        dynamic_cadences = DynamicCadence.objects.annotate(target_id=Cast(KeyTextTransform('target_id', 'cadence_parameters'), models.IntegerField()))
+        dynamic_cadences = DynamicCadence.objects.annotate(
+            target_id=Cast(KeyTextTransform('target_id', 'cadence_parameters'), models.IntegerField()))
         # ... so we can filter them (the dynamic cadences) down to the ones that match the standard_type
-        dynamic_cadences.filter(target_id__in=targets_for_standard_type)
+        dynamic_cadences = dynamic_cadences.filter(target_id__in=targets_for_standard_type)
 
-        for site in settings.NRES_SITES:  # TODO: exclude inactive configdb instruments (.get_active_nres_sites())
+        for site in active_requested_nres_sites:
             dynamic_cadences_for_site = dynamic_cadences.filter(cadence_parameters__site=site)
             if dynamic_cadences_for_site.count() == 0:
-                og = ObservationGroup.objects.create(name=f'Cadenced NRES {standard_type} calibrations for {site}')
+                # we need to create the DynamicCadence here (for the site we're looping through)
+                og = ObservationGroup.objects.create(name=f'NRES {standard_type} calibration for {site.upper()}')
                 DynamicCadence.objects.create(
                     cadence_strategy='NRESCadenceStrategy',
                     cadence_parameters={
@@ -198,30 +224,35 @@ class NRESCalibrationSubmissionView(FormView):
                     observation_group=og,
                     active=True
                 )
+            # here we don't create, but only  update the existing DynamicCadence (for the site)
             for dc in dynamic_cadences_for_site:
                 dc.cadence_parameters['target_id'] = target.id
                 dc.cadence_parameters['cadence_frequency'] = cadence_frequency
                 dc.save()
             # TODO: Should the next observation be cancelled and replaced?
 
-        messages.success(
-            self.request,
-            f'Successfully created/updated cadences with target {target} and frequency {cadence_frequency}.'
-        )
+        # report back to the user
+        if active_requested_nres_sites:
+            messages.success(
+                self.request,
+                (f'Created/updated {standard_type} cadences at {active_requested_nres_sites} '
+                 f'with target {target} and frequency {cadence_frequency}.'))
+        else:
+            messages.warning(
+                self.request,
+                f'The requested site(s) ({requested_sites}) have no SCHEDULABLE or COMMISSIONING instruments.',)
 
         return super().form_valid(form)
 
 
-class NRESCadencePlayPauseView(RedirectView):
+class NRESCadenceToggleView(RedirectView):
     pattern_name = 'targeted_calibrations:nres_home'
 
     def get_redirect_url(self, *args, **kwargs):
         cadence_id = kwargs.pop('pk', None)
-        active = self.request.GET.get('active', None)
-        if active is not None:
-            dc = DynamicCadence.objects.get(pk=cadence_id)
-            dc.active = active
-            dc.save()
+        dc = DynamicCadence.objects.get(pk=cadence_id)
+        dc.active = not dc.active
+        dc.save()
         return super().get_redirect_url(*args, **kwargs)
 
 

@@ -150,6 +150,10 @@ class ConfigDBInterface(object):
                                             default_readout_mode = mode_type['default']
                                             break
 
+                                    config_change_overheads = {
+                                        config_type['code']: config_type['config_change_overhead'] for config_type in
+                                        instrument['instrument_type']['configuration_types']}
+
                                     active_instruments[telcode].append({
                                         'state': instrument['state'].upper(),
                                         'site': site['code'],
@@ -172,9 +176,12 @@ class ConfigDBInterface(object):
                                         'overheads': {
                                             'fixed_overhead_per_exposure': instrument['instrument_type'][
                                                 'fixed_overhead_per_exposure'],
-                                            'front_padding': instrument['instrument_type']['front_padding'],
+                                            'observation_front_padding': instrument['instrument_type'][
+                                                'observation_front_padding'],
+                                            'config_front_padding': instrument['instrument_type'][
+                                                'config_front_padding'],
                                             'filter_change_time': oeg_change_time,
-                                            'config_change_time': instrument['instrument_type']['config_change_time'],
+                                            'config_change_overhead': config_change_overheads,
                                             'acquire_exposure_time': instrument['instrument_type'][
                                                 'acquire_exposure_time']
                                         }
@@ -279,6 +286,6 @@ def _get_overheads(overheads_dict: Dict[Any, Any]) -> Overheads:
         overheads_dict['fixed_overhead_per_exposure'],
         overheads_dict['front_padding'],
         overheads_dict['filter_change_time'],
-        overheads_dict['config_change_time'],
+        overheads_dict['config_change_overheads'],
         overheads_dict['acquire_exposure_time'],
     )

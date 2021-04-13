@@ -151,6 +151,15 @@ class InstrumentTargetDetailView(DetailView):
         return context
 
 
+class ImagerCalibrationsView(TemplateView):
+    template_name = 'targeted_calibrations/imager_calibrations_view.html'
+
+
+class ImagerCalibrationSubmissionView(FormView):
+    # TODO: implement ImagerCalibrationsSubmissionView
+    pass
+
+
 class NRESCalibrationsView(TemplateView):
     template_name = 'targeted_calibrations/nres_calibrations_view.html'
 

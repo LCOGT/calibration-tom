@@ -21,12 +21,13 @@ register = template.Library()
 
 
 @register.inclusion_tag('targeted_calibrations/partials/nres_targets_list.html')
-def nres_targets_list():
+def nres_targets_list() -> dict:
     nres_targets = Target.objects.all()
     # determine "last" observation
     # determine "next" observation
     # annotate target with the observation
     # then, in the template extract these annotation for display in list
+
     context = {'targets_data': [{
         'target': nres_target,
         'prev_obs': nres_target.observationrecord_set.filter(status='COMPLETED').order_by('-scheduled_end').first(),
@@ -36,12 +37,14 @@ def nres_targets_list():
 
 
 @register.inclusion_tag('targeted_calibrations/partials/nres_cadence_list.html')
-def nres_cadence_list():
+def nres_cadence_list() -> dict:
     # Annotate Dynamic Cadences with site and calibration type in order to sort by JSONField values
     nres_cadences = (DynamicCadence.objects.filter(cadence_strategy='NRESCadenceStrategy')
                      .annotate(site=Cast(KeyTextTransform('site', 'cadence_parameters'), models.TextField()))
                      .annotate(target_id=Cast(KeyTextTransform('target_id', 'cadence_parameters'), models.TextField()))
                      .order_by('site', '-target_id'))
+
+    # Construct cadence_data for the template context
     cadences_data = []
     for cadence in nres_cadences:
         target = Target.objects.filter(pk=cadence.target_id).first()
@@ -52,18 +55,21 @@ def nres_cadence_list():
             'prev_obs': cadence.observation_group.observation_records.filter(status='COMPLETED').order_by('-scheduled_end').first(),
             'next_obs': cadence.observation_group.observation_records.filter(status='PENDING').order_by('scheduled_start').first()
             })
+
     context = {'cadences_data': cadences_data}
     return context
 
 
 @register.inclusion_tag('targeted_calibrations/partials/nres_submission_form.html')
-def nres_submission_form():
+def nres_submission_form() -> dict:
     nres_cadence_form = NRESCalibrationSubmissionForm()
-    return {'nres_cadence_form': nres_cadence_form}
+
+    context = {'nres_cadence_form': nres_cadence_form}
+    return context
 
 
 @register.inclusion_tag('targeted_calibrations/partials/target_observation_list.html')
-def target_observation_list(target):
+def target_observation_list(target) -> dict:
     observation_records = ObservationRecord.objects.filter(target=target, status='COMPLETED')
     observations = []
     for obsr in observation_records:
@@ -79,11 +85,12 @@ def target_observation_list(target):
                     'rv_error': rd_value.get('rv_error')
                 })
 
-    return {'observations': observations}
+    context = {'observations': observations}
+    return context
 
 
 @register.inclusion_tag('targeted_calibrations/partials/rv_plot.html')
-def rv_plot(target):
+def rv_plot(target) -> dict:
     # TODO: Ensure that this works when there isn't data
     rv_data = [[], []]
 
@@ -96,11 +103,15 @@ def rv_plot(target):
 
     plot_data = go.Scatter(x=rv_data[0], y=rv_data[1], mode='markers')
     layout = go.Layout(xaxis={'title': 'Date'}, yaxis={'title': 'RV (m/s)'})
-    return {'rv_plot': offline.plot(go.Figure(data=plot_data, layout=layout), output_type='div', show_link=False)}
+
+    context = {
+        'rv_plot': offline.plot(go.Figure(data=plot_data, layout=layout), output_type='div', show_link=False)
+    }
+    return context
 
 
 @register.simple_tag
-def rv_average(target):
+def rv_average(target) -> str:
     rd_values = [json.loads(rd.value)['radial_velocity'] for rd in ReducedDatum.objects.filter(target=target)]
     if len(rd_values) > 0:
         return f'{truncate_number(statistics.mean(rd_values))} m/s'
@@ -109,7 +120,7 @@ def rv_average(target):
 
 
 @register.inclusion_tag('targeted_calibrations/partials/scalar_timeseries_for_target.html', takes_context=True)
-def scalar_timeseries_for_target(context, target):
+def scalar_timeseries_for_target(context, target) -> dict:
     """
     TODO: re-write documentation from copy-paste
     Renders a photometric plot for a target.
@@ -152,7 +163,9 @@ def scalar_timeseries_for_target(context, target):
         height=600,
         width=700
     )
-    return {
+
+    context = {
         'target': target,
         'plot': offline.plot(go.Figure(data=plot_data, layout=layout), output_type='div', show_link=False)
     }
+    return context

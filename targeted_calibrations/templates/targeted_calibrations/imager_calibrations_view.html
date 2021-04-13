@@ -1,0 +1,17 @@
+{% extends 'targeted_calibrations/index.html' %}
+{% load targeted_calibrations_extras %}
+{% block content %}
+<h4>Submit Photometric Standard for Imager Form</h4>
+<hr/>
+<h4>imager cadence list here</h4>
+<!--{% nres_cadence_list %}-->
+<hr/>
+<h4>update imager cadence form here</h4>
+<hr/>
+<h4>imager target list here</h4>
+<!--{% nres_targets_list %}-->
+<hr/>
+<p></p>
+    <a class="btn btn-primary" href="{% url 'targeted_calibrations:instrument_type_list' %}">View ConfigDB Instruments -></a>
+</p>
+{% endblock content %}

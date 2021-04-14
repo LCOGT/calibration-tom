@@ -17,13 +17,40 @@ def enum_to_choices(emum_class) -> [()]:
 
 
 class ImagerCalibrationManualSubmissionForm(forms.Form):
+    """Form for submission of photometric standards to imagers.
+
+    This is loosely based on the options to the calibration_util submit_calibration script.
+    """
+    # set up the self.fields dict of form.xFields; dict key is property name (i.e. 'target_id')
     site = forms.ChoiceField(required=True,
                              choices=enum_to_choices(configdb.site.SiteCode),
                              label='Site')
+    enclosure = forms.ChoiceField()  # TODO: populate enclosure choices from site choice
+    telescope = forms.ChoiceField()  # TODO: populate telescope choices from enclosure choice
+    instrument = forms.ChoiceField()  # TODO: populate instrument choices from telescope choice
+    filter = forms.ChoiceField()  # TODO: populate filter choices
+    diffusers = forms.ChoiceField(choices=[('In', 'In'), ('Out', 'Out')])
+    g_diffuser = forms.ChoiceField(choices=[('In', 'In'), ('Out', 'Out')])
+    r_diffuser = forms.ChoiceField(choices=[('In', 'In'), ('Out', 'Out')])
+    i_diffuser = forms.ChoiceField(choices=[('In', 'In'), ('Out', 'Out')])
+    z_diffuser = forms.ChoiceField(choices=[('In', 'In'), ('Out', 'Out')])
+    slit = forms.ChoiceField(choices=[('slit choice', 'slit choice')])  # TODO: populate slit choices
+    group = forms.ChoiceField(choices=[('group choice', 'group choice')])  # TODO: populate group choices
+    # TODO: set exposure_time dynamically according to filter selection
+    exposure_time = forms.IntegerField(min_value=1, label=False,
+                                       widget=forms.NumberInput(attrs={'placeholder': 'Exposure Time (seconds)'}))
+    exposure_count = forms.IntegerField(min_value=1, label=False,
+                                        widget=forms.NumberInput(attrs={'placeholder': 'Exposure Count (exposures)'}))
+
+    target_id = forms.ChoiceField(required=True,
+                                  choices=[(target.id,
+                                            f"{target.name} plus additional helpful info")
+                                           # TODO: filter to only Imager photometric standard targets
+                                           for target in Target.objects.all()],
+                                  label='Standard Field')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        pass
 
 
 class NRESCalibrationSubmissionForm(forms.Form):

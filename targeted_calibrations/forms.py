@@ -36,6 +36,11 @@ class NRESCalibrationSubmissionForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        # target_id choices must  be defined here in the __init__ rather than in the class definition
+        # because the target_is_in_season method used below is added dynamically to the Target class
+        # and it doesn't yet exist at the time of class interpretation, but it does when the instance
+        # is made (and __init__ is called)
         self.fields['target_id'] = forms.ChoiceField(  # Create choices for standard_types of targets currently in season
             choices=[(target.id,
                       f"{target.targetextra_set.filter(key='standard_type').first().value} (currently {target.name})")

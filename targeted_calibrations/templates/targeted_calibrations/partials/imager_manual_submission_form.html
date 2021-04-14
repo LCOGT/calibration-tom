@@ -1,0 +1,6 @@
+{% load bootstrap4 crispy_forms_tags %}
+<h4>Imager Standard Calibration Manual Submission</h4>
+<div>
+  {% csrf_token %}
+  {% crispy imager_manual_submission_form %}
+</div>

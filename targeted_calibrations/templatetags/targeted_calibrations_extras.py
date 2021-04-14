@@ -10,7 +10,7 @@ from guardian.shortcuts import get_objects_for_user
 from plotly import offline
 import plotly.graph_objs as go
 
-from targeted_calibrations.forms import NRESCalibrationSubmissionForm
+from targeted_calibrations.forms import NRESCalibrationSubmissionForm, ImagerCalibrationManualSubmissionForm
 from tom_common.templatetags.tom_common_extras import truncate_number
 from tom_dataproducts.models import ReducedDatum
 from tom_observations.models import DynamicCadence, ObservationRecord
@@ -18,6 +18,15 @@ from tom_targets.models import Target
 
 
 register = template.Library()
+
+# TODO: NRES inclusion tags and Imager inclusion tags should probably be separated into their own modules
+
+
+@register.inclusion_tag('targeted_calibrations/partials/imager_manual_submission_form.html')
+def imager_manual_submission_form() -> dict:
+
+    context = {'imager_manual_submission_form': ImagerCalibrationManualSubmissionForm()}
+    return context
 
 
 @register.inclusion_tag('targeted_calibrations/partials/nres_targets_list.html')

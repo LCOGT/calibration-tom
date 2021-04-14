@@ -7,6 +7,23 @@ from django.conf import settings
 from django.urls import reverse
 
 from tom_targets.models import Target
+import configdb.site
+
+
+def enum_to_choices(emum_class) -> [()]:
+    """Turn an enum.Enum into a list of 2-tuples suitable for the forms.ChoiceField.choices parameter
+     """
+    return [(e.value, e.name) for e in emum_class]
+
+
+class ImagerCalibrationManualSubmissionForm(forms.Form):
+    site = forms.ChoiceField(required=True,
+                             choices=enum_to_choices(configdb.site.SiteCode),
+                             label='Site')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        pass
 
 
 class NRESCalibrationSubmissionForm(forms.Form):

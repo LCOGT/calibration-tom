@@ -1,6 +1,6 @@
 from django.urls import path
 
-from targeted_calibrations.views import ImagerCalibrationsView, ImagerCalibrationSubmissionView
+from targeted_calibrations.views import ImagerCalibrationsView
 from targeted_calibrations.views import NRESCalibrationsView, NRESCalibrationSubmissionView
 from targeted_calibrations.views import InstrumentListView
 from targeted_calibrations.views import InstrumentTargetDetailView

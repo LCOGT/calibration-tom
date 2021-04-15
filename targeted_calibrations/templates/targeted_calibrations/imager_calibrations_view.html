@@ -1,7 +1,7 @@
 {% extends 'targeted_calibrations/index.html' %}
-{% load targeted_calibrations_extras %}
+{% load targeted_calibrations_extras crispy_forms_tags %}
 {% block content %}
-{% imager_manual_submission_form %}
+{% crispy form %}
 <hr/>
 <h4>imager cadence list here</h4>
 <!--{% nres_cadence_list %}-->

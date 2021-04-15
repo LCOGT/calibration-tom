@@ -20,13 +20,12 @@ from tom_targets.models import Target
 register = template.Library()
 
 # TODO: NRES inclusion tags and Imager inclusion tags should probably be separated into their own modules
-
-
-@register.inclusion_tag('targeted_calibrations/partials/imager_manual_submission_form.html')
-def imager_manual_submission_form() -> dict:
-
-    context = {'imager_manual_submission_form': ImagerCalibrationManualSubmissionForm()}
-    return context
+# TODO: consider whether we even need this inclusion tag
+#@register.inclusion_tag('targeted_calibrations/partials/imager_manual_submission_form.html')
+#def imager_manual_submission_form() -> dict:
+#
+#    context = {'imager_manual_submission_form': ImagerCalibrationManualSubmissionForm()}
+#    return context
 
 
 @register.inclusion_tag('targeted_calibrations/partials/nres_targets_list.html')

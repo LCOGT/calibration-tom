@@ -152,15 +152,15 @@ class InstrumentTargetDetailView(DetailView):
         return context
 
 
-class ImagerCalibrationsView(TemplateView):
-    template_name = 'targeted_calibrations/imager_calibrations_view.html'
+#class ImagerCalibrationsView(TemplateView):
+#    template_name = 'targeted_calibrations/imager_calibrations_view.html'
 
 
 # TODO: finish implementation of ImagerCalibrationsSubmissionView
-class ImagerCalibrationSubmissionView(FormView):
-    template_name = 'targeted_calibrations/nres_calibrations_view.html'
+class ImagerCalibrationsView(FormView):
+    template_name = 'targeted_calibrations/imager_calibrations_view.html'
     form_class = ImagerCalibrationManualSubmissionForm
-    success_url = reverse_lazy('targeted_calibrations:nres_home')
+    success_url = reverse_lazy('targeted_calibrations:imager_home')
 
     def form_invalid(self, form):
         messages.error(self.request, f'The imager calibration submission form is invalid: {form.errors}.')

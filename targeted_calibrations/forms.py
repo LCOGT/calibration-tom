@@ -1,7 +1,8 @@
 from datetime import datetime
 
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import ButtonHolder, Column, Layout, Row, Submit
+from crispy_forms.bootstrap import InlineCheckboxes
+from crispy_forms.layout import ButtonHolder, Column, HTML, Layout, Row, Submit
 from django import forms
 from django.conf import settings
 from django.urls import reverse
@@ -51,6 +52,21 @@ class ImagerCalibrationManualSubmissionForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        # TODO: define 'targeted_calibrations:imager_submission'
+        #self.helper.form_action = reverse('targeted_calibrations:imager_submission')
+
+        self.helper.layout = Layout(
+            HTML("<hr/>"),
+            Row(Column('site'), Column('enclosure'), Column('telescope'), Column('instrument')),
+            Row(Column('target_id')),
+            HTML("<hr/>"),
+            Row(Column(InlineCheckboxes('filter'))),
+            Row(Column('exposure_time'), Column('exposure_count')),
+            HTML("<hr/>"),
+            Row(Column(ButtonHolder(Submit('submit', 'Submit Request'))))
+        )
 
 
 class NRESCalibrationSubmissionForm(forms.Form):

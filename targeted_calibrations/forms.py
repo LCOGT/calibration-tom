@@ -69,6 +69,9 @@ class ImagerCalibrationManualSubmissionForm(forms.Form):
             Row(Column(InlineCheckboxes('filter'))),
             Row(Column('exposure_time'), Column('exposure_count')),
             HTML("<hr/>"),
+            Row(Column('diffusers'), Column('g_diffuser'), Column('r_diffuser'), Column('i_diffuser'), Column('z_diffuser')),
+            Row(Column('slit'), Column('group')),
+            HTML("<hr/>"),
             Row(Column(ButtonHolder(Submit('submit', 'Submit Request'))))
         )
 

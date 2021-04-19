@@ -29,7 +29,16 @@ class ImagerCalibrationManualSubmissionForm(forms.Form):
     enclosure = forms.ChoiceField()  # TODO: populate enclosure choices from site choice
     telescope = forms.ChoiceField()  # TODO: populate telescope choices from enclosure choice
     instrument = forms.ChoiceField()  # TODO: populate instrument choices from telescope choice
-    filter = forms.ChoiceField()  # TODO: populate filter choices
+    filter = forms.MultipleChoiceField(
+        choices=enum_to_choices(configdb.site.Filter)
+    )  # TODO: populate filter choices instrument choice via ConfigDB
+
+    # TODO: set exposure_time dynamically according to filter selection
+    exposure_time = forms.IntegerField(min_value=1, label=False,
+                                       widget=forms.NumberInput(attrs={'placeholder': 'Exposure Time (seconds)'}))
+    exposure_count = forms.IntegerField(min_value=1, label=False,
+                                        widget=forms.NumberInput(attrs={'placeholder': 'Exposure Count (exposures)'}))
+
     diffusers = forms.ChoiceField(choices=[('In', 'In'), ('Out', 'Out')])
     g_diffuser = forms.ChoiceField(choices=[('In', 'In'), ('Out', 'Out')])
     r_diffuser = forms.ChoiceField(choices=[('In', 'In'), ('Out', 'Out')])
@@ -37,11 +46,6 @@ class ImagerCalibrationManualSubmissionForm(forms.Form):
     z_diffuser = forms.ChoiceField(choices=[('In', 'In'), ('Out', 'Out')])
     slit = forms.ChoiceField(choices=[('slit choice', 'slit choice')])  # TODO: populate slit choices
     group = forms.ChoiceField(choices=[('group choice', 'group choice')])  # TODO: populate group choices
-    # TODO: set exposure_time dynamically according to filter selection
-    exposure_time = forms.IntegerField(min_value=1, label=False,
-                                       widget=forms.NumberInput(attrs={'placeholder': 'Exposure Time (seconds)'}))
-    exposure_count = forms.IntegerField(min_value=1, label=False,
-                                        widget=forms.NumberInput(attrs={'placeholder': 'Exposure Count (exposures)'}))
 
     target_id = forms.ChoiceField(required=True,
                                   choices=[(target.id,

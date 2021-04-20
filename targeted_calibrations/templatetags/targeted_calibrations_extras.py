@@ -10,7 +10,7 @@ from guardian.shortcuts import get_objects_for_user
 from plotly import offline
 import plotly.graph_objs as go
 
-from targeted_calibrations.forms import NRESCalibrationSubmissionForm, ImagerCalibrationManualSubmissionForm
+from targeted_calibrations.forms import NRESCadenceSubmissionForm, ImagerCalibrationManualSubmissionForm
 from tom_common.templatetags.tom_common_extras import truncate_number
 from tom_dataproducts.models import ReducedDatum
 from tom_observations.models import DynamicCadence, ObservationRecord
@@ -70,7 +70,7 @@ def nres_cadence_list() -> dict:
 
 @register.inclusion_tag('targeted_calibrations/partials/nres_submission_form.html')
 def nres_submission_form() -> dict:
-    nres_cadence_form = NRESCalibrationSubmissionForm()
+    nres_cadence_form = NRESCadenceSubmissionForm()
 
     context = {'nres_cadence_form': nres_cadence_form}
     return context

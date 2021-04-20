@@ -11,7 +11,7 @@ from django.views.generic import DeleteView, DetailView, ListView, RedirectView,
 from django.views.generic.edit import FormView
 
 from configdb.configdb_connections import ConfigDBInterface
-from targeted_calibrations.forms import ImagerCalibrationManualSubmissionForm, NRESCalibrationSubmissionForm
+from targeted_calibrations.forms import ImagerCalibrationManualSubmissionForm, NRESCadenceSubmissionForm
 from tom_observations.models import DynamicCadence, ObservationGroup
 from tom_targets.models import Target
 
@@ -177,7 +177,7 @@ class NRESCalibrationsView(TemplateView):
 
 
 class NRESCalibrationSubmissionView(FormView):
-    form_class = NRESCalibrationSubmissionForm
+    form_class = NRESCadenceSubmissionForm
     success_url = reverse_lazy('targeted_calibrations:nres_home')
     # TODO: make sure this template_name assignment makes sense
     #  (it's required for tests.TestNRESCalibrationSubmissionView)

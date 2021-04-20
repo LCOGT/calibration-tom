@@ -76,7 +76,7 @@ class ImagerCalibrationManualSubmissionForm(forms.Form):
         )
 
 
-class NRESCalibrationSubmissionForm(forms.Form):
+class NRESCadenceSubmissionForm(forms.Form):
     site = forms.ChoiceField(required=True,
                              choices=[('all', 'All Sites')] + [(site, site) for site in settings.NRES_SITES],
                              label=False)

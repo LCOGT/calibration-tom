@@ -11,7 +11,9 @@ from tom_targets.models import Target
 logger = logging.getLogger(__name__)
 
 
-class NRESCalibrationForm(LCOBaseObservationForm):
+class LCOCalibrationForm(LCOBaseObservationForm):
+    # TODO: make a proper super-class out of this LCOCalibrationForm
+
     VALID_INSTRUMENT_CODES = ['1M0-NRES-SCICAM']  # TODO: Should this be in settings.py?
     VALID_PROPOSAL_CODES = ['ENG2017AB-001']  # TODO: Should this be in settings.py?
     # This needs to exist on both the NRESCalibrationForm and the NRESCadenceForm
@@ -108,11 +110,25 @@ class NRESCalibrationForm(LCOBaseObservationForm):
         return payload
 
 
+class NRESCalibrationForm(LCOCalibrationForm):
+    # TODO: make a proper subclass out of this NRESCalibrationForm
+    pass
+
+
+class ImagerCalibrationForm(LCOCalibrationForm):
+    # TODO: make a proper subclass out of this ImagerCalibrationForm
+    pass
+
+
 class LCOCalibrationFacility(LCOFacility):
     name = 'LCO Calibrations'
+
+    # these key-values appear as tabs in the Observations/create template
     observation_forms = {
-        'NRES': NRESCalibrationForm
+        'NRES': NRESCalibrationForm,
+        'IMAGER': ImagerCalibrationForm,
     }
+
     EXCLUDED_FRAME_SUFFIXES = (
         'e91',  # e91 frames are NRES Autoguider images and are not desirable to download
     )

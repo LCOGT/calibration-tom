@@ -1,13 +1,13 @@
-filter, exptime, expcount
-U, 180, 2
-B, 90, 2
-V, 60, 2
-R, 60, 2
-I, 60, 2
-up, 160, 2
-gp, 80, 2
-rp, 60, 2
-ip, 60, 2
-zs, 80, 2
+filter,exp_time,exp_count
+U,180,2
+B,90,2
+V,60,2
+R,60,2
+I,60,2
+up,160,2
+gp,80,2
+rp,60,2
+ip,60,2
+zs,80,2
 
 

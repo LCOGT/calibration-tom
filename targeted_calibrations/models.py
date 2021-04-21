@@ -34,6 +34,9 @@ class Filter(models.Model):
         verbose_name='Exposure Count', help_text='Number of exposures.'
     )
 
+    def __str__(self):
+        return f'{self.name} filter with {self.exposure_count} exposures of {self.exposure_time} seconds'
+
     # Boilerplate fields
     created = models.DateTimeField(
         auto_now_add=True, verbose_name='Time Created',

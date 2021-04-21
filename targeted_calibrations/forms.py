@@ -26,9 +26,18 @@ class ImagerCalibrationManualSubmissionForm(forms.Form):
     site = forms.ChoiceField(required=True,
                              choices=enum_to_choices(configdb.site.SiteCode),
                              label='Site')
-    enclosure = forms.ChoiceField()  # TODO: populate enclosure choices from site choice
-    telescope = forms.ChoiceField()  # TODO: populate telescope choices from enclosure choice
-    instrument = forms.ChoiceField()  # TODO: populate instrument choices from telescope choice
+    enclosure = forms.ChoiceField(
+        # TODO: these are just temporary choices
+        choices=[('doma', 'doma'),
+                 ('domb', 'domb'),
+                 ('domc', 'domc')]
+    )  # TODO: populate enclosure choices from site choice
+
+    telescope = forms.ChoiceField(
+        choices=enum_to_choices(configdb.site.TelescopeCode),
+    )  # TODO: populate telescope choices from enclosure choice
+
+    instrument = forms.ChoiceField(choices=[('ef12', 'ef12')])  # TODO: populate instrument choices from telescope choice
     filter = forms.MultipleChoiceField(
         choices=enum_to_choices(configdb.site.Filter)
     )  # TODO: populate filter choices instrument choice via ConfigDB

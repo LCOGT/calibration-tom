@@ -39,7 +39,9 @@ class ImagerCalibrationManualSubmissionForm(forms.Form):
         choices=enum_to_choices(configdb.site.TelescopeCode),
     )  # TODO: populate telescope choices from enclosure choice
 
-    instrument = forms.ChoiceField(choices=[('ef12', 'ef12')])  # TODO: populate instrument choices from telescope choice
+    instrument = forms.ChoiceField(
+        choices=[('ef12', 'ef12')],
+    )  # TODO: populate instrument choices from telescope choice
 
     filter = forms.MultipleChoiceField(
         choices=[(obj.name, obj.name) for obj in Filter.objects.all()]

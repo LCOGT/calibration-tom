@@ -8,6 +8,8 @@ from django.conf import settings
 from django.urls import reverse
 
 from tom_targets.models import Target
+from targeted_calibrations.models import Filter
+
 import configdb.site
 
 
@@ -38,9 +40,10 @@ class ImagerCalibrationManualSubmissionForm(forms.Form):
     )  # TODO: populate telescope choices from enclosure choice
 
     instrument = forms.ChoiceField(choices=[('ef12', 'ef12')])  # TODO: populate instrument choices from telescope choice
+
     filter = forms.MultipleChoiceField(
-        choices=enum_to_choices(configdb.site.Filter)
-    )  # TODO: populate filter choices instrument choice via ConfigDB
+        choices=[(obj.name, obj.name) for obj in Filter.objects.all()]
+    )  # TODO: limit filter choices by instrument choice via ConfigDB
 
     # TODO: set exposure_time dynamically according to filter selection
     exposure_time = forms.IntegerField(min_value=1, label=False,

@@ -8,6 +8,20 @@
 # TODO: bump replicaCount after change from sqlite3 to postgresql
 replicaCount: 1
 
+djangoDebug: false
+
+# Production mode: use production PostgreSQL database server
+useDockerizedDatabase: false
+postgresql:
+  hostname: "postgres1-cluster.cluster-cple9sjsskrf.us-west-2.rds.amazonaws.com"
+  postgresqlDatabase: "calibration-tom"
+  postgresqlUsername: "calibration-tom"
+  postgresqlPassword: "overridden"
+
+# Apply database migrations when the application is started
+applyDatabaseMigrations: true
+
+
 # CronJob: cron_trigger management command
 crontrigger:
   enabled: true
@@ -19,7 +33,6 @@ crontrigger:
       cpu: 1000m
       memory: 1024Mi
 
-djangoDebug: false
 
 lcoServices:
   configdbURL: "http://configdb.lco.gtn"

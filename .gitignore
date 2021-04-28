@@ -22,7 +22,7 @@ _static
 
 # Helm 
 helm-chart/charts/
-*secret.yaml
+*secret*.yaml
 
 # IDE and editor ignores
 .idea/

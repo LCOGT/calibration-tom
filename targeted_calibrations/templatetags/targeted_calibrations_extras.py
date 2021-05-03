@@ -10,7 +10,7 @@ from guardian.shortcuts import get_objects_for_user
 from plotly import offline
 import plotly.graph_objs as go
 
-from targeted_calibrations.forms import NRESCadenceSubmissionForm, ImagerCalibrationManualSubmissionForm
+from targeted_calibrations.forms import NRESCadenceSubmissionForm
 from tom_common.templatetags.tom_common_extras import truncate_number
 from tom_dataproducts.models import ReducedDatum
 from tom_observations.models import DynamicCadence, ObservationRecord

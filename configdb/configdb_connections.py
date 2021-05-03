@@ -42,7 +42,7 @@ class ConfigDBInterface(object):
             new_site_info = self._get_all_sites()
             ConfigDBInterface.site_info = new_site_info
         except ConfigDBException as e:
-            logger.warning("update_site_info error {}. Reusing previous site info".format(repr(e)))
+            logger.warning(f'update_site_info error with URL {self.configdb_url}: {e}. Reusing previous site info')
 
     def _get_all_sites(self) -> dict:
         """

@@ -127,6 +127,70 @@ class ImagerCalibrationForm(LCOCalibrationForm):
     # TODO: make a proper subclass out of this ImagerCalibrationForm
     pass
 
+
+class FilterMultiWidget(forms.MultiWidget):
+    """Set up a checkbox and two integer widgets for the FilterMultiValueField
+    """
+    def __init__(self, attrs=None):
+        widgets = [
+            forms.CheckboxInput,  # to select the filter
+            forms.NumberInput,  # for the exposure_time
+            forms.NumberInput,  # for the exposure_count
+        ]
+        super().__init__(widgets, attrs)
+
+    def decompress(self, value) -> []:
+        """Split the combined value of the form MultiValueField into the values for each widget"""
+
+        logger.debug(f'FilterMultiWidget decompress value: {value}')
+        if value:
+            return [None, 0, 0]  # TOOD: return actual values
+        return [None, None, None]
+
+
+class FilterMultiValueField(forms.MultiValueField):
+
+    def compress(self, data_list):
+        """Combine cleaned field values in a single value"""
+        return data_list
+        #  raise NotImplemented  # TODO: implement me
+
+    def __init__(self, **kwargs):
+        logger.debug(f'FilterMultiValueField kwargs: {kwargs}')
+        self.filter = kwargs.pop('filter')  # Filter model object instance
+        # Define one message for all fields.
+        error_messages = {
+            'incomplete': 'Exposure time and count must be greater than zero for selected filters.',
+        }
+
+        # Or define a different message for each field.
+        fields = (
+            # use the filter if checkbox is checked
+            forms.BooleanField(),
+
+            # TODO: set exposure_time dynamically according to filter selection
+            # exposure_time
+            forms.IntegerField(
+                min_value=1, label='time(s)',
+                initial=self.filter.exposure_time,
+                widget=forms.NumberInput(attrs={'placeholder': 'Exposure Time (seconds)'})
+            ),
+
+            # exposure_count
+            forms.IntegerField(
+                min_value=1, label='count',
+                initial=self.filter.exposure_count,
+                widget=forms.NumberInput(attrs={'placeholder': 'Exposure Count (exposures)'}))
+        )
+
+        self.widget = FilterMultiWidget()
+
+        super().__init__(
+            error_messages=error_messages, fields=fields,
+            require_all_fields=False, **kwargs
+        )
+
+
 def enum_to_choices(emum_class) -> [()]:
     """Turn an enum.Enum into a list of 2-tuples suitable for the forms.ChoiceField.choices parameter
      """
@@ -158,8 +222,11 @@ class ImagerCalibrationManualSubmissionForm(forms.Form):
     )  # TODO: populate instrument choices from telescope choice
 
     filter = forms.MultipleChoiceField(
-        choices=[(obj.name, obj.name) for obj in Filter.objects.all()]
+        # these choices must be defined at runtime (after the database is accessible)
+        choices=[('No filters found in database', 'No filters found in database')],
     )  # TODO: limit filter choices by instrument choice via ConfigDB
+
+    #filter_mv = FilterMultiValueField(fields=None)
 
     # TODO: set exposure_time dynamically according to filter selection
     exposure_time = forms.IntegerField(min_value=1, label=False,
@@ -176,14 +243,21 @@ class ImagerCalibrationManualSubmissionForm(forms.Form):
     group = forms.ChoiceField(choices=[('group choice', 'group choice')])  # TODO: populate group choices
 
     target_id = forms.ChoiceField(required=True,
-                                  choices=[(target.id,
-                                            f"{target.name} plus additional helpful info")
-                                           # TODO: filter to only Imager photometric standard targets
-                                           for target in Target.objects.all()],
+                                  # these choices must be defined at runtime (after the database is accessible)
+                                  choices=[('No targets found in database', 'No targets found in database')],
                                   label='Standard Field')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # set up the form field choices that must be assigned at run-time (when byte-compiling the class definition
+        self.fields['filter'].choices = [(filter.name, f'{filter.name} et al') for filter in Filter.objects.all()]  # TODO: will go away
+        self.fields['target_id'].choices = [(target.id, f'{target.name} et al') for target in Target.objects.all()]
+
+        # set up FilterMultiValueFields
+        for filter_instance in Filter.objects.all():
+            self.fields.update({f'{filter_instance.name}': FilterMultiValueField(filter=filter_instance)})
+
+
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         # TODO: define 'targeted_calibrations:imager_submission'
@@ -202,9 +276,6 @@ class ImagerCalibrationManualSubmissionForm(forms.Form):
             HTML("<hr/>"),
             Row(Column(ButtonHolder(Submit('submit', 'Submit Request'))))
         )
-
-
-
 
 
 class LCOCalibrationFacility(LCOFacility):

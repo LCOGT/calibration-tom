@@ -257,23 +257,25 @@ class ImagerCalibrationManualSubmissionForm(forms.Form):
         for filter_instance in Filter.objects.all():
             self.fields.update({f'{filter_instance.name}': FilterMultiValueField(filter=filter_instance)})
 
-
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         # TODO: define 'targeted_calibrations:imager_submission'
         #self.helper.form_action = reverse('targeted_calibrations:imager_submission')
 
         self.helper.layout = Layout(
-            HTML("<hr/>"),
+            HTML("<hr/>"),  # Site.Enclosure.Telescope.Instrument section
             Row(Column('site'), Column('enclosure'), Column('telescope'), Column('instrument')),
             Row(Column('target_id')),
-            HTML("<hr/>"),
-            Row(Column(InlineCheckboxes('filter'))),
-            Row(Column('exposure_time'), Column('exposure_count')),
-            HTML("<hr/>"),
+
+            HTML("<hr/>"),  # new Filter section
+            # here, we  unpack the tuple of Rows created by the list comprehension
+            *tuple([Row(Column(f'{filter.name}')) for filter in Filter.objects.all()]),
+
+            HTML("<hr/>"),  # Diffuser and Slit section
             Row(Column('diffusers'), Column('g_diffuser'), Column('r_diffuser'), Column('i_diffuser'), Column('z_diffuser')),
             Row(Column('slit'), Column('group')),
-            HTML("<hr/>"),
+
+            HTML("<hr/>"),  # Submit section
             Row(Column(ButtonHolder(Submit('submit', 'Submit Request'))))
         )
 

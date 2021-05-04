@@ -221,19 +221,6 @@ class ImagerCalibrationManualSubmissionForm(forms.Form):
         choices=[('ef12', 'ef12')],
     )  # TODO: populate instrument choices from telescope choice
 
-    filter = forms.MultipleChoiceField(
-        # these choices must be defined at runtime (after the database is accessible)
-        choices=[('No filters found in database', 'No filters found in database')],
-    )  # TODO: limit filter choices by instrument choice via ConfigDB
-
-    #filter_mv = FilterMultiValueField(fields=None)
-
-    # TODO: set exposure_time dynamically according to filter selection
-    exposure_time = forms.IntegerField(min_value=1, label=False,
-                                       widget=forms.NumberInput(attrs={'placeholder': 'Exposure Time (seconds)'}))
-    exposure_count = forms.IntegerField(min_value=1, label=False,
-                                        widget=forms.NumberInput(attrs={'placeholder': 'Exposure Count (exposures)'}))
-
     diffusers = forms.ChoiceField(choices=[('In', 'In'), ('Out', 'Out')])
     g_diffuser = forms.ChoiceField(choices=[('In', 'In'), ('Out', 'Out')])
     r_diffuser = forms.ChoiceField(choices=[('In', 'In'), ('Out', 'Out')])
@@ -249,8 +236,7 @@ class ImagerCalibrationManualSubmissionForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # set up the form field choices that must be assigned at run-time (when byte-compiling the class definition
-        self.fields['filter'].choices = [(filter.name, f'{filter.name} et al') for filter in Filter.objects.all()]  # TODO: will go away
+        # set up the form field choices that must be assigned at run-time (not when byte-compiling the class definition)
         self.fields['target_id'].choices = [(target.id, f'{target.name} et al') for target in Target.objects.all()]
 
         # set up FilterMultiValueFields

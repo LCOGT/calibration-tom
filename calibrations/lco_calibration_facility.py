@@ -268,6 +268,7 @@ class ImagerCalibrationManualSubmissionForm(forms.Form):
             Row(Column('target_id')),
 
             HTML("<hr/>"),  # new Filter section
+            # TODO: somehow insert Column headers: 'Filter, Exposure Time, Exposure count
             # here, we  unpack the tuple of Rows created by the list comprehension
             *tuple([Row(Column(f'{filter.name}')) for filter in Filter.objects.all()]),
 

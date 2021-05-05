@@ -172,6 +172,11 @@ class ImagerCalibrationsView(FormView):
         # This method is called when valid form data has been POSTed.
         return super().form_valid(form)
 
+    def get_initial(self):
+        initial = super().get_initial()
+        initial.update({'facility': 'LCO Calibrations'})
+        return initial
+
 
 class NRESCalibrationsView(TemplateView):
     template_name = 'targeted_calibrations/nres_calibrations_view.html'

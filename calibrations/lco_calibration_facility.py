@@ -5,7 +5,7 @@ import logging
 from django import forms
 from django.core.exceptions import ValidationError
 
-from crispy_forms.bootstrap import InlineCheckboxes
+
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import ButtonHolder, Column, HTML, Layout, Row, Submit
 
@@ -17,6 +17,7 @@ import configdb.site
 
 
 logger = logging.getLogger(__name__)
+logger.level = logging.DEBUG
 
 
 class LCOCalibrationForm(LCOBaseObservationForm):
@@ -118,24 +119,14 @@ class LCOCalibrationForm(LCOBaseObservationForm):
         return payload
 
 
-class NRESCalibrationForm(LCOCalibrationForm):
-    # TODO: make a proper subclass out of this NRESCalibrationForm
-    pass
-
-
-class ImagerCalibrationForm(LCOCalibrationForm):
-    # TODO: make a proper subclass out of this ImagerCalibrationForm
-    pass
-
-
 class FilterMultiWidget(forms.MultiWidget):
     """Set up a checkbox and two integer widgets for the FilterMultiValueField
     """
     def __init__(self, attrs=None):
         widgets = [
-            forms.CheckboxInput,  # to select the filter
-            forms.NumberInput,  # for the exposure_time
-            forms.NumberInput,  # for the exposure_count
+            forms.CheckboxInput(attrs=attrs),  # to select the filter
+            forms.NumberInput(attrs=attrs),  # for the exposure_time
+            forms.NumberInput(attrs=attrs),  # for the exposure_count
         ]
         super().__init__(widgets, attrs)
 
@@ -152,11 +143,13 @@ class FilterMultiValueField(forms.MultiValueField):
 
     def compress(self, data_list):
         """Combine cleaned field values in a single value"""
+        logger.debug(f'FilterMultiValueField.compress data_list: {data_list}')
         return data_list
         #  raise NotImplemented  # TODO: implement me
 
     def __init__(self, **kwargs):
-        logger.debug(f'FilterMultiValueField kwargs: {kwargs}')
+        # TODO: clean up debug statements
+        # logger.debug(f'FilterMultiValueField.__init__ kwargs: {kwargs}')
         self.filter = kwargs.pop('filter')  # Filter model object instance
         # Define one message for all fields.
         error_messages = {
@@ -171,14 +164,14 @@ class FilterMultiValueField(forms.MultiValueField):
             # TODO: set exposure_time dynamically according to filter selection
             # exposure_time
             forms.IntegerField(
-                min_value=1, label='time(s)',
+                min_value=0, label=True,
                 initial=self.filter.exposure_time,
                 widget=forms.NumberInput(attrs={'placeholder': 'Exposure Time (seconds)'})
             ),
 
             # exposure_count
             forms.IntegerField(
-                min_value=1, label='count',
+                min_value=0, label=True,
                 initial=self.filter.exposure_count,
                 widget=forms.NumberInput(attrs={'placeholder': 'Exposure Count (exposures)'}))
         )
@@ -197,7 +190,7 @@ def enum_to_choices(emum_class) -> [()]:
     return [(e.value, e.name) for e in emum_class]
 
 
-class ImagerCalibrationManualSubmissionForm(forms.Form):
+class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
     """Form for submission of photometric standards to imagers.
 
     This is loosely based on the options to the calibration_util submit_calibration script.
@@ -238,33 +231,72 @@ class ImagerCalibrationManualSubmissionForm(forms.Form):
         super().__init__(*args, **kwargs)
         # set up the form field choices that must be assigned at run-time (not when byte-compiling the class definition)
         self.fields['target_id'].choices = [(target.id, f'{target.name} et al') for target in Target.objects.all()]
+        self.fields['target_id'].initial = Target.objects.first().id
 
-        # set up FilterMultiValueFields
-        for filter_instance in Filter.objects.all():
-            self.fields.update({f'{filter_instance.name}': FilterMultiValueField(filter=filter_instance)})
+        # each filter gets an entry in the self.fields dictionary
+        self.fields.update({f.name: FilterMultiValueField(filter=f, required=False) for f in Filter.objects.all()})
 
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         # TODO: define 'targeted_calibrations:imager_submission'
         #self.helper.form_action = reverse('targeted_calibrations:imager_submission')
 
+        # remove (pop) unwanted fields from the self.fields
+        #  self.fields.pop('filter')
+
         self.helper.layout = Layout(
+            HTML("<hr/>"),  #
+            self.common_layout,
+            'name',  # TODO: deal
+            'proposal',
+            'ipp_value',
+            'observation_mode',
+            'instrument_type',
+            'exposure_count',
+            'exposure_time',
+            'filter',
+            'max_airmass',
+            'start',
+            'end',
+
             HTML("<hr/>"),  # Site.Enclosure.Telescope.Instrument section
             Row(Column('site'), Column('enclosure'), Column('telescope'), Column('instrument')),
             Row(Column('target_id')),
 
             HTML("<hr/>"),  # new Filter section
             # TODO: somehow insert Column headers: 'Filter, Exposure Time, Exposure count
-            # here, we  unpack the tuple of Rows created by the list comprehension
-            *tuple([Row(Column(f'{filter.name}')) for filter in Filter.objects.all()]),
+            # here, we  unpack (*) the tuple of Rows created by the list comprehension
+            # this just adds one Row(Column(...) per Filter to the Layout args
+            *tuple([Row(Column(filter.name)) for filter in Filter.objects.all()]),
 
             HTML("<hr/>"),  # Diffuser and Slit section
             Row(Column('diffusers'), Column('g_diffuser'), Column('r_diffuser'), Column('i_diffuser'), Column('z_diffuser')),
             Row(Column('slit'), Column('group')),
 
             HTML("<hr/>"),  # Submit section
-            Row(Column(ButtonHolder(Submit('submit', 'Submit Request'))))
+            Row(Column(ButtonHolder(Submit('submit', 'Submit Request')))),
         )
+
+    def _build_instrument_config(self):
+        """For example:
+        .. code:: python
+          instrument_config = {
+              'exposure_count': self.cleaned_data['exposure_count'],
+              'exposure_time': self.cleaned_data['exposure_time'],
+              'optical_elements': {
+                  'filter': self.cleaned_data['filter']
+              }
+          }
+        """
+        instrument_config = super()._build_instrument_config()
+        logger.debug(f'instrument_config: {instrument_config}')
+        return instrument_config
+
+    def is_valid(self):
+        valid = super().is_valid()
+        logger.debug(f'is_valid: {valid}')
+        logger.debug(f'is_valid: errors: {self.errors}')
+        return valid
 
 
 class LCOCalibrationFacility(LCOFacility):
@@ -272,8 +304,8 @@ class LCOCalibrationFacility(LCOFacility):
 
     # these key-values appear as tabs in the Observations/create template
     observation_forms = {
-        'NRES': NRESCalibrationForm,
-        'IMAGER': ImagerCalibrationForm,
+        'NRES': LCOCalibrationForm,
+        'IMAGER': ImagerCalibrationManualSubmissionForm,
     }
 
     EXCLUDED_FRAME_SUFFIXES = (

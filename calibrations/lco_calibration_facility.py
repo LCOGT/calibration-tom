@@ -245,6 +245,13 @@ class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
                                   choices=[('No targets found in database', 'No targets found in database')],
                                   label='Standard Field')
 
+    def optical_filters(self):
+        """The single source of truth for the list filters that are included in the
+        form, considered in the instrument_config, and checked in clean().
+        """
+        # if you want a subset of the Filters from the db, this is the place to restrict the queryset.
+        return Filter.objects.all()
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # set up the form field choices that must be assigned at run-time (not when byte-compiling the class definition)

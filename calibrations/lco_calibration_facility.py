@@ -47,11 +47,20 @@ class LCOCalibrationForm(LCOBaseObservationForm):
         self.fields['cadence_frequency'] = forms.IntegerField(required=False, help_text='in hours', initial=120)
         self.fields['ipp_value'].initial = 1.05
         self.fields['filter'].initial = 'air'
-        self.fields['exposure_time'].initial = target.targetextra_set.filter(key='exp_time').first().value
-        self.fields['exposure_count'].initial = target.targetextra_set.filter(key='exp_count').first().value
+
+        # TODO: some of these fields are NRES-specific and Imager Form handles them differently
+        exposure_time = target.targetextra_set.filter(key='exp_time').first()
+        if exposure_time:
+            self.fields['exposure_time'].initial = exposure_time.value
+
+        exposure_count = target.targetextra_set.filter(key='exp_count').first()
+        if exposure_count:
+            self.fields['exposure_count'].initial = exposure_count.value
+
         min_lunar_distance = target.targetextra_set.filter(key='min_lunar_distance').first()
         if min_lunar_distance is not None:
             self.fields['min_lunar_distance'].initial = min_lunar_distance.value
+
         self.fields['max_airmass'].initial = 2
         self.fields['start'].initial = datetime.now()
         self.fields['end'].widget = forms.HiddenInput()
@@ -157,7 +166,7 @@ class FilterMultiValueField(forms.MultiValueField):
         required = kwargs.get('required', False)  # don't pop so it gets sent to super via kwargs
         # Define one message for all fields.
         error_messages = {
-            'incomplete': f'Exposure time and count must be greater than zero for selected filter: {self.filter}',
+            'incomplete': f'Exposure time and count must be greater than zero for selected filter: {filter.name}',
         }
 
         # Or define a different message for each field.
@@ -277,8 +286,9 @@ class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
         for field_name in ['filter', 'exposure_time', 'exposure_count']:
             self.fields.pop(field_name)
 
-        # TODO: until we have cadences, we don't need a cadence_frequecy in this form
-        self.fields['cadence_frequency'].required = False
+        # TODO: until we have cadences, we don't need a cadence_frequency in this form
+        if 'cadence_frequency' in self.fields:
+            self.fields['cadence_frequency'].required = False
 
         self.helper.layout = Layout(
             HTML("<hr/>"),  #
@@ -321,10 +331,27 @@ class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
               }
           }
 
-        Override the LCOBaseObservaitonForm._build_instrument_config method and customize
-        for
+        Because the photometric sequence form provides form inputs for 10 different filters, they must be
+        constructed into a list of instrument configurations as per the LCO API. This method constructs the
+        instrument configurations in the appropriate manner.
         """
-        instrument_config = super()._build_instrument_config()
+        logger.debug(f'instrument_config cleaned_data: {self.cleaned_data}')
+
+        instrument_config = []
+        # TODO: this list of filters must be consistent with the FilterMultiValueField instances
+        #  created in the __init__
+        for f in self.optical_filters():
+            # check that field is selected (zero-th index is the checkbox)
+            if self.cleaned_data.get(f.name)[0]:
+                instrument_config.append({
+                    # this indexing must be consistent with the field order in decompress
+                    'exposure_count': self.cleaned_data[f.name][1],
+                    'exposure_time': self.cleaned_data[f.name][2],
+                    'optical_elements': {
+                        'filter': f.name
+                    }
+                })
+
         logger.debug(f'instrument_config: {instrument_config}')
         return instrument_config
 

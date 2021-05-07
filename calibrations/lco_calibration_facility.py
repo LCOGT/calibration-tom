@@ -149,13 +149,10 @@ class FilterMultiValueField(forms.MultiValueField):
 
     def compress(self, data_list):
         """Combine cleaned field values in a single value"""
-        logger.debug(f'FilterMultiValueField.compress data_list: {data_list}')
+        # logger.debug(f'FilterMultiValueField.compress data_list: {data_list}')
         return data_list
-        #  raise NotImplemented  # TODO: implement me
 
     def __init__(self, **kwargs):
-        # TODO: clean up debug statements
-        # logger.debug(f'FilterMultiValueField.__init__ kwargs: {kwargs}')
         self.filter = kwargs.pop('filter')  # Filter model object instance
         # Define one message for all fields.
         error_messages = {
@@ -192,6 +189,21 @@ def enum_to_choices(emum_class) -> [()]:
     """Turn an enum.Enum into a list of 2-tuples suitable for the forms.ChoiceField.choices parameter
      """
     return [(e.value, e.name) for e in emum_class]
+
+
+# TODO: clean up unnecessary superclass overrides
+# TODO: Have Site/Enclosure/Telescope/Instrument field values into InstrumentConfig or observation_payload or
+#   Instrument goes into InstrumentConfig
+#   Site goes into Location
+#   Enclosure goes into ???
+#   Instrument goes into Location
+# TODO: Dynamically load values for Site/Enc/Tel/Inst from configdb
+
+# Diffusers, Slits, and Groups were part of the CLI of the calibration_utils submit_calibration script
+# TODO: what's the deal with Diffusers?
+#    (diffusers are part of MUSCat, I think)
+# TODO: what's the deal with Slits
+# TODO: what's the deal with Groups
 
 
 class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
@@ -290,7 +302,8 @@ class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
         )
 
     def _build_instrument_config(self):
-        """For example:
+        """
+        For example:
         .. code:: python
           instrument_config = {
               'exposure_count': self.cleaned_data['exposure_count'],
@@ -308,9 +321,11 @@ class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
         return instrument_config
 
     def observation_payload(self):
-        payload = super().observation_payload()
-        logger.debug(f'observation_payload: {payload}')
-        return payload
+        # TODO: remove me when logger.debug messages are not useful
+        observation_payload = super().observation_payload()
+        logger.debug(f'observation_payload: {observation_payload}')
+        return observation_payload
+
     def clean(self):
         cleaned_data = super().clean()
         logger.debug(f'cleaned_data: {cleaned_data}')  # TODO: remove logger.debug
@@ -328,6 +343,7 @@ class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
         return cleaned_data
 
     def is_valid(self):
+        # TODO: remove me when logger.debug messages are not useful
         valid = super().is_valid()
         logger.debug(f'is_valid: {valid}')
         logger.debug(f'is_valid: errors: {self.errors}')

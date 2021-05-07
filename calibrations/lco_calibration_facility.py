@@ -153,7 +153,8 @@ class FilterMultiValueField(forms.MultiValueField):
         return data_list
 
     def __init__(self, **kwargs):
-        self.filter = kwargs.pop('filter')  # Filter model object instance
+        filter = kwargs.pop('filter')  # Filter model object instance
+        required = kwargs.get('required', False)  # don't pop so it gets sent to super via kwargs
         # Define one message for all fields.
         error_messages = {
             'incomplete': f'Exposure time and count must be greater than zero for selected filter: {self.filter}',
@@ -161,27 +162,28 @@ class FilterMultiValueField(forms.MultiValueField):
 
         # Or define a different message for each field.
         fields = (
-            # use the filter if checkbox is checked
-            forms.BooleanField(),
-
-            # TODO: set exposure_time dynamically according to filter selection
-            # exposure_time
-            forms.IntegerField(
-                min_value=0, label=True,
-                widget=forms.NumberInput(attrs={'placeholder': 'Exposure Time (seconds)'})
-            ),
-
+            # add the filter to the instrument_config if checkbox is checked
+            forms.BooleanField(required=required),
             # exposure_count
             forms.IntegerField(
                 min_value=0, label=True,
-                widget=forms.NumberInput(attrs={'placeholder': 'Exposure Count (exposures)'}))
+                widget=forms.NumberInput(attrs={'placeholder': 'Exposure Count (exposures)'}),
+                required=required
+            ),
+            # exposure_time
+            forms.IntegerField(
+                min_value=0, label=True,
+                widget=forms.NumberInput(attrs={'placeholder': 'Exposure Time (seconds)'}),
+                required=required
+            ),
         )
 
         self.widget = FilterMultiWidget()
 
         super().__init__(
             error_messages=error_messages, fields=fields,
-            require_all_fields=False, **kwargs
+            require_all_fields=False,
+            **kwargs  # required is part of the kwargs
         )
 
 
@@ -250,15 +252,14 @@ class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
         self.fields['target_id'].initial = Target.objects.first().id
 
         # each filter gets an entry in the self.fields dictionary
-        self.fields.update({f.name: FilterMultiValueField(filter=f,
-                                                          # TODO: see DC docstring and make more general method
-                                                          initial={
-                                                              # see FilterMultiWidget for definition of widget_names
-                                                              f'{f.name}_selected': False,
-                                                              f'{f.name}_exposure_count': f.exposure_count,
-                                                              f'{f.name}_exposure_time': f.exposure_time,
-                                                          },
-                                                          required=False) for f in Filter.objects.all()})
+        self.fields.update({
+            f.name: FilterMultiValueField(filter=f,
+                                          initial={  # see FilterMultiWidget for definition of widget_names
+                                              f'{f.name}_selected': False,
+                                              f'{f.name}_exposure_count': f.exposure_count,
+                                              f'{f.name}_exposure_time': f.exposure_time,
+                                          },
+                                          required=False) for f in self.optical_filters()})
 
         self.helper = FormHelper()
         self.helper.form_method = 'post'

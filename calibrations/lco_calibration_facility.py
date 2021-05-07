@@ -311,6 +311,21 @@ class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
         payload = super().observation_payload()
         logger.debug(f'observation_payload: {payload}')
         return payload
+    def clean(self):
+        cleaned_data = super().clean()
+        logger.debug(f'cleaned_data: {cleaned_data}')  # TODO: remove logger.debug
+        # check that at least one filter is marked for inclusion in the instrument config
+        # by finding the value of the filter.name key (which is the decompress)
+        # and the zero-th item is the checkbox
+        at_least_one_filter_checked = False
+        for f in self.optical_filters():
+            if cleaned_data[f.name][0]:
+                at_least_one_filter_checked = True
+                break
+        if not at_least_one_filter_checked:
+            # TODO: set the error message to be "At least one filter must be included in the request"
+            pass
+        return cleaned_data
 
     def is_valid(self):
         valid = super().is_valid()

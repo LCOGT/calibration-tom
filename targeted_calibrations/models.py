@@ -35,7 +35,7 @@ class Filter(models.Model):
     )
 
     def __str__(self):
-        return f'{self.name} filter with {self.exposure_count} exposures of {self.exposure_time} seconds'
+        return f'{self.name} filter (default: {self.exposure_count} x {self.exposure_time} second exposures)'
 
     # Boilerplate fields
     created = models.DateTimeField(

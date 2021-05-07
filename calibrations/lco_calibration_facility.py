@@ -125,17 +125,23 @@ class FilterMultiWidget(forms.MultiWidget):
     def __init__(self, attrs=None):
         widgets = [
             forms.CheckboxInput(attrs=attrs),  # to select the filter
-            forms.NumberInput(attrs=attrs),  # for the exposure_time
             forms.NumberInput(attrs=attrs),  # for the exposure_count
+            forms.NumberInput(attrs=attrs),  # for the exposure_time
         ]
         super().__init__(widgets, attrs)
+        # re-assign widgets_name after the __init__ (or else they'll be overridden)
+        self.widgets_names = [
+            '_selected',
+            '_exposure_count',
+            '_exposure_time',
+        ]
 
     def decompress(self, value) -> []:
         """Split the combined value of the form MultiValueField into the values for each widget"""
 
         logger.debug(f'FilterMultiWidget decompress value: {value}')
         if value:
-            return [None, 0, 0]  # TOOD: return actual values
+            return [v for v in value.values()]
         return [None, None, None]
 
 
@@ -153,7 +159,7 @@ class FilterMultiValueField(forms.MultiValueField):
         self.filter = kwargs.pop('filter')  # Filter model object instance
         # Define one message for all fields.
         error_messages = {
-            'incomplete': 'Exposure time and count must be greater than zero for selected filters.',
+            'incomplete': f'Exposure time and count must be greater than zero for selected filter: {self.filter}',
         }
 
         # Or define a different message for each field.
@@ -165,14 +171,12 @@ class FilterMultiValueField(forms.MultiValueField):
             # exposure_time
             forms.IntegerField(
                 min_value=0, label=True,
-                initial=self.filter.exposure_time,
                 widget=forms.NumberInput(attrs={'placeholder': 'Exposure Time (seconds)'})
             ),
 
             # exposure_count
             forms.IntegerField(
                 min_value=0, label=True,
-                initial=self.filter.exposure_count,
                 widget=forms.NumberInput(attrs={'placeholder': 'Exposure Count (exposures)'}))
         )
 
@@ -234,7 +238,15 @@ class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
         self.fields['target_id'].initial = Target.objects.first().id
 
         # each filter gets an entry in the self.fields dictionary
-        self.fields.update({f.name: FilterMultiValueField(filter=f, required=False) for f in Filter.objects.all()})
+        self.fields.update({f.name: FilterMultiValueField(filter=f,
+                                                          # TODO: see DC docstring and make more general method
+                                                          initial={
+                                                              # see FilterMultiWidget for definition of widget_names
+                                                              f'{f.name}_selected': False,
+                                                              f'{f.name}_exposure_count': f.exposure_count,
+                                                              f'{f.name}_exposure_time': f.exposure_time,
+                                                          },
+                                                          required=False) for f in Filter.objects.all()})
 
         self.helper = FormHelper()
         self.helper.form_method = 'post'
@@ -242,7 +254,11 @@ class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
         #self.helper.form_action = reverse('targeted_calibrations:imager_submission')
 
         # remove (pop) unwanted fields from the self.fields
-        #  self.fields.pop('filter')
+        for field_name in ['filter', 'exposure_time', 'exposure_count']:
+            self.fields.pop(field_name)
+
+        # TODO: until we have cadences, we don't need a cadence_frequecy in this form
+        self.fields['cadence_frequency'].required = False
 
         self.helper.layout = Layout(
             HTML("<hr/>"),  #
@@ -252,16 +268,12 @@ class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
             'ipp_value',
             'observation_mode',
             'instrument_type',
-            'exposure_count',
-            'exposure_time',
-            'filter',
             'max_airmass',
             'start',
             'end',
 
             HTML("<hr/>"),  # Site.Enclosure.Telescope.Instrument section
             Row(Column('site'), Column('enclosure'), Column('telescope'), Column('instrument')),
-            Row(Column('target_id')),
 
             HTML("<hr/>"),  # new Filter section
             # TODO: somehow insert Column headers: 'Filter, Exposure Time, Exposure count
@@ -287,10 +299,18 @@ class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
                   'filter': self.cleaned_data['filter']
               }
           }
+
+        Override the LCOBaseObservaitonForm._build_instrument_config method and customize
+        for
         """
         instrument_config = super()._build_instrument_config()
         logger.debug(f'instrument_config: {instrument_config}')
         return instrument_config
+
+    def observation_payload(self):
+        payload = super().observation_payload()
+        logger.debug(f'observation_payload: {payload}')
+        return payload
 
     def is_valid(self):
         valid = super().is_valid()

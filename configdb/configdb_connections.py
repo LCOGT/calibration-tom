@@ -1,12 +1,12 @@
-import logging
 from http import HTTPStatus
-from typing import List, Dict, Any, FrozenSet, Union
+import logging
 import requests
+from typing import List, Dict, Any, FrozenSet, Union
 
-# from django.core.cache import cache
+from django.core.cache import cache
 
-from configdb.state import InstrumentState
 from configdb.site import SiteCode, Instrument, Readout, Location, Overheads, InstrumentInfo
+from configdb.state import InstrumentState
 
 logger = logging.getLogger(__name__)
 
@@ -20,10 +20,11 @@ class InstrumentNotFoundException(Exception):
 
 
 class ConfigDBInterface(object):
-    """ Class for providing access to information in configdb. Used to replace both the camera_mappings file and
-        the telescopes file. It saves/loads a local file of each from disk to use in case configdb is down.
-        Proper usage is to call the update_configdb_structures once each scheduling run, then get the loaded
-        in data as needed.
+    """
+    Class for providing access to information in configdb. Used to replace both the camera_mappings file and
+    the telescopes file. It saves/loads a local file of each from disk to use in case configdb is down.
+    Proper usage is to call the update_configdb_structures once each scheduling run, then get the loaded
+    in data as needed.
     """
 
     site_info: list
@@ -32,17 +33,26 @@ class ConfigDBInterface(object):
         self.configdb_url = configdb_url
         if not self.configdb_url.endswith('/'):
             self.configdb_url += '/'
-        self.update_site_info()
+        self.get_site_info()
 
-    # FIXME: Retry connecting to configdb if it fails
-    # FIXME: Alternatively, cache the response and attempt to load from cache first
-    # FIXME: This should probably be replaced by a site_info getter
-    def update_site_info(self):
-        try:
-            new_site_info = self._get_all_sites()
-            ConfigDBInterface.site_info = new_site_info
-        except ConfigDBException as e:
-            logger.warning(f'update_site_info error with URL {self.configdb_url}: {e}. Reusing previous site info')
+    def get_site_info(self, force_update=False):
+        """
+        Update stored site for the ConfigDBInterface instance by doing the following:
+            - Get cached site info
+            - If site info isn't cached, query ConfigDB for new data
+            - If ConfigDBException, don't update site_info
+        """
+        cached_site_info = cache.get('configdb_site_info')
+
+        if not cached_site_info or force_update:
+            try:
+                new_site_info = self._get_all_sites()
+                cache.set('configdb_site_info', new_site_info)
+                cached_site_info = new_site_info
+            except ConfigDBException as e:
+                logger.warning(f'update_site_info error with URL {self.configdb_url}: {e}. Reusing previous site info')
+        
+        ConfigDBInterface.site_info = cached_site_info
 
     def _get_all_sites(self) -> dict:
         """

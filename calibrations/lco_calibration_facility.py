@@ -1,19 +1,21 @@
 from datetime import datetime, timedelta
 from dateutil.parser import parse
+from enum import Enum
 import logging
-
-from django import forms
-from django.core.exceptions import ValidationError
-
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import ButtonHolder, Column, HTML, Layout, Row, Submit
-
+from django import forms
+from django.conf import settings
+from django.core.exceptions import ValidationError
 from tom_observations.facilities.lco import LCOBaseObservationForm, LCOFacility
 from tom_targets.models import Target
 
-from targeted_calibrations.models import Filter
 import configdb.site
+from configdb.configdb_connections import ConfigDBInterface
+from calibrations.fields import FilterMultiValueField, FilterMultiWidget
+from targeted_calibrations.models import Filter
+
 
 
 logger = logging.getLogger(__name__)
@@ -48,7 +50,6 @@ class LCOCalibrationForm(LCOBaseObservationForm):
         self.fields['ipp_value'].initial = 1.05
         self.fields['filter'].initial = 'air'
 
-        # TODO: some of these fields are NRES-specific and Imager Form handles them differently
         exposure_time = target.targetextra_set.filter(key='exp_time').first()
         if exposure_time:
             self.fields['exposure_time'].initial = exposure_time.value
@@ -86,13 +87,6 @@ class LCOCalibrationForm(LCOBaseObservationForm):
         location['site'] = self.cleaned_data['site']
         return location
 
-    # def is_valid(self):
-    #     super().is_valid()
-    #     self.validate_at_facility()
-    #     if self._errors:  # TODO: This should migrate up into tom_base
-    #         logging.log(msg=f'Observation submission errors: {self._errors}', level=logging.WARNING)
-    #     return not self._errors
-
     # In order to prevent the superclass' clean_end from being called, we override it and return the submitted value.
     # The end field is hidden and is not set by the form.
     def clean_end(self):
@@ -128,74 +122,6 @@ class LCOCalibrationForm(LCOBaseObservationForm):
         return payload
 
 
-class FilterMultiWidget(forms.MultiWidget):
-    """Set up a checkbox and two integer widgets for the FilterMultiValueField
-    """
-    def __init__(self, attrs=None):
-        widgets = [
-            forms.CheckboxInput(attrs=attrs),  # to select the filter
-            forms.NumberInput(attrs=attrs),  # for the exposure_count
-            forms.NumberInput(attrs=attrs),  # for the exposure_time
-        ]
-        super().__init__(widgets, attrs)
-        # re-assign widgets_name after the __init__ (or else they'll be overridden)
-        self.widgets_names = [
-            '_selected',
-            '_exposure_count',
-            '_exposure_time',
-        ]
-
-    def decompress(self, value) -> []:
-        """Split the combined value of the form MultiValueField into the values for each widget"""
-
-        logger.debug(f'FilterMultiWidget decompress value: {value}')
-        if value:
-            return [v for v in value.values()]
-        return [None, None, None]
-
-
-class FilterMultiValueField(forms.MultiValueField):
-
-    def compress(self, data_list):
-        """Combine cleaned field values in a single value"""
-        # logger.debug(f'FilterMultiValueField.compress data_list: {data_list}')
-        return data_list
-
-    def __init__(self, **kwargs):
-        filter = kwargs.pop('filter')  # Filter model object instance
-        required = kwargs.get('required', False)  # don't pop so it gets sent to super via kwargs
-        # Define one message for all fields.
-        error_messages = {
-            'incomplete': f'Exposure time and count must be greater than zero for selected filter: {filter.name}',
-        }
-
-        # Or define a different message for each field.
-        fields = (
-            # add the filter to the instrument_config if checkbox is checked
-            forms.BooleanField(required=required),
-            # exposure_count
-            forms.IntegerField(
-                min_value=0, label=True,
-                widget=forms.NumberInput(attrs={'placeholder': 'Exposure Count (exposures)'}),
-                required=required
-            ),
-            # exposure_time
-            forms.IntegerField(
-                min_value=0, label=True,
-                widget=forms.NumberInput(attrs={'placeholder': 'Exposure Time (seconds)'}),
-                required=required
-            ),
-        )
-
-        self.widget = FilterMultiWidget()
-
-        super().__init__(
-            error_messages=error_messages, fields=fields,
-            require_all_fields=False,
-            **kwargs  # required is part of the kwargs
-        )
-
-
 def enum_to_choices(emum_class) -> [()]:
     """Turn an enum.Enum into a list of 2-tuples suitable for the forms.ChoiceField.choices parameter
      """
@@ -203,18 +129,13 @@ def enum_to_choices(emum_class) -> [()]:
 
 
 # TODO: clean up unnecessary superclass overrides
-# TODO: Have Site/Enclosure/Telescope/Instrument field values into InstrumentConfig or observation_payload or
-#   Instrument goes into InstrumentConfig
-#   Site goes into Location
-#   Enclosure goes into ???
-#   Instrument goes into Location
-# TODO: Dynamically load values for Site/Enc/Tel/Inst from configdb
 
 # Diffusers, Slits, and Groups were part of the CLI of the calibration_utils submit_calibration script
 # TODO: what's the deal with Diffusers?
-#    (diffusers are part of MUSCat, I think)
-# TODO: what's the deal with Slits
-# TODO: what's the deal with Groups
+#    (diffusers are part of MUSCat, I think) (from David: this is correct)
+# TODO: what's the deal with Slits (from David: slit is almost certainly not necessary for PHOTOMETRIC standards)
+# TODO: what's the deal with Groups (from David: group is not used in calibration_utils photometric standards)
+# TODO: according to doc, photometric standards window is open at a certain time--should this be pre-filled into the form?
 
 
 class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
@@ -222,32 +143,23 @@ class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
 
     This is loosely based on the options to the calibration_util submit_calibration script.
     """
+    config_db = ConfigDBInterface(settings.CONFIGDB_URL)
     # set up the self.fields dict of form.xFields; dict key is property name (i.e. 'target_id')
     site = forms.ChoiceField(required=True,
-                             choices=enum_to_choices(configdb.site.SiteCode),
+                            #  choices=enum_to_choices(SiteCode),
+                             choices=[],
                              label='Site')
-    enclosure = forms.ChoiceField(
-        # TODO: these are just temporary choices
-        choices=[('doma', 'doma'),
-                 ('domb', 'domb'),
-                 ('domc', 'domc')]
-    )  # TODO: populate enclosure choices from site choice
+    enclosure = forms.ChoiceField(choices=[])
 
-    telescope = forms.ChoiceField(
-        choices=enum_to_choices(configdb.site.TelescopeCode),
-    )  # TODO: populate telescope choices from enclosure choice
+    telescope = forms.ChoiceField(choices=[])  # TODO: populate telescope choices from enclosure choice
 
-    instrument = forms.ChoiceField(
-        choices=[('ef12', 'ef12')],
-    )  # TODO: populate instrument choices from telescope choice
+    instrument = forms.ChoiceField(choices=[])  # TODO: populate instrument choices from telescope choice
 
     diffusers = forms.ChoiceField(choices=[('In', 'In'), ('Out', 'Out')])
     g_diffuser = forms.ChoiceField(choices=[('In', 'In'), ('Out', 'Out')])
     r_diffuser = forms.ChoiceField(choices=[('In', 'In'), ('Out', 'Out')])
     i_diffuser = forms.ChoiceField(choices=[('In', 'In'), ('Out', 'Out')])
     z_diffuser = forms.ChoiceField(choices=[('In', 'In'), ('Out', 'Out')])
-    slit = forms.ChoiceField(choices=[('slit choice', 'slit choice')])  # TODO: populate slit choices
-    group = forms.ChoiceField(choices=[('group choice', 'group choice')])  # TODO: populate group choices
 
     target_id = forms.ChoiceField(required=True,
                                   # these choices must be defined at runtime (after the database is accessible)
@@ -261,11 +173,34 @@ class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
         # if you want a subset of the Filters from the db, this is the place to restrict the queryset.
         return Filter.objects.all()
 
+    def enclosure_choices(self):
+        enclosures = set()
+
+        for site in self.config_db.site_info:
+            for enclosure in site['enclosure_set']:
+                enclosures.add(enclosure['code'])
+        
+        return sorted([(e, e) for e in enclosures], key=lambda enclosure_tuple: enclosure_tuple[0])
+
+    def instrument_choices(self):  # Overrides the LCOBaseForm instrument_choices()
+        instruments = set()
+
+        for dome_values in self.config_db.get_active_instruments_info().values():
+            for instrument in dome_values:
+                instruments.add((instrument['code'], instrument['code']))
+
+        return sorted(instruments)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # set up the form field choices that must be assigned at run-time (not when byte-compiling the class definition)
         self.fields['target_id'].choices = [(target.id, f'{target.name} et al') for target in Target.objects.all()]
         self.fields['target_id'].initial = Target.objects.first().id
+
+        self.fields['site'].choices = [(site['code'].upper(), site['code']) for site in self.config_db.site_info]
+        self.fields['enclosure'].choices = self.enclosure_choices()
+        self.fields['telescope'].choices = sorted(set([(dome, dome) for dome, _ in self.config_db.get_active_instruments_info().items()]))
+        self.fields['instrument'].choices = self.instrument_choices()
 
         # each filter gets an entry in the self.fields dictionary
         self.fields.update({
@@ -280,7 +215,7 @@ class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         # TODO: define 'targeted_calibrations:imager_submission'
-        #self.helper.form_action = reverse('targeted_calibrations:imager_submission')
+        # self.helper.form_action = reverse('targeted_calibrations:imager_submission')
 
         # remove (pop) unwanted fields from the self.fields
         for field_name in ['filter', 'exposure_time', 'exposure_count']:
@@ -309,15 +244,25 @@ class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
             # TODO: somehow insert Column headers: 'Filter, Exposure Time, Exposure count
             # here, we  unpack (*) the tuple of Rows created by the list comprehension
             # this just adds one Row(Column(...) per Filter to the Layout args
-            *tuple([Row(Column(filter.name)) for filter in Filter.objects.all()]),
+            Row(
+                Column(HTML('Filter')),
+                Column(HTML('Exposure Count')),
+                Column(HTML('Exposure Time'))
+            ),
+            *tuple([Row(Column(f.name)) for f in Filter.objects.all()]),
 
             HTML("<hr/>"),  # Diffuser and Slit section
             Row(Column('diffusers'), Column('g_diffuser'), Column('r_diffuser'), Column('i_diffuser'), Column('z_diffuser')),
-            Row(Column('slit'), Column('group')),
 
             HTML("<hr/>"),  # Submit section
             Row(Column(ButtonHolder(Submit('submit', 'Submit Request')))),
         )
+
+    def _build_configuration(self):
+        configuration = super()._build_configuration()
+        configuration['instrument_name'] = self.cleaned_data['instrument']
+
+        return configuration
 
     def _build_instrument_config(self):
         """
@@ -355,11 +300,20 @@ class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
         logger.debug(f'instrument_config: {instrument_config}')
         return instrument_config
 
-    def observation_payload(self):
-        # TODO: remove me when logger.debug messages are not useful
-        observation_payload = super().observation_payload()
-        logger.debug(f'observation_payload: {observation_payload}')
-        return observation_payload
+    def _build_location(self):
+        # TODO: Add support for submitting to all sites, which will require direct scheduler submission
+        location = super()._build_location()
+        location['site'] = self.cleaned_data['site']
+        location['enclosure'] = self.cleaned_data['enclosure']
+        location['telescope'] = self.cleaned_data['telescope']
+
+        return location
+
+    # def observation_payload(self):
+    #     # TODO: remove me when logger.debug messages are not useful
+    #     observation_payload = super().observation_payload()
+    #     logger.debug(f'observation_payload: {observation_payload}')
+    #     return observation_payload
 
     def clean(self):
         cleaned_data = super().clean()
@@ -367,22 +321,20 @@ class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
         # check that at least one filter is marked for inclusion in the instrument config
         # by finding the value of the filter.name key (which is the decompress)
         # and the zero-th item is the checkbox
-        at_least_one_filter_checked = False
         for f in self.optical_filters():
             if cleaned_data[f.name][0]:
-                at_least_one_filter_checked = True
                 break
-        if not at_least_one_filter_checked:
-            # TODO: set the error message to be "At least one filter must be included in the request"
-            pass
+        else:
+            raise forms.ValidationError('At least one filter must be included in the request.')
         return cleaned_data
 
-    def is_valid(self):
-        # TODO: remove me when logger.debug messages are not useful
-        valid = super().is_valid()
-        logger.debug(f'is_valid: {valid}')
-        logger.debug(f'is_valid: errors: {self.errors}')
-        return valid
+    # def is_valid(self):
+    #     # TODO: remove me when logger.debug messages are not useful
+    #     valid = super().is_valid()
+    #     print(self.validate_at_facility())
+    #     logger.debug(f'is_valid: {valid}')
+    #     logger.debug(f'is_valid: errors: {self.errors}')
+    #     return valid
 
 
 class LCOCalibrationFacility(LCOFacility):

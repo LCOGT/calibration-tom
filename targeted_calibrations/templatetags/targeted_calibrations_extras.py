@@ -30,7 +30,7 @@ register = template.Library()
 
 @register.inclusion_tag('targeted_calibrations/partials/nres_targets_list.html')
 def nres_targets_list() -> dict:
-    nres_targets = Target.objects.all()
+    nres_targets = Target.objects.filter(targetextra__key='standard_type', targetextra__value__in=['RV', 'FLUX'])
     # determine "last" observation
     # determine "next" observation
     # annotate target with the observation

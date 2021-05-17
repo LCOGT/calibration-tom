@@ -49,9 +49,12 @@ class ConfigDBInterface(object):
                 new_site_info = self._get_all_sites()
                 cache.set('configdb_site_info', new_site_info)
                 cached_site_info = new_site_info
-                ConfigDBInterface.site_info = cached_site_info
+                self.site_info = cached_site_info
             except ConfigDBException as e:
                 logger.warning(f'update_site_info error with URL {self.configdb_url}: {e}. Reusing previous site info')
+                return
+        else:
+            self.site_info = cached_site_info
 
     def _get_all_sites(self) -> dict:
         """
@@ -128,7 +131,7 @@ class ConfigDBInterface(object):
         """ Returns set of instruments by telescope that are in schedulable or commissioning state """
         active_instruments = {}
 
-        for site in ConfigDBInterface.site_info:
+        for site in self.site_info:
             if site['code'] == site_code or site_code == 'all':
                 for enclosure in site['enclosure_set']:
                     for telescope in enclosure['telescope_set']:

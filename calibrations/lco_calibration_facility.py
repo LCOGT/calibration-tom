@@ -179,7 +179,7 @@ class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
         for site in self.config_db.site_info:
             for enclosure in site['enclosure_set']:
                 enclosures.add(enclosure['code'])
-        
+
         return sorted([(e, e) for e in enclosures], key=lambda enclosure_tuple: enclosure_tuple[0])
 
     def instrument_choices(self):  # Overrides the LCOBaseForm instrument_choices()

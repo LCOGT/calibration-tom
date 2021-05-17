@@ -49,10 +49,9 @@ class ConfigDBInterface(object):
                 new_site_info = self._get_all_sites()
                 cache.set('configdb_site_info', new_site_info)
                 cached_site_info = new_site_info
+                ConfigDBInterface.site_info = cached_site_info
             except ConfigDBException as e:
                 logger.warning(f'update_site_info error with URL {self.configdb_url}: {e}. Reusing previous site info')
-        
-        ConfigDBInterface.site_info = cached_site_info
 
     def _get_all_sites(self) -> dict:
         """

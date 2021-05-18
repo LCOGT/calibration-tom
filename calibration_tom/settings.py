@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'django_filters',
     'django_gravatar',
+    'rest_framework',
     'tom_targets',
     'tom_alerts',
     'tom_catalogs',

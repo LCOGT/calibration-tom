@@ -38,10 +38,11 @@ class ConfigDbInterfaceTests(unittest.TestCase):
         self.config_db.update_site_info()
         with self.assertLogs('configdb.configdb_connections', level='WARNING') as logs:
             self.config_db.update_site_info()
-            # FIXME: How to properly format this for flake8?
-            self.assertIn(
-                f'WARNING:configdb.configdb_connections:update_site_info error ConfigDBException(\'get_all_sites failed: ConfigDB status code {HTTPStatus.NOT_FOUND}\'). Reusing previous site info',
-                logs.output)
+            expected_logging = (
+                f'WARNING:configdb.configdb_connections:update_site_info error with URL {self.config_db_url}/: '
+                f'get_all_sites failed: ConfigDB status code 404. Reusing previous site info'
+            )
+            self.assertIn(expected_logging, logs.output)
         self.assertEqual(self.config_db.site_info, ['test_site_info_value'])
 
     def test_get_all_sites(self):

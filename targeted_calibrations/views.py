@@ -5,12 +5,14 @@ from django.contrib import messages
 from django.db import models
 from django.db.models.fields.json import KeyTextTransform
 from django.db.models.functions import Cast
+from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import DeleteView, DetailView, ListView, RedirectView, TemplateView
 from django.views.generic.edit import FormView
 
 from configdb.configdb_connections import ConfigDBInterface
-from targeted_calibrations.forms import NRESCalibrationSubmissionForm
+from calibrations.lco_calibration_facility import ImagerCalibrationManualSubmissionForm
+from targeted_calibrations.forms import NRESCadenceSubmissionForm
 from tom_observations.models import DynamicCadence, ObservationGroup
 from tom_targets.models import Target
 
@@ -151,12 +153,37 @@ class InstrumentTargetDetailView(DetailView):
         return context
 
 
+#class ImagerCalibrationsView(TemplateView):
+#    template_name = 'targeted_calibrations/imager_calibrations_view.html'
+
+
+# TODO: finish implementation of ImagerCalibrationsSubmissionView
+class ImagerCalibrationsView(FormView):
+    template_name = 'targeted_calibrations/imager_calibrations_view.html'
+    form_class = ImagerCalibrationManualSubmissionForm
+    success_url = reverse_lazy('targeted_calibrations:imager_home')
+
+    def form_invalid(self, form):
+        messages.error(self.request, f'The imager calibration submission form is invalid: {form.errors}.')
+        logger.error(f'Invalid form submission for imager manual submission: {form.errors}.')
+        return super().form_invalid(form)
+
+    def form_valid(self, form) -> HttpResponse:
+        # This method is called when valid form data has been POSTed.
+        return super().form_valid(form)
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial.update({'facility': 'LCO Calibrations'})
+        return initial
+
+
 class NRESCalibrationsView(TemplateView):
     template_name = 'targeted_calibrations/nres_calibrations_view.html'
 
 
 class NRESCalibrationSubmissionView(FormView):
-    form_class = NRESCalibrationSubmissionForm
+    form_class = NRESCadenceSubmissionForm
     success_url = reverse_lazy('targeted_calibrations:nres_home')
     # TODO: make sure this template_name assignment makes sense
     #  (it's required for tests.TestNRESCalibrationSubmissionView)

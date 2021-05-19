@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'django_filters',
     'django_gravatar',
+    'rest_framework',
     'tom_targets',
     'tom_alerts',
     'tom_catalogs',
@@ -114,6 +115,8 @@ DATABASES = {
        'PORT': os.getenv('DB_PORT', '5432'),
    },
 }
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'  # for Django 3.2
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators

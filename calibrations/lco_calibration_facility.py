@@ -182,7 +182,7 @@ class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
 
         return sorted([(e, e) for e in enclosures], key=lambda enclosure_tuple: enclosure_tuple[0])
 
-    def instrument_choices(self):  # Overrides the LCOBaseForm instrument_choices()
+    def instrument_granular_choices(self):
         instruments = set()
 
         for dome_values in self.config_db.get_active_instruments_info().values():
@@ -200,7 +200,7 @@ class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
         self.fields['site'].choices = [(site['code'].upper(), site['code']) for site in self.config_db.site_info]
         self.fields['enclosure'].choices = self.enclosure_choices()
         self.fields['telescope'].choices = sorted(set([(dome.split('.')[-1], dome.split('.')[-1]) for dome, _ in self.config_db.get_active_instruments_info().items()]))
-        self.fields['instrument'].choices = self.instrument_choices()
+        self.fields['instrument'].choices = self.instrument_granular_choices()
 
         # each filter gets an entry in the self.fields dictionary
         self.fields.update({

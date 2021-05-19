@@ -287,7 +287,7 @@ def _get_readouts(readouts_dict: Dict[Any, Any]) -> FrozenSet[Readout]:
     readouts: List[Readout] = []
 
     for readout in readouts_dict:
-        binning = readout['validation_schema'].get('bin_x', {}).get('default')
+        binning = readout['validation_schema'].get('extra_params', {}).get('bin_x', {}).get('default')
         readouts.append(Readout(readout['code'], binning, readout['name'], readout['overhead']))
 
     return frozenset(readouts)

@@ -197,7 +197,7 @@ class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
         self.fields['target_id'].choices = [(target.id, f'{target.name} et al') for target in Target.objects.all()]
         self.fields['target_id'].initial = Target.objects.first().id
 
-        self.fields['site'].choices = [(site['code'].upper(), site['code']) for site in self.config_db.site_info]
+        self.fields['site'].choices = [(site['code'], site['code']) for site in self.config_db.site_info]
         self.fields['enclosure'].choices = self.enclosure_choices()
         self.fields['telescope'].choices = sorted(set([(dome.split('.')[-1], dome.split('.')[-1]) for dome, _ in self.config_db.get_active_instruments_info().items()]))
         self.fields['instrument'].choices = self.instrument_granular_choices()

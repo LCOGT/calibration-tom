@@ -20,7 +20,9 @@ def site_calibration_button(site, instrument):
 
 @register.simple_tag
 def display_seasonal_start_or_end(month):
-    return datetime(year=datetime.now().year, month=int(month), day=1).strftime('%B')
+    if month:
+        return datetime(year=datetime.now().year, month=int(month), day=1).strftime('%B')
+    return ''
 
 
 @register.simple_tag

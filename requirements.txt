@@ -6,3 +6,6 @@ whitenoise==5.2.0
 lcogt-logging==0.3.2
 responses==0.12.1
 factory_boy
+# for AWS S3 data storage
+django-storages==1.11.1
+boto3==1.16.61

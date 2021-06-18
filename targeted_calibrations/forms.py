@@ -25,7 +25,8 @@ class NRESCadenceSubmissionForm(forms.Form):
         self.fields['target_id'] = forms.ChoiceField(  # Create choices for standard_types of targets currently in season
             choices=[(target.id,
                       f"{target.targetextra_set.filter(key='standard_type').first().value} (currently {target.name})")
-                     for target in Target.objects.all() if target.target_is_in_season()],
+                     for target in Target.objects.filter(targetextra__key='nres_active_type', targetextra__value=True)
+                     if target.target_is_in_season()],
             label=False
         )
         self.helper = FormHelper()

@@ -11,7 +11,7 @@ from django.views.generic import DeleteView, DetailView, ListView, RedirectView,
 from django.views.generic.edit import FormView
 
 from configdb.configdb_connections import ConfigDBInterface
-from calibrations.lco_calibration_facility import ImagerCalibrationManualSubmissionForm
+from calibrations.facilities.imager_calibration_facility import ImagerCalibrationManualSubmissionForm
 from targeted_calibrations.forms import NRESCadenceSubmissionForm
 from tom_observations.models import DynamicCadence, ObservationGroup
 from tom_targets.models import Target

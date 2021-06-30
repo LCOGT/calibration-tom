@@ -250,7 +250,10 @@ DATA_PROCESSORS = {
     'spectroscopy': 'tom_dataproducts.processors.spectroscopy_processor.SpectroscopyProcessor',
 }
 
-TOM_FACILITY_CLASSES = ['calibrations.lco_calibration_facility.LCOCalibrationFacility']
+TOM_FACILITY_CLASSES = [
+    'calibrations.facilities.imager_calibration_facility.ImagerCalibrationFacility',
+    'calibrations.facilities.lco_calibration_facility.LCOCalibrationFacility'
+]
 
 TOM_ALERT_CLASSES = []
 

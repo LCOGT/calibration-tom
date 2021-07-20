@@ -24,10 +24,9 @@ class NRESCadenceSubmissionForm(forms.Form):
         # and it doesn't yet exist at the time of class interpretation, but it does when the instance
         # is made (and __init__ is called)
         self.fields['target_id'] = forms.ChoiceField(  # Create choices for standard_types of targets currently in season
-            choices=[(target.id,  # TODO: This will not work for FLOYDS
+            choices=[(target.id,
                       f"{target.targetextra_set.filter(key='standard_type').first().value} (currently {target.name})")
-                     for target in Target.objects.filter(Q(targetextra__key='standard_type', targetextra__value='RV') |
-                                                         Q(targetextra__key='standard_type', targetextra__value='FLUX'))
+                     for target in Target.objects.filter(targetextra__key='calibration_type', targetextra__value='NRES')
                      if target.target_is_in_season()],
             label=False
         )

@@ -2,7 +2,6 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import ButtonHolder, Column, Layout, Row, Submit
 from django import forms
 from django.conf import settings
-from django.db.models import Q
 from django.urls import reverse
 
 from tom_targets.models import Target

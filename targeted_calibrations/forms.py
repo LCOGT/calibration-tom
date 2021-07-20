@@ -2,6 +2,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import ButtonHolder, Column, Layout, Row, Submit
 from django import forms
 from django.conf import settings
+from django.db.models import Q
 from django.urls import reverse
 
 from tom_targets.models import Target
@@ -23,9 +24,10 @@ class NRESCadenceSubmissionForm(forms.Form):
         # and it doesn't yet exist at the time of class interpretation, but it does when the instance
         # is made (and __init__ is called)
         self.fields['target_id'] = forms.ChoiceField(  # Create choices for standard_types of targets currently in season
-            choices=[(target.id,
+            choices=[(target.id,  # TODO: This will not work for FLOYDS
                       f"{target.targetextra_set.filter(key='standard_type').first().value} (currently {target.name})")
-                     for target in Target.objects.filter(targetextra__key='nres_active_type', targetextra__value=True)
+                     for target in Target.objects.filter(Q(targetextra__key='standard_type', targetextra__value='RV') |
+                                                         Q(targetextra__key='standard_type', targetextra__value='FLUX'))
                      if target.target_is_in_season()],
             label=False
         )

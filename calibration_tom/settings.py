@@ -276,12 +276,12 @@ EXTRA_FIELDS = [
     {'name': 'exp_count', 'type': 'number'},
     {'name': 'observing_frequency', 'type': 'number', 'default': 5},
     {'name': 'observing_period', 'type': 'number', 'default': 3},
-    {'name': 'nres_active_target', 'type': 'boolean', 'default': False},
+    {'name': 'nres_active_target', 'type': 'boolean', 'default': None},
     {'name': 'cadence_expiration_date', 'type': 'datetime'},  # The date the target is no longer valid for a cadence
     {'name': 'expected_rv', 'type': 'number'},
     {'name': 'standard_type', 'type': 'string'},  # Either FLUX or RV
     {'name': 'min_lunar_distance', 'type': 'number'},  # Min lunar distance value for obs portal submission
-    {'name': 'calibration_type', 'type': 'string'}
+    {'name': 'calibration_type', 'type': 'string', 'default': None}
 ]
 
 # Authentication strategy can either be LOCKED (required login for all views)

@@ -257,7 +257,10 @@ TOM_FACILITY_CLASSES = [
 
 TOM_ALERT_CLASSES = []
 
-TOM_CADENCE_STRATEGIES = ['calibrations.cadences.nres_cadence.NRESCadenceStrategy']
+TOM_CADENCE_STRATEGIES = [
+    'calibrations.cadences.nres_cadence.NRESCadenceStrategy',
+    'calibrations.cadences.imager_cadence.ImagerCadenceStrategy'  # TODO: migrations can't be run with this present
+]
 
 BROKER_CREDENTIALS = {}
 

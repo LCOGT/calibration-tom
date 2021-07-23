@@ -1,8 +1,10 @@
 from datetime import datetime
 
 from django.db import models
-
+from tom_observations.models import ObservationRecord
 from tom_targets.models import Target
+
+from configdb.site import SiteCode
 
 
 # this is an extension to tom_targets.models.Target class
@@ -46,3 +48,36 @@ class Filter(models.Model):
         auto_now=True, verbose_name='Last Modified',
         help_text='The time which this target was changed in the TOM database.'
     )
+
+
+class Instrument(models.Model):
+    code = models.CharField(max_length=20, unique=True)
+    enclosure = models.CharField(max_length=20)
+    site = models.CharField(max_length=3)
+    telescope = models.CharField(max_length=20)
+    type = models.CharField(max_length=50, null=True, blank=True)  # TODO: this should probably not be on instrument
+
+    def update_from_configdb(self):
+        raise NotImplementedError  # TODO
+
+    def __str__(self):
+        return f'{self.site}.{self.enclosure}.{self.telescope}.{self.code}'
+
+
+class InstrumentFilter(models.Model):
+    instrument = models.ForeignKey(Instrument, on_delete=models.CASCADE)
+    filter = models.ForeignKey(Filter, on_delete=models.CASCADE)
+    max_age = models.IntegerField(default=5)
+
+    def get_last_calibration_age(self, observation_group=None):
+        if not observation_group:
+            records = ObservationRecord.objects.all()
+        else:
+            records = observation_group.observation_records.all()
+        kwargs = {'parameters__has_key': 'filter', f'parameters__{self.filter.name}__contains': True}
+        last_calibration = records.order_by('-created').filter(**kwargs).first()
+        if last_calibration:
+            return datetime.now() - last_calibration.scheduled_end
+
+    def __str__(self):
+        return f'{self.instrument.code} - {self.filter.name}'

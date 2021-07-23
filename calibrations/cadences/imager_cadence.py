@@ -1,5 +1,4 @@
-import copy
-from datetime import datetime
+from datetime import datetime, timedelta
 from dateutil.parser import parse
 import logging
 
@@ -12,13 +11,18 @@ from tom_observations.models import ObservationRecord
 from tom_targets.models import Target
 
 from configdb.configdb_connections import ConfigDBInterface
+from targeted_calibrations.models import Filter, Instrument, InstrumentFilter
 
 logger = logging.getLogger(__name__)
 
 
 class ImagerCadenceForm(BaseCadenceForm):
-    site = forms.ChoiceField(required=True, choices=[(site, site) for site in settings.NRES_SITES])  # TODO: update with new sites setting
-    instrument_code = forms.ChoiceField(required=True, choices=[])  # TODO: update with all instruments
+    instrument_code = forms.ChoiceField(required=True,
+                                        choices=[(code, code) for code in Instrument.objects.values_list('code', flat=True)])
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.cadence_fields.update(['instrument_code', 'target_id'])
 
 
 class ImagerCadenceStrategy(ResumeCadenceAfterFailureStrategy):
@@ -33,18 +37,22 @@ class ImagerCadenceStrategy(ResumeCadenceAfterFailureStrategy):
 
     def update_observation_filters(self, observation_payload):
         logger.info(msg='Updating observation_payload filters')
-        site = self.dynamic_cadence.cadence_parameters['site']
-        instrument_code = self.dynamic_cadence.cadence_parameters['instrument_code']
-        available_filters = {inst['code']: inst['code']
-                             for inst
-                             in (self.config_db.get_matching_instrument(site_code=site, instrument_name=instrument_code)
-                                 .get('optical_elements', [{}]).get('optical_elements', []))
-                             if inst['type'] == 'filters'}
-        filters_copy = copy(available_filters)
-        observation_records = self.dynamic_cadence.observation_group.observation_records.order_by('-created')
-        for 
+        instrument = Instrument.objects.get(code=self.dynamic_cadence.cadence_parameters['instrument_code'])
+        filter_dates = []
+        for inst_filter in instrument.instrumentfilter_set.all():
+            filter_dates.append([inst_filter, inst_filter.get_last_calibration_age(self.dynamic_cadence.observation_group)])
+        print(f'before sort: {filter_dates}')
+        filter_dates.sort(key=lambda filters: filters[1] if filters[1] is not None else datetime.now())
+        new_filters = filter_dates[:-2]
 
+        for inst_filter in instrument.instrumentfilter_set.all():
+            observation_payload[inst_filter.filter.name][0] = False
 
+        for new_filter in new_filters:
+            observation_payload[new_filter[0].filter.name][0] = True
+
+        print('done')
+        return observation_payload
 
     def run(self):
         last_obs = self.dynamic_cadence.observation_group.observation_records.order_by('-created').first()
@@ -56,21 +64,61 @@ class ImagerCadenceStrategy(ResumeCadenceAfterFailureStrategy):
             last_obs.refresh_from_db()
             observation_payload = last_obs.parameters
         else:
-            pass  # create an observation for the new cadence, as we do not have a previous one to use
-            # facility = get_service_class('LCO Calibrations')()
-            # form_class = facility.observation_forms['Imager Calibrations']
+            print('else')
+            # create an observation for the new cadence, as we do not have a previous one to use
+            facility = get_service_class('Imager Calibrations')()
+            form_class = facility.observation_forms['IMAGER']
 
-            # site = self.dynamic_cadence.cadence_parameters['site']
+            inst = Instrument.objects.get(code=self.dynamic_cadence.cadence_parameters['instrument_code'])
+            inst_filters = inst.instrumentfilter_set.all()
 
-            # form_data = {
-            #     'name': f'',
-            #     'observation_types': 'IMAGER',
-            #     'observation_mode': 'NORMAL',
-            #     # 'instrument_type': ,
-            #     'cadence_frequency': self.dynamic_cadence.cadence_parameters['cadence_frequency'],
-            #     'site': site,
-            # }
+            form_data = {
+                'name': f'Photometric standard for {inst.code}',
+                'facility': 'Imager Calibrations',  # TODO: Do something better here
+                'proposal': 'ENG2017AB-001',  # TODO: Do something better here
+                'ipp_value': 1.05,  # TODO: is this right?
+                'instrument_type': inst.type.upper(),  # TODO: this needs to be part of the Instrument model or InstrumentFilter model
+                'observation_types': 'IMAGER',
+                'observation_mode': 'NORMAL',
+                'cadence_frequency': self.dynamic_cadence.cadence_parameters['cadence_frequency'],
+                'site': inst.site,
+                'enclosure': inst.enclosure,
+                'telescope': inst.telescope,
+                'instrument': inst.code,
+                'target_id': target.id,
+                'max_airmass': 3,  # TODO: revisit this
+                'start': datetime.now(),
+                'end': datetime.now() + timedelta(hours=24),
+                'diffusers': 'Out',  # TODO: should we still ahve these?
+                'g_diffuser': 'Out',
+                'r_diffuser': 'Out',
+                'i_diffuser': 'Out',
+                'z_diffuser': 'Out',
+            }
 
+            print('pre form data')
+            print(inst_filters[0].filter.name)
+            for f in inst_filters:
+                form_data[f'{f.filter.name}_exposure_count'] = f.filter.exposure_count
+                form_data[f'{f.filter.name}_exposure_time'] = f.filter.exposure_time
+            form_data[f'{inst_filters[0].filter.name}_selected'] = True
+            # form_data[inst_filters[1].filter.name] = [True, inst_filters[1].filter.exposure_count, inst_filters[1].filter.exposure_time]
+            print(form_data)
+            print('post form data')
+
+            form = form_class(data=form_data)
+            print('is form valid?')
+            if form.is_valid():
+                print(f'form_valid: {form.cleaned_data}')
+                observation_payload = form.cleaned_data
+            else:
+                print(f'form invalid: {form.errors}')
+                logger.error(f'Unable to submit initial calibration for cadence {self.dc.id}', extra={
+                    'tags': {'dynamic_cadence_id': self.dc.id, 'target': target.name}
+                })
+                raise forms.ValidationError(f'Unable to submit initial calibration for cadence {self.dc}')
+
+        print('after submission')
         # Boilerplate to get necessary properties for future calls
         start_keyword, end_keyword = facility.get_start_end_keywords()
 
@@ -89,20 +137,23 @@ class ImagerCadenceStrategy(ResumeCadenceAfterFailureStrategy):
                 observation_payload, start_keyword=start_keyword, end_keyword=end_keyword
             )
             observation_payload = self.update_observation_filters(observation_payload)
-            
 
         observation_payload = self.update_observation_payload(observation_payload)
 
+        print('updated observation payload')
+
         # Submission of the new observation to the facility
-        form = facility.get_form('Imager Calibrations')(observation_payload)
+        form = facility.get_form('IMAGER')(observation_payload)
         logger.info(f'Observation form data to be submitted for {self.dynamic_cadence.id}: {observation_payload}',
                     extra={'tags': {
                         'dynamic_cadence_id': self.dynamic_cadence.id,
                         'target': target.name
                     }})
         if form.is_valid():
+            print('form.is_valid last time')
             observation_ids = facility.submit_observation(form.observation_payload())
         else:
+            print('form totes not valid')
             logger.error(f'Unable to submit next cadenced observation: {form.errors}',
                          extra={'tags': {
                             'dynamic_cadence_id': self.dynamic_cadence.id,

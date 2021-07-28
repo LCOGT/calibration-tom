@@ -22,7 +22,7 @@ class Command(BaseCommand):
                                           cadence_parameters={
                                               'instrument_code': inst.code,
                                               'cadence_frequency': 24,
-                                              'target_id': 47  # TODO: this needs to be more dynamic
+                                              'target_id': 9  # TODO: this needs to be more dynamic
                                           },
                                           active=True,
                                           observation_group=og)

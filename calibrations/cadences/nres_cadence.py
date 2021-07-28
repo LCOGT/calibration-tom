@@ -98,10 +98,10 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
             if form.is_valid():
                 observation_payload = form.cleaned_data
             else:
-                logger.error(f'Unable to submit initial calibration for cadence {self.dc.id}', extra={
-                    'tags': {'dynamic_cadence_id': self.dc.id, 'target': target.name}
+                logger.error(f'Unable to submit initial calibration for cadence {self.dynamic_cadence.id}', extra={
+                    'tags': {'dynamic_cadence_id': self.dynamic_cadence.id, 'target': target.name}
                 })
-                raise forms.ValidationError(f'Unable to submit initial calibration for cadence {self.dc}')
+                raise forms.ValidationError(f'Unable to submit initial calibration for cadence {self.dynamic_cadence}')
 
         # Boilerplate to get necessary properties for future calls
         start_keyword, end_keyword = facility.get_start_end_keywords()

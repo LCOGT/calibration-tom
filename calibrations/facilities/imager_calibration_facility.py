@@ -27,8 +27,6 @@ def enum_to_choices(emum_class) -> [()]:
 # Diffusers, Slits, and Groups were part of the CLI of the calibration_utils submit_calibration script
 # TODO: what's the deal with Diffusers?
 #    (diffusers are part of MUSCat, I think) (from David: this is correct)
-# TODO: what's the deal with Slits (from David: slit is almost certainly not necessary for PHOTOMETRIC standards)
-# TODO: what's the deal with Groups (from David: group is not used in calibration_utils photometric standards)
 # TODO: according to doc, photometric standards window is open at a certain time--should this be pre-filled into the form?
 class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
     """Form for submission of photometric standards to imagers.
@@ -126,6 +124,7 @@ class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
             'observation_mode',
             'instrument_type',
             'max_airmass',
+            'min_lunar_distance',
             'start',
             'end',
 
@@ -153,6 +152,7 @@ class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
     def _build_configuration(self):
         configuration = super()._build_configuration()
         configuration['instrument_name'] = self.cleaned_data['instrument']
+        configuration['min_lunar_distance'] = self.cleaned_data['min_lunar_distance']  # TODO: this needs to go into tom_base
 
         return configuration
 
@@ -172,8 +172,6 @@ class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
         constructed into a list of instrument configurations as per the LCO API. This method constructs the
         instrument configurations in the appropriate manner.
         """
-        logger.debug(f'instrument_config cleaned_data: {self.cleaned_data}')
-
         instrument_config = []
         # TODO: this list of filters must be consistent with the FilterMultiValueField instances
         #  created in the __init__
@@ -189,7 +187,6 @@ class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
                     }
                 })
 
-        logger.debug(f'instrument_config: {instrument_config}')
         return instrument_config
 
     def _build_location(self):
@@ -204,17 +201,17 @@ class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
     # def observation_payload(self):
     #     # TODO: remove me when logger.debug messages are not useful
     #     observation_payload = super().observation_payload()
-    #     logger.debug(f'observation_payload: {observation_payload}')
+    #     logger.debug(f'observation_payload: {observation_payload}\n')
     #     return observation_payload
 
     def clean(self):
         cleaned_data = super().clean()
-        logger.debug(f'cleaned_data: {cleaned_data}')  # TODO: remove logger.debug
+        # logger.debug(f'cleaned_data: {cleaned_data}')  # TODO: remove logger.debug
         # check that at least one filter is marked for inclusion in the instrument config
         # by finding the value of the filter.name key (which is the decompress)
         # and the zero-th item is the checkbox
         for f in self.optical_filters():
-            if cleaned_data[f.name][0]:
+            if cleaned_data[f.name][0] is True:
                 break
         else:
             raise forms.ValidationError('At least one filter must be included in the request.')

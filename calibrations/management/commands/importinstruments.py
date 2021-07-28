@@ -57,7 +57,7 @@ class Command(BaseCommand):
                 print(i.code)
                 for camera in inst['science_cameras']:
                     if camera['code'] == i.code:
-                        i.type = camera.get('camera_type', {}).get('code')
+                        i.type = camera.get('camera_type', {}).get('code').upper()
                         i.save()
                         oe_groups = camera.get('optical_element_groups', [])
                         for oe_group in oe_groups:

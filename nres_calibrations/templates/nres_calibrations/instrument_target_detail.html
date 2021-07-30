@@ -1,12 +1,12 @@
-{% extends 'targeted_calibrations/instrument_target_list.html' %}
-<!-- targeted_calibrations/instrument_target_detail.html -->
-{% load tom_common_extras targets_extras observation_extras calibrations_extras targeted_calibrations_extras %}
+{% extends 'nres_calibrations/instrument_target_list.html' %}
+<!-- nres_calibrations/instrument_target_detail.html -->
+{% load tom_common_extras targets_extras observation_extras calibrations_extras nres_calibrations_extras %}
 {% block content %}
 <!-- block content -->
 <p>
     {% block breadcrumbs %}
         {{ block.super }} &raquo;
-        <a href="{% url 'targeted_calibrations:instrument_target_detail' instrument_type instrument_code target_id %}">{{ target.name }} Target Detail</a>
+        <a href="{% url 'nres_calibrations:instrument_target_detail' instrument_type instrument_code target_id %}">{{ target.name }} Target Detail</a>
     {% endblock breadcrumbs%}
 </p>
 

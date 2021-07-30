@@ -11,7 +11,7 @@ from guardian.shortcuts import get_objects_for_user
 from plotly import offline
 import plotly.graph_objs as go
 
-from targeted_calibrations.forms import NRESCadenceSubmissionForm
+from nres_calibrations.forms import NRESCadenceSubmissionForm
 from tom_common.templatetags.tom_common_extras import truncate_number
 from tom_dataproducts.models import ReducedDatum
 from tom_observations.models import DynamicCadence, ObservationRecord
@@ -33,14 +33,14 @@ def inst_in_filter_data(inst_filters, inst):
 
 # TODO: NRES inclusion tags and Imager inclusion tags should probably be separated into their own modules
 # TODO: consider whether we even need this inclusion tag
-#@register.inclusion_tag('targeted_calibrations/partials/imager_manual_submission_form.html')
+#@register.inclusion_tag('nres_calibrations/partials/imager_manual_submission_form.html')
 #def imager_manual_submission_form() -> dict:
 #
 #    context = {'imager_manual_submission_form': ImagerCalibrationManualSubmissionForm()}
 #    return context
 
 
-@register.inclusion_tag('targeted_calibrations/partials/nres_targets_list.html')
+@register.inclusion_tag('nres_calibrations/partials/nres_targets_list.html')
 def nres_targets_list() -> dict:
     nres_targets = Target.objects.filter(targetextra__key='standard_type', targetextra__value__in=['RV', 'FLUX'])
     # determine "last" observation
@@ -56,7 +56,7 @@ def nres_targets_list() -> dict:
     return context
 
 
-@register.inclusion_tag('targeted_calibrations/partials/nres_cadence_list.html')
+@register.inclusion_tag('nres_calibrations/partials/nres_cadence_list.html')
 def nres_cadence_list() -> dict:
     # Annotate Dynamic Cadences with site and calibration type in order to sort by JSONField values
     nres_cadences = (DynamicCadence.objects.filter(cadence_strategy='NRESCadenceStrategy')
@@ -80,7 +80,7 @@ def nres_cadence_list() -> dict:
     return context
 
 
-@register.inclusion_tag('targeted_calibrations/partials/nres_submission_form.html')
+@register.inclusion_tag('nres_calibrations/partials/nres_submission_form.html')
 def nres_submission_form() -> dict:
     nres_cadence_form = NRESCadenceSubmissionForm()
 
@@ -88,7 +88,7 @@ def nres_submission_form() -> dict:
     return context
 
 
-@register.inclusion_tag('targeted_calibrations/partials/target_observation_list.html')
+@register.inclusion_tag('nres_calibrations/partials/target_observation_list.html')
 def target_observation_list(target) -> dict:
     observation_records = ObservationRecord.objects.filter(target=target, status='COMPLETED')
     observations = []
@@ -109,7 +109,7 @@ def target_observation_list(target) -> dict:
     return context
 
 
-@register.inclusion_tag('targeted_calibrations/partials/rv_plot.html')
+@register.inclusion_tag('nres_calibrations/partials/rv_plot.html')
 def rv_plot(target) -> dict:
     # TODO: Ensure that this works when there isn't data
     rv_data = [[], []]
@@ -139,7 +139,7 @@ def rv_average(target) -> str:
         return 'No data yet'
 
 
-@register.inclusion_tag('targeted_calibrations/partials/scalar_timeseries_for_target.html', takes_context=True)
+@register.inclusion_tag('nres_calibrations/partials/scalar_timeseries_for_target.html', takes_context=True)
 def scalar_timeseries_for_target(context, target) -> dict:
     """
     TODO: re-write documentation from copy-paste

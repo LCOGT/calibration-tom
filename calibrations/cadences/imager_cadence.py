@@ -11,17 +11,17 @@ from tom_observations.models import ObservationRecord
 from tom_targets.models import Target
 
 from configdb.configdb_connections import ConfigDBInterface
-from targeted_calibrations.models import Filter, Instrument, InstrumentFilter
+from calibrations.models import Filter, Instrument, InstrumentFilter
 
 logger = logging.getLogger(__name__)
 
 
 class ImagerCadenceForm(BaseCadenceForm):
-    instrument_code = forms.ChoiceField(required=True,
-                                        choices=[(code, code) for code in Instrument.objects.values_list('code', flat=True)])
+    instrument_code = forms.ChoiceField(required=True, choices=[])
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['instrument_code'].choices = [(code, code) for code in Instrument.objects.values_list('code', flat=True)]
         self.cadence_fields.update(['instrument_code', 'target_id'])
 
 

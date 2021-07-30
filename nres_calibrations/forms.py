@@ -31,7 +31,7 @@ class NRESCadenceSubmissionForm(forms.Form):
         )
         self.helper = FormHelper()
         self.helper.form_method = 'post'
-        self.helper.form_action = reverse('targeted_calibrations:nres_submission')
+        self.helper.form_action = reverse('nres_calibrations:nres_submission')
 
         self.helper.layout = Layout(
             Row(

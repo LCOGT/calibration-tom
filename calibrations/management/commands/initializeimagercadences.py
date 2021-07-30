@@ -3,7 +3,7 @@ import logging
 from django.core.management.base import BaseCommand
 from tom_observations.models import DynamicCadence, ObservationGroup
 
-from targeted_calibrations.models import Instrument
+from calibrations.models import Instrument
 
 logger = logging.getLogger(__name__)
 

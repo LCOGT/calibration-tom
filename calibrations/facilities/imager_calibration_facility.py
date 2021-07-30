@@ -10,7 +10,7 @@ from tom_targets.models import Target
 
 from configdb.configdb_connections import ConfigDBInterface
 from calibrations.fields import FilterMultiValueField
-from targeted_calibrations.models import Filter
+from calibrations.models import Filter
 
 logger = logging.getLogger(__name__)
 logger.level = logging.DEBUG
@@ -104,8 +104,8 @@ class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
 
         self.helper = FormHelper()
         self.helper.form_method = 'post'
-        # TODO: define 'targeted_calibrations:imager_submission'
-        # self.helper.form_action = reverse('targeted_calibrations:imager_submission')
+        # TODO: define 'nres_calibrations:imager_submission'
+        # self.helper.form_action = reverse('nres_calibrations:imager_submission')
 
         # remove (pop) unwanted fields from the self.fields
         for field_name in ['filter', 'exposure_time', 'exposure_count']:

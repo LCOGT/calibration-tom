@@ -1,4 +1,4 @@
-{% load humanize bootstrap4 targeted_calibrations_extras %}
+{% load humanize bootstrap4 nres_calibrations_extras %}
 <h4>NRES Cadences</h4>
 <style type="text/css">
 .obs_header{ background-color: #0b3053; color: white }
@@ -34,13 +34,13 @@
         <td>{{ cadence_data.cadence.active|yesno:"Active,Inactive" }}</td>
         <td>
         {% if cadence_data.cadence.active %}
-            <a href="{% url 'targeted_calibrations:cadence_toggle' cadence_data.cadence.id %}" class="btn btn-warning">||</a>
+            <a href="{% url 'nres_calibrations:cadence_toggle' cadence_data.cadence.id %}" class="btn btn-warning">||</a>
         {% else %}
-            <a href="{% url 'targeted_calibrations:cadence_toggle' cadence_data.cadence.id %}" class="btn btn-success">></a>
+            <a href="{% url 'nres_calibrations:cadence_toggle' cadence_data.cadence.id %}" class="btn btn-success">></a>
         {% endif %}
         </td>
         <td>
-            <a href="{% url 'targeted_calibrations:cadence_delete' cadence_data.cadence.id %}" class="btn btn-danger">X</a>
+            <a href="{% url 'nres_calibrations:cadence_delete' cadence_data.cadence.id %}" class="btn btn-danger">X</a>
         </td>
         <td>{{ cadence_data.cadence.modified|naturaltime }}</td>
 

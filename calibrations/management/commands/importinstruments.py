@@ -4,7 +4,7 @@ import requests
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-from targeted_calibrations.models import Filter, Instrument, InstrumentFilter
+from calibrations.models import Filter, Instrument, InstrumentFilter
 from configdb.configdb_connections import ConfigDBInterface
 
 logger = logging.getLogger(__name__)

@@ -59,7 +59,8 @@ INSTALLED_APPS = [
     'tom_catalogs',
     'tom_observations',
     'tom_dataproducts',
-    'targeted_calibrations',
+    'nres_calibrations',
+    'imager_calibrations',
     'calibrations',
 ]
 
@@ -259,7 +260,7 @@ TOM_ALERT_CLASSES = []
 
 TOM_CADENCE_STRATEGIES = [
     'calibrations.cadences.nres_cadence.NRESCadenceStrategy',
-    'calibrations.cadences.imager_cadence.ImagerCadenceStrategy'  # TODO: migrations can't be run with this present
+    'calibrations.cadences.imager_cadence.ImagerCadenceStrategy'
 ]
 
 BROKER_CREDENTIALS = {}

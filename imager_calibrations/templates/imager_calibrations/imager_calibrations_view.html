@@ -1,5 +1,5 @@
-{% extends 'targeted_calibrations/index.html' %}
-{% load targeted_calibrations_extras crispy_forms_tags %}
+{% extends 'tom_common/index.html' %}
+{% load nres_calibrations_extras crispy_forms_tags %}
 {% block content %}
 <h4>Imager Standard Calibration Manual Submission</h4>
 {% csrf_token %}
@@ -14,6 +14,6 @@
 <!--{% nres_targets_list %}-->
 <hr/>
 <p></p>
-    <a class="btn btn-primary" href="{% url 'targeted_calibrations:instrument_type_list' %}">View ConfigDB Instruments -></a>
+    <a class="btn btn-primary" href="{% url 'nres_calibrations:instrument_type_list' %}">View ConfigDB Instruments -></a>
 </p>
 {% endblock content %}

@@ -5,15 +5,12 @@ from django.contrib import messages
 from django.db import models
 from django.db.models.fields.json import KeyTextTransform
 from django.db.models.functions import Cast
-from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import DeleteView, DetailView, ListView, RedirectView, TemplateView
 from django.views.generic.edit import FormView
 
 from configdb.configdb_connections import ConfigDBInterface
-from calibrations.facilities.imager_calibration_facility import ImagerCalibrationManualSubmissionForm
-from targeted_calibrations.forms import NRESCadenceSubmissionForm
-from targeted_calibrations.models import Filter, Instrument, InstrumentFilter
+from nres_calibrations.forms import NRESCadenceSubmissionForm
 from tom_observations.models import DynamicCadence, ObservationGroup
 from tom_targets.models import Target
 
@@ -28,7 +25,7 @@ class InstrumentTypeListView(ListView):
 
     # if not overridden, the context_object_name is <model>_list (used in {% for ... in ... %} template tags
     #  context_object_name = ''
-    template_name = 'targeted_calibrations/instrument_type_list.html'
+    template_name = 'nres_calibrations/instrument_type_list.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -55,7 +52,7 @@ class InstrumentTypeListView(ListView):
 
 class InstrumentListView(ListView):
     # if not overridden, template_name is <app name>/<model name >_detail.html
-    template_name = 'targeted_calibrations/instrument_list.html'
+    template_name = 'nres_calibrations/instrument_list.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -95,7 +92,7 @@ class InstrumentListView(ListView):
 
 class InstrumentTargetListView(ListView):
     # if not overridden, template_name is <app name>/<model name >_detail.html
-    template_name = 'targeted_calibrations/instrument_target_list.html'
+    template_name = 'nres_calibrations/instrument_target_list.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -130,7 +127,7 @@ class InstrumentTargetListView(ListView):
 
 class InstrumentTargetDetailView(DetailView):
     # if not overridden, template_name is <app name>/<model name >_detail.html
-    template_name = 'targeted_calibrations/instrument_target_detail.html'
+    template_name = 'nres_calibrations/instrument_target_detail.html'
     model = Target
 
     def get_context_data(self, **kwargs):
@@ -154,59 +151,16 @@ class InstrumentTargetDetailView(DetailView):
         return context
 
 
-class ImagerCadenceView(TemplateView):
-    template_name = 'targeted_calibrations/imager_cadence_view.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        cadences = DynamicCadence.objects.filter(cadence_strategy='ImagerCadenceStrategy')
-        instrument_sites = InstrumentFilter.objects.values('instrument__site').distinct()
-        calibration_config_by_site = {}
-        for instrument_site in instrument_sites:
-            site = instrument_site['instrument__site']
-            calibration_config_by_site[site] = {}
-            calibration_config_by_site[site]['instruments'] = Instrument.objects.filter(site=site)
-            calibration_config_by_site[site]['filters'] = {}
-            available_filters = Filter.objects.all()
-            for f in available_filters:
-                calibration_config_by_site[site]['filters'][f.name] = InstrumentFilter.objects.filter(instrument__site=site, filter=f)
-
-        context['sites'] = Instrument.objects.values('site').distinct()
-        context['inst_filters'] = calibration_config_by_site
-        return context
-
-
-# TODO: finish implementation of ImagerCalibrationsSubmissionView
-class ImagerCalibrationsView(FormView):
-    template_name = 'targeted_calibrations/imager_calibrations_view.html'
-    form_class = ImagerCalibrationManualSubmissionForm
-    success_url = reverse_lazy('targeted_calibrations:imager_home')
-
-    def form_invalid(self, form):
-        messages.error(self.request, f'The imager calibration submission form is invalid: {form.errors}.')
-        logger.error(f'Invalid form submission for imager manual submission: {form.errors}.')
-        return super().form_invalid(form)
-
-    def form_valid(self, form) -> HttpResponse:
-        # This method is called when valid form data has been POSTed.
-        return super().form_valid(form)
-
-    def get_initial(self):
-        initial = super().get_initial()
-        initial.update({'facility': 'LCO Calibrations'})
-        return initial
-
-
 class NRESCalibrationsView(TemplateView):
-    template_name = 'targeted_calibrations/nres_calibrations_view.html'
+    template_name = 'nres_calibrations/nres_calibrations_view.html'
 
 
 class NRESCalibrationSubmissionView(FormView):
     form_class = NRESCadenceSubmissionForm
-    success_url = reverse_lazy('targeted_calibrations:nres_home')
+    success_url = reverse_lazy('nres_calibrations:nres_home')
     # TODO: make sure this template_name assignment makes sense
     #  (it's required for tests.TestNRESCalibrationSubmissionView)
-    template_name = 'targeted_calibrations/nres_calibrations_view.html'
+    template_name = 'nres_calibrations/nres_calibrations_view.html'
 
     def form_invalid(self, form):
         messages.error(self.request, f'The form is invalid: {form.errors}.')
@@ -292,7 +246,7 @@ class NRESCalibrationSubmissionView(FormView):
 
 
 class NRESCadenceToggleView(RedirectView):
-    pattern_name = 'targeted_calibrations:nres_home'
+    pattern_name = 'nres_calibrations:nres_home'
 
     def get_redirect_url(self, *args, **kwargs):
         cadence_id = kwargs.pop('pk', None)
@@ -304,5 +258,5 @@ class NRESCadenceToggleView(RedirectView):
 
 class NRESCadenceDeleteView(DeleteView):
     model = DynamicCadence
-    success_url = reverse_lazy('targeted_calibrations:nres_home')
-    template_name = 'targeted_calibrations/dynamiccadence_confirm_delete.html'
+    success_url = reverse_lazy('nres_calibrations:nres_home')
+    template_name = 'nres_calibrations/dynamiccadence_confirm_delete.html'

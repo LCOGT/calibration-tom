@@ -1,0 +1,12 @@
+{% extends 'nres_calibrations/index.html' %}
+{% load nres_calibrations_extras %}
+{% block content %}
+{% nres_cadence_list %}
+<hr/>
+{% nres_submission_form %}
+<hr/>
+{% nres_targets_list %}
+<p></p>
+    <a class="btn btn-primary" href="{% url 'nres_calibrations:instrument_type_list' %}">View ConfigDB Instruments -></a>
+</p>
+{% endblock content %}

@@ -1,10 +1,10 @@
-{% extends 'targeted_calibrations/index.html' %}
-<!-- targeted_calibrations/instrument_list.html -->
+{% extends 'nres_calibrations/index.html' %}
+<!-- nres_calibrations/instrument_list.html -->
 {% block content %}
 <!-- block content -->
 {% block breadcrumbs %}
     {{ block.super }} &raquo;
-    <a href="{% url 'targeted_calibrations:instrument_list' instrument_type %}">{{ instrument_type }} Instrument List</a>
+    <a href="{% url 'nres_calibrations:instrument_list' instrument_type %}">{{ instrument_type }} Instrument List</a>
 {% endblock breadcrumbs%}
 
 <h1>{{ instrument_type }} Instrument List</h1>
@@ -23,7 +23,7 @@
             {% for instrument in object_list %}
             <tr>
                 <td>
-                    <a href="{% url 'targeted_calibrations:instrument_target_list' instrument_type instrument.code %}">{{instrument.code}}</a>
+                    <a href="{% url 'nres_calibrations:instrument_target_list' instrument_type instrument.code %}">{{instrument.code}}</a>
                 </td>
                 <td>{{instrument.state}}</td>
                 <td>{{instrument.site}}</td>

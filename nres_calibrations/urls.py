@@ -1,19 +1,17 @@
 from django.urls import path
 
-from targeted_calibrations.views import ImagerCadenceView, ImagerCalibrationsView
-from targeted_calibrations.views import NRESCalibrationsView, NRESCalibrationSubmissionView
-from targeted_calibrations.views import InstrumentListView
-from targeted_calibrations.views import InstrumentTargetDetailView
-from targeted_calibrations.views import InstrumentTargetListView
-from targeted_calibrations.views import InstrumentTypeListView
-from targeted_calibrations.views import NRESCadenceToggleView, NRESCadenceDeleteView
+from nres_calibrations.views import NRESCalibrationsView, NRESCalibrationSubmissionView
+from nres_calibrations.views import InstrumentListView
+from nres_calibrations.views import InstrumentTargetDetailView
+from nres_calibrations.views import InstrumentTargetListView
+from nres_calibrations.views import InstrumentTypeListView
+from nres_calibrations.views import NRESCadenceToggleView, NRESCadenceDeleteView
 
 # app_name is required in order to specify a namespace in include()
-app_name = 'targeted_calibrations'
+app_name = 'nres_calibrations'
 
 urlpatterns = [
     path('nres', NRESCalibrationsView.as_view(), name='nres_home'),
-    path('imager', ImagerCadenceView.as_view(), name='imager_home'),
     # TODO: rename this path
     path('submit-cadence', NRESCalibrationSubmissionView.as_view(), name='nres_submission'),
     path('instruments', InstrumentTypeListView.as_view(), name='instrument_type_list'),

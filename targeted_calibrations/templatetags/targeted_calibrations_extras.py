@@ -3,6 +3,7 @@ import statistics
 
 from django import template
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.db.models.fields.json import KeyTextTransform
 from django.db.models.functions import Cast
@@ -18,6 +19,17 @@ from tom_targets.models import Target
 
 
 register = template.Library()
+
+@register.filter
+def inst_in_filter_data(inst_filters, inst):
+    try:
+        last_calibration_age = inst_filters.get(instrument__code=inst.code).get_last_calibration_age()
+        if not last_calibration_age:
+            return 'Never'
+        return last_calibration_age
+    except ObjectDoesNotExist:
+        return ''
+
 
 # TODO: NRES inclusion tags and Imager inclusion tags should probably be separated into their own modules
 # TODO: consider whether we even need this inclusion tag

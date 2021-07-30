@@ -1,0 +1,31 @@
+{% extends 'targeted_calibrations/index.html' %}
+{% load bootstrap4 targeted_calibrations_extras %}
+{% block content %}
+{% for site, site_data in inst_filters.items %}
+<div>
+    <h3>{{ site }}</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th></th>
+                {% for inst in site_data.instruments %}
+                <th>{{ inst.code }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for f, filter_data in site_data.filters.items %}
+                <tr>
+                    <td>{{ f }}</td>
+                    {% for inst in site_data.instruments %}
+                        <td>
+                            {{ filter_data|inst_in_filter_data:inst }}
+                        </td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endfor %}
+{% endblock content %}

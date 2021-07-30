@@ -13,6 +13,7 @@ from django.views.generic.edit import FormView
 from configdb.configdb_connections import ConfigDBInterface
 from calibrations.facilities.imager_calibration_facility import ImagerCalibrationManualSubmissionForm
 from targeted_calibrations.forms import NRESCadenceSubmissionForm
+from targeted_calibrations.models import Filter, Instrument, InstrumentFilter
 from tom_observations.models import DynamicCadence, ObservationGroup
 from tom_targets.models import Target
 
@@ -153,8 +154,26 @@ class InstrumentTargetDetailView(DetailView):
         return context
 
 
-#class ImagerCalibrationsView(TemplateView):
-#    template_name = 'targeted_calibrations/imager_calibrations_view.html'
+class ImagerCadenceView(TemplateView):
+    template_name = 'targeted_calibrations/imager_cadence_view.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        cadences = DynamicCadence.objects.filter(cadence_strategy='ImagerCadenceStrategy')
+        instrument_sites = InstrumentFilter.objects.values('instrument__site').distinct()
+        calibration_config_by_site = {}
+        for instrument_site in instrument_sites:
+            site = instrument_site['instrument__site']
+            calibration_config_by_site[site] = {}
+            calibration_config_by_site[site]['instruments'] = Instrument.objects.filter(site=site)
+            calibration_config_by_site[site]['filters'] = {}
+            available_filters = Filter.objects.all()
+            for f in available_filters:
+                calibration_config_by_site[site]['filters'][f.name] = InstrumentFilter.objects.filter(instrument__site=site, filter=f)
+
+        context['sites'] = Instrument.objects.values('site').distinct()
+        context['inst_filters'] = calibration_config_by_site
+        return context
 
 
 # TODO: finish implementation of ImagerCalibrationsSubmissionView

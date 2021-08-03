@@ -59,7 +59,8 @@ INSTALLED_APPS = [
     'tom_catalogs',
     'tom_observations',
     'tom_dataproducts',
-    'targeted_calibrations',
+    'nres_calibrations',
+    'imager_calibrations',
     'calibrations',
 ]
 
@@ -210,8 +211,6 @@ CACHES = {
 # the helm-chart value*.yaml file will set the value of djangoDebug (and thus DEBUG).
 # For local development and dev namespace deployment, do NOT use the AWS S3 buckets.
 if not DEBUG:
-
-
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
@@ -250,11 +249,17 @@ DATA_PROCESSORS = {
     'spectroscopy': 'tom_dataproducts.processors.spectroscopy_processor.SpectroscopyProcessor',
 }
 
-TOM_FACILITY_CLASSES = ['calibrations.lco_calibration_facility.LCOCalibrationFacility']
+TOM_FACILITY_CLASSES = [
+    'calibrations.facilities.imager_calibration_facility.ImagerCalibrationFacility',
+    'calibrations.facilities.lco_calibration_facility.LCOCalibrationFacility'
+]
 
 TOM_ALERT_CLASSES = []
 
-TOM_CADENCE_STRATEGIES = ['calibrations.cadences.nres_cadence.NRESCadenceStrategy']
+TOM_CADENCE_STRATEGIES = [
+    'calibrations.cadences.nres_cadence.NRESCadenceStrategy',
+    'calibrations.cadences.imager_cadence.ImagerCadenceStrategy'
+]
 
 BROKER_CREDENTIALS = {}
 

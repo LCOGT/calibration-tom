@@ -3,6 +3,7 @@ import logging
 import requests
 from typing import List, Dict, Any, FrozenSet, Union
 
+from deprecation import deprecated
 from django.core.cache import cache
 
 from configdb.site import SiteCode, Instrument, Readout, Location, Overheads, InstrumentInfo
@@ -35,6 +36,7 @@ class ConfigDBInterface(object):
             self.configdb_url += '/'
         self.get_site_info()
 
+    @deprecated()
     def get_site_info(self, force_update=False):
         """
         Update stored site for the ConfigDBInterface instance by doing the following:
@@ -56,6 +58,7 @@ class ConfigDBInterface(object):
         else:
             self.site_info = cached_site_info
 
+    @deprecated()
     def _get_all_sites(self) -> dict:
         """
             Function returns the current structure of sites we can use for telescope info
@@ -81,6 +84,7 @@ class ConfigDBInterface(object):
 
         return json_results['results']
 
+    @deprecated()
     def get_active_telescopes_info(self, site_code='all'):  # noqa
         """ Returns set of telescopes that are currently active """
         active_telescopes = {}
@@ -102,6 +106,7 @@ class ConfigDBInterface(object):
                                 }
         return active_telescopes
 
+    @deprecated()
     def get_instruments_types(self, site_code: str = 'all') -> list:  # noqa
         """Returns a list of InstrumentType dictionaries
         """
@@ -124,6 +129,7 @@ class ConfigDBInterface(object):
         return everything or state == InstrumentState.SCHEDULABLE or (
                 commissioning and state == InstrumentState.COMMISSIONING) or state == InstrumentState.STANDBY
 
+    @deprecated()
     def get_active_instruments_info(self, site_code: str = 'all',
                                     instrument_type: str = '',
                                     include_commissioning: bool = True,
@@ -200,6 +206,7 @@ class ConfigDBInterface(object):
                                     })
         return active_instruments
 
+    @deprecated()
     def get_matching_instrument(self,
                                 site='all',
                                 observatory='',
@@ -232,6 +239,7 @@ def _is_spectrograph(instrument_type):
     return 'NRES' in instrument_type or 'FLOYDS' in instrument_type
 
 
+@deprecated()
 def _get_instruments(site_code: SiteCode, configdb_url: str) -> List[Instrument]:
     """
     Get a list of all instruments at a site
@@ -249,6 +257,7 @@ def _get_instruments(site_code: SiteCode, configdb_url: str) -> List[Instrument]
     return instruments
 
 
+@deprecated()
 def _create_instrument(config_db_blob: Dict[str, Any]) -> Instrument:
     readouts = _get_readouts(config_db_blob['named_readout_modes'])
     default_readout = _get_default_readout(config_db_blob['default_readout_mode'], readouts)
@@ -275,6 +284,7 @@ def _create_instrument(config_db_blob: Dict[str, Any]) -> Instrument:
     )
 
 
+@deprecated()
 def _get_default_readout(default_readout_str: str, readouts: FrozenSet[Readout]) -> Union[Readout, None]:
     for readout in readouts:
         if readout.code == default_readout_str:
@@ -283,6 +293,7 @@ def _get_default_readout(default_readout_str: str, readouts: FrozenSet[Readout])
     return None
 
 
+@deprecated()
 def _get_readouts(readouts_dict: Dict[Any, Any]) -> FrozenSet[Readout]:
     readouts: List[Readout] = []
 
@@ -293,6 +304,7 @@ def _get_readouts(readouts_dict: Dict[Any, Any]) -> FrozenSet[Readout]:
     return frozenset(readouts)
 
 
+@deprecated()
 def _get_overheads(overheads_dict: Dict[Any, Any]) -> Overheads:
     return Overheads(
         overheads_dict['fixed_overhead_per_exposure'],

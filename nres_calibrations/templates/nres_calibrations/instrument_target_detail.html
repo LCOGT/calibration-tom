@@ -1,0 +1,59 @@
+{% extends 'nres_calibrations/instrument_target_list.html' %}
+<!-- nres_calibrations/instrument_target_detail.html -->
+{% load tom_common_extras targets_extras observation_extras calibrations_extras nres_calibrations_extras %}
+{% block content %}
+<!-- block content -->
+<p>
+    {% block breadcrumbs %}
+        {{ block.super }} &raquo;
+        <a href="{% url 'nres_calibrations:instrument_target_detail' instrument_type instrument_code target_id %}">{{ target.name }} Target Detail</a>
+    {% endblock breadcrumbs%}
+</p>
+
+<div style="display: inline;">
+    <h3>{{ target.name }}</h3><h5>{% standard_type target %}{% sitecode_tag instrument_code %}</h5>
+</div>
+<div class="row">
+    <div class="col-md-6">Last observed: {% last_observation_date target %}</div>
+    <div class="col-md-6">RV scatter = {% rv_average target %}</div>
+</div>
+<div class="row">
+    <div class="col-md-6">Next scheduled: {% next_observation_date target %}</div>
+    <div class="col-md-6">Number of observations: {% observation_count target 'COMPLETED' %}</div>
+</div>
+<hr/>
+
+{% rv_plot target %}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="row">
+            {% observation_plan target 'LCO' length=3 airmass_limit=2 %}
+        </div>
+        <div class="row">
+            {% target_observation_list target %}
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="col-md-12">
+            <h6>Target Info:</h6>
+            <div class="row">RA = {{ target.ra | deg_to_sexigesimal:"hms" }}</div>
+            <div class="row">Dec = {{ target.ra | deg_to_sexigesimal:"hms" }}</div>
+            <div class="row">V = {{ target.tags.v_mag }}</div>
+        </div>
+    </div>
+</div>
+
+{% comment %}
+<hr/>
+<h3>debug data:</h3>
+<p>get_context_data kwargs: {{ kwargs }}</p>
+<p>get_context_data context: {{ context }}</p>
+<p>get_context_data template_name: {{ template_name }}</p>
+<p>get_context_data instrument_type: {{ instrument_type }}</p>
+<p>get_context_data instrument_code: {{ instrument_code }}</p>
+{% endcomment %}
+
+<!-- endblock content -->
+{% endblock content %}

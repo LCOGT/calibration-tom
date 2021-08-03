@@ -1,0 +1,44 @@
+{% extends 'nres_calibrations/index.html' %}
+<!-- nres_calibrations/instrument_type_list.html -->
+{% block content %}
+<!-- block content -->
+{% block breadcrumbs %}
+    {{ block.super }} &raquo;
+    <a href="{% url 'nres_calibrations:instrument_type_list' %}">Instrument Types</a>
+{% endblock breadcrumbs%}
+
+<h1>Instrument Types</h1>
+    <div>
+        <table class='table table-striped'>
+            <thead>
+            <tr>
+                <th scope="col">Instrument Type Code</th>
+                <th scope="col">Instrument Type Name</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for instrument_type in object_list %}
+            <tr>
+                <td>
+                    <a href="{% url 'nres_calibrations:instrument_list' instrument_type.code %}">{{instrument_type.code}}</a>
+                </td>
+                <td>
+                {{instrument_type.name}}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+<hr/>
+
+
+{% comment %}
+<h3>debug info:</h3>
+<p>get_context_data kwargs: {{ kwargs }}</p>
+<p>object_list: {{ object_list }}</p>
+<p>instrument_types: {{ instrument_types }}</p>
+{% endcomment %}
+
+<!-- endblock content -->
+{% endblock content %}

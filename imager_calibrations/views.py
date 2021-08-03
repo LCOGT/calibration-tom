@@ -37,6 +37,18 @@ class ImagerCadenceView(TemplateView):
         return context
 
 
+class ImagerCadenceSiteView(TemplateView):
+    template_name = 'imager_calibrations/imager_cadence_site_view.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        site = kwargs.get('site')
+        instruments_for_site = Instrument.objects.filter(site=site)
+        context['site'] = site
+        context['instruments'] = instruments_for_site
+        return context
+
+
 # TODO: finish implementation of ImagerCalibrationsSubmissionView
 class ImagerCalibrationsView(FormView):
     template_name = 'imager_calibrations/imager_calibrations_view.html'

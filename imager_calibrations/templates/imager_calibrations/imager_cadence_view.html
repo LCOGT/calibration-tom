@@ -1,9 +1,9 @@
 {% extends 'tom_common/index.html' %}
-{% load bootstrap4 nres_calibrations_extras %}
+{% load bootstrap4 imager_calibrations_extras %}
 {% block content %}
 {% for site, site_data in inst_filters.items %}
 <div>
-    <h3>{{ site }}</h3>
+    <h3><a href="{% url 'imager_calibrations:site_detail' site %}">{{ site }}</a></h3>
     <table class="table table-striped">
         <thead>
             <tr>

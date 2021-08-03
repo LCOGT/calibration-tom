@@ -77,7 +77,7 @@ class InstrumentFilter(models.Model):
         kwargs = {'parameters__has_key': 'filter', f'parameters__{self.filter.name}__contains': True}
         last_calibration = records.order_by('-created').filter(**kwargs).first()
         if last_calibration:
-            return datetime.now() - last_calibration.scheduled_end
+            return (datetime.now() - last_calibration.scheduled_end).days
 
     def __str__(self):
         return f'{self.instrument.code} - {self.filter.name}'

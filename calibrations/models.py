@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from django.db import models
 from tom_observations.models import ObservationRecord
@@ -74,10 +74,10 @@ class InstrumentFilter(models.Model):
             records = ObservationRecord.objects.all()
         else:
             records = observation_group.observation_records.all()
-        kwargs = {'parameters__has_key': 'filter', f'parameters__{self.filter.name}__contains': True}
+        kwargs = {f'parameters__{self.filter.name}__contains': True}
         last_calibration = records.order_by('-created').filter(**kwargs).first()
         if last_calibration:
-            return (datetime.now() - last_calibration.scheduled_end).days
+            return (datetime.now(timezone.utc) - last_calibration.scheduled_end).days
 
     def __str__(self):
         return f'{self.instrument.code} - {self.filter.name}'

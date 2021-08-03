@@ -1,5 +1,5 @@
 {% extends 'tom_common/index.html' %}
-{% load bootstrap4 imager_calibrations_extras %}
+{% load static bootstrap4 imager_calibrations_extras %}
 {% block content %}
 {% for site, site_data in inst_filters.items %}
 <div>
@@ -18,7 +18,7 @@
                 <tr>
                     <td>{{ f }}</td>
                     {% for inst in site_data.instruments %}
-                        <td>
+                        <td class="{{ f|css_color:inst }}">
                             {{ filter_data|inst_in_filter_data:inst }}
                         </td>
                     {% endfor %}

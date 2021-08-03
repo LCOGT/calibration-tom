@@ -211,8 +211,6 @@ CACHES = {
 # the helm-chart value*.yaml file will set the value of djangoDebug (and thus DEBUG).
 # For local development and dev namespace deployment, do NOT use the AWS S3 buckets.
 if not DEBUG:
-
-
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 

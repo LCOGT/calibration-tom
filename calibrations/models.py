@@ -53,7 +53,7 @@ class Instrument(models.Model):
     enclosure = models.CharField(max_length=20)
     site = models.CharField(max_length=3)
     telescope = models.CharField(max_length=20)
-    type = models.CharField(max_length=50, null=True, blank=True)  # TODO: this should probably not be on instrument
+    type = models.CharField(max_length=50, null=True, blank=True)
 
     def update_from_configdb(self):
         raise NotImplementedError  # TODO

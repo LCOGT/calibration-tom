@@ -4,8 +4,6 @@ from django.db import models
 from tom_observations.models import ObservationRecord
 from tom_targets.models import Target
 
-from configdb.site import SiteCode
-
 
 # this is an extension to tom_targets.models.Target class
 #

@@ -75,7 +75,7 @@ class ImagerCadenceStrategy(ResumeCadenceAfterFailureStrategy):
                 'proposal': 'standard',  # TODO: Do something better here
                 'ipp_value': 1.05,  # TODO: is this right?
                 'instrument_type': inst.type,
-                'observation_types': 'IMAGER',
+                'observation_type': 'IMAGER',
                 'observation_mode': 'NORMAL',
                 'cadence_frequency': self.dynamic_cadence.cadence_parameters['cadence_frequency'],
                 'site': inst.site,
@@ -86,7 +86,7 @@ class ImagerCadenceStrategy(ResumeCadenceAfterFailureStrategy):
                 'max_airmass': 3,  # TODO: revisit this
                 'min_lunar_distance': 10,  # TODO: revisit this
                 'start': datetime.now(),
-                'end': datetime.now() + timedelta(hours=40),
+                'end': datetime.now() + timedelta(hours=40),  # TODO: this should be cadence frequency
                 'diffusers': 'Out',  # TODO: should we still have these?
                 'g_diffuser': 'Out',
                 'r_diffuser': 'Out',

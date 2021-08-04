@@ -47,11 +47,9 @@ class Command(BaseCommand):
 
         instruments_info = requests.get(f'{settings.CONFIGDB_URL}/instruments/').json()
         for inst in instruments_info.get('results', []):  # TODO: filter SOAR
-            print(inst['code'])
-            print(inst['instrument_type']['instrument_category'])
             if inst.get('instrument_type', {})['instrument_category'] == 'IMAGE' and inst.get('state') == 'SCHEDULABLE':  # TODO: include COMMISSIONING
                 site, enclosure, telescope, code = inst['__str__'].split('.')
-                if site == 'sor' or code == 'mc03':  # TODO: include MuSCAT, exclude guide cameras
+                if site == 'sor' or any(x in code for x in ['mc', 'xx']):  # TODO: include MuSCAT, exclude guide cameras
                     continue
                 i, _ = Instrument.objects.get_or_create(code=code, site=site, enclosure=enclosure, telescope=telescope)
                 print(i.code)

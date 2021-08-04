@@ -39,7 +39,6 @@ class LCOCalibrationForm(LCOBaseObservationForm):
         )
         self.fields['cadence_frequency'] = forms.IntegerField(required=False, help_text='in hours', initial=120)
         self.fields['ipp_value'].initial = 1.05
-        self.fields['filter'].initial = 'air'
 
         exposure_time = target.targetextra_set.filter(key='exp_time').first()
         if exposure_time:
@@ -58,13 +57,16 @@ class LCOCalibrationForm(LCOBaseObservationForm):
         self.fields['end'].widget = forms.HiddenInput()
         self.fields['end'].required = False  # Not required on the form, but must be submitted to LCO
 
-        for field_name in ['period', 'jitter']:
+        for field_name in ['period', 'jitter', 'filter']:
             self.fields.pop(field_name)
 
     def _build_instrument_config(self):
         # According to ConfigDB, there are no available optical elements for NRES instruments.
-        instrument_configs = super()._build_instrument_config()
-        instrument_configs[0]['optical_elements'].pop('filter')
+        instrument_configs = []
+        instrument_configs.append({
+            'exposure_count': self.cleaned_data['exposure_count'],
+            'exposure_time': self.cleaned_data['exposure_time']
+        })
         # instrument_configs[0]['optical_elements']['slit'] = self.cleaned_data['filter']
 
         return instrument_configs

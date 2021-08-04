@@ -1,6 +1,6 @@
 from django import template
 from django.core.exceptions import ObjectDoesNotExist
-from tom_observations.models import DynamicCadence, ObservationRecord
+from tom_observations.models import DynamicCadence
 
 from calibrations.models import InstrumentFilter
 

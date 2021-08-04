@@ -28,7 +28,9 @@ def css_color(filter_name, inst):
     except ObjectDoesNotExist:
         return ''
 
-    if calibration_age <= 6:
+    if not calibration_age:
+        return ''
+    elif calibration_age <= 6:
         return 'green'
     elif calibration_age > 6 and calibration_age < 13:
         return 'yellow'

@@ -1,102 +1,110 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from dateutil.parser import parse
 import logging
 
-from crispy_forms.layout import Column, Div, HTML, Layout, Row
 from django import forms
 from django.conf import settings
-
 from tom_observations.cadence import BaseCadenceForm
 from tom_observations.cadences.resume_cadence_after_failure import ResumeCadenceAfterFailureStrategy
 from tom_observations.facility import get_service_class
 from tom_observations.models import ObservationRecord
 from tom_targets.models import Target
 
+from configdb.configdb_connections import ConfigDBInterface
+from calibrations.models import Filter, Instrument, InstrumentFilter
+
 logger = logging.getLogger(__name__)
 
 
-class NRESCadenceForm(BaseCadenceForm):
-    # TODO: maybe initialize choices in the init in a try/except?
-    site = forms.ChoiceField(required=True, choices=[(site, site) for site in settings.NRES_SITES])
+class ImagerCadenceForm(BaseCadenceForm):
+    instrument_code = forms.ChoiceField(required=True, choices=[])
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.cadence_fields.update(['site', 'target_id'])  # self.cadence_fields is a set
-
-    def cadence_layout(self):
-        return Layout(
-                Div(
-                    HTML('<p>Dynamic cadencing parameters. Leave blank if no dynamic cadencing is desired.</p>'),
-                ),
-                Row(Column('site')),
-                Row(Column('cadence_strategy'), Column('cadence_frequency')),
-            )
+        self.fields['instrument_code'].choices = [(code, code) for code in Instrument.objects.values_list('code', flat=True)]
+        self.cadence_fields.update(['instrument_code', 'target_id'])
 
 
-class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
-    """The ResumeCadenceAfterFailureStrategy chooses when to submit the next observation based on the success of the
-    previous observation. If the observation is successful, it submits a new one on the same cadence--that is, if the
-    cadence is every three days, it will submit the next observation three days in the future. If the observations
-    fails, it will submit the next observation immediately, and follow the same decision tree based on the success
-    of the subsequent observation.
-
-    For the NRES Cadence Strategy, this will need to ensure that observations for a site are grouped together, not
-    simply per target."""
-
-    name = 'NRES Cadence Strategy'
-    description = """This strategy schedules one observation in the cadence at a time. If the observation fails, it
-                     re-submits the observation until it succeeds. If it succeeds, it submits the next observation on
-                     the same cadence."""
-    form = NRESCadenceForm
+class ImagerCadenceStrategy(ResumeCadenceAfterFailureStrategy):
+    name = 'Imager Cadence Strategy'
+    form = ImagerCadenceForm
+    config_db = ConfigDBInterface(settings.CONFIGDB_URL)
 
     def update_observation_payload(self, observation_payload):
         logger.log(msg='Updating observation_payload', level=logging.INFO)
         observation_payload['target_id'] = self.dynamic_cadence.cadence_parameters['target_id']
         return observation_payload
 
+    def update_observation_filters(self, observation_payload):
+        logger.info(msg='Updating observation_payload filters')
+        instrument = Instrument.objects.get(code=self.dynamic_cadence.cadence_parameters['instrument_code'])
+        filter_dates = []
+        for inst_filter in instrument.instrumentfilter_set.all():
+            filter_dates.append([inst_filter, inst_filter.get_last_calibration_age(self.dynamic_cadence.observation_group)])
+        filter_dates.sort(key=lambda filters: filters[1] if filters[1] is not None else datetime.now())
+        filters_by_calib_age = filter_dates[:2]  # change the name of "new filters" to "filter_by_age"
+
+        for inst_filter in instrument.instrumentfilter_set.all():
+            observation_payload[inst_filter.filter.name][0] = False
+
+        for f in filters_by_calib_age:
+            observation_payload[f[0].filter.name][0] = True
+
+        return observation_payload
+
     def run(self):
-        # gets the most recent observation because the next observation is just going to modify these parameters
         last_obs = self.dynamic_cadence.observation_group.observation_records.order_by('-created').first()
         target = Target.objects.get(pk=self.dynamic_cadence.cadence_parameters['target_id'])
 
         if last_obs is not None:
-            # Make a call to the facility to get the current status of the observation
             facility = get_service_class(last_obs.facility)()
-            facility.update_observation_status(last_obs.observation_id)  # Updates the DB record
-            last_obs.refresh_from_db()  # Gets the record updates
+            facility.update_observation_status(last_obs.observation_id)
+            last_obs.refresh_from_db()
             observation_payload = last_obs.parameters
         else:
-            # We need to create an observation for the new cadence, as we do not have a previous one to use
-            # TODO: this should be its own method, put a bunch of defaults into lco_calibration_facility.py
-            facility = get_service_class('LCO Calibrations')()
-            form_class = facility.observation_forms['NRES']
-            standard_type = target.targetextra_set.filter(key='standard_type').first().value
-            site = self.dynamic_cadence.cadence_parameters['site']
+            # create an observation for the new cadence, as we do not have a previous one to use
+            facility = get_service_class('Imager Calibrations')()
+            form_class = facility.observation_forms['IMAGER']
+
+            inst = Instrument.objects.get(code=self.dynamic_cadence.cadence_parameters['instrument_code'])
+            inst_filters = inst.instrumentfilter_set.all()
 
             form_data = {
-                'name': f'NRES {standard_type} calibration for {site.upper()}',
-                'observation_type': 'NRES',
+                'name': f'Photometric standard for {inst.code}',
+                'facility': 'Imager Calibrations',  # TODO: Do something better here
+                'proposal': 'standard',  # TODO: Do something better here
+                'ipp_value': 1.05,  # TODO: is this right?
+                'instrument_type': inst.type,
+                'observation_types': 'IMAGER',
                 'observation_mode': 'NORMAL',
-                'instrument_type': '1M0-NRES-SCICAM',
                 'cadence_frequency': self.dynamic_cadence.cadence_parameters['cadence_frequency'],
-                'site': site,
-                'target_id': self.dynamic_cadence.cadence_parameters['target_id'],
-                'facility': 'LCO Calibrations',
-                'proposal': 'ENG2017AB-001',
-                'ipp_value': 1.05,
-                'filter': 'air',
-                'exposure_time': target.targetextra_set.filter(key='exp_time').first().value,
-                'exposure_count': target.targetextra_set.filter(key='exp_count').first().value,
-                'max_airmass': 2,
-                'start': datetime.now()
+                'site': inst.site,
+                'enclosure': inst.enclosure,
+                'telescope': inst.telescope,
+                'instrument': inst.code,
+                'target_id': target.id,
+                'max_airmass': 3,  # TODO: revisit this
+                'min_lunar_distance': 10,  # TODO: revisit this
+                'start': datetime.now(),
+                'end': datetime.now() + timedelta(hours=40),
+                'diffusers': 'Out',  # TODO: should we still have these?
+                'g_diffuser': 'Out',
+                'r_diffuser': 'Out',
+                'i_diffuser': 'Out',
+                'z_diffuser': 'Out'
             }
-            min_lunar_distance = target.targetextra_set.filter(key='min_lunar_distance').first()
-            if min_lunar_distance is not None:
-                form_data['min_lunar_distance'] = min_lunar_distance.value
+
+            for f in inst_filters:
+                form_data[f'{f.filter.name}_exposure_count'] = f.filter.exposure_count
+                form_data[f'{f.filter.name}_exposure_time'] = f.filter.exposure_time
+            form_data[f'{inst_filters[0].filter.name}_selected'] = True
 
             form = form_class(data=form_data)
             if form.is_valid():
-                observation_payload = form.cleaned_data
+                # form.is_valid() produces cleaned_data, but cleaned_data modifies the structure of the data
+                # As a result, we set observation_payload to form_data, so it can be further modified before form
+                # submission (this is specifically due to the FilterMultiValueField)
+                observation_payload = form_data
             else:
                 logger.error(f'Unable to submit initial calibration for cadence {self.dynamic_cadence.id}', extra={
                     'tags': {'dynamic_cadence_id': self.dynamic_cadence.id, 'target': target.name}
@@ -120,13 +128,12 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
             observation_payload = self.advance_window(
                 observation_payload, start_keyword=start_keyword, end_keyword=end_keyword
             )
+            observation_payload = self.update_observation_filters(observation_payload)
 
         observation_payload = self.update_observation_payload(observation_payload)
 
         # Submission of the new observation to the facility
-        # obs_type = last_obs.parameters.get('observation_type')
-        # form = facility.get_form(obs_type)(observation_payload)
-        form = facility.get_form('NRES')(observation_payload)
+        form = facility.get_form('IMAGER')(observation_payload)
         logger.info(f'Observation form data to be submitted for {self.dynamic_cadence.id}: {observation_payload}',
                     extra={'tags': {
                         'dynamic_cadence_id': self.dynamic_cadence.id,

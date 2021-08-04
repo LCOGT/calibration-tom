@@ -1,0 +1,24 @@
+<div>
+    <table class="table">
+        <tbody>
+            <tbody>
+                <th>Date</th>
+                <th>Filter</th>
+                <th>Status</th>
+                {% for obsr in observation_records %}
+                <tr>
+                    <td>
+                        {{ obsr.scheduled_end }}
+                    </td>
+                    <td>
+                        {{ obsr.parameters }}
+                    </td>
+                    <td>
+                        {{ obsr.status }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </tbody>
+    </table>
+</div>

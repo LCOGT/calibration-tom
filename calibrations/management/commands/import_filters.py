@@ -2,7 +2,7 @@ import csv
 import logging
 
 from django.core.management.base import BaseCommand
-from targeted_calibrations.models import Filter
+from calibrations.models import Filter
 
 logger = logging.getLogger(__name__)
 

@@ -40,7 +40,7 @@ class ImagerCadenceStrategy(ResumeCadenceAfterFailureStrategy):
         instrument = Instrument.objects.get(code=self.dynamic_cadence.cadence_parameters['instrument_code'])
         filter_dates = []
         for inst_filter in instrument.instrumentfilter_set.all():
-            filter_dates.append([inst_filter, inst_filter.get_last_calibration_age(self.dynamic_cadence.observation_group)])
+            filter_dates.append([inst_filter, inst_filter.get_last_calibration_age(self.dynamic_cadence.observation_group)])  # TODO: explore an annotation instead
         filter_dates.sort(key=lambda filters: filters[1] if filters[1] is not None else datetime.now())
         filters_by_calib_age = filter_dates[:2]  # change the name of "new filters" to "filter_by_age"
 
@@ -54,13 +54,16 @@ class ImagerCadenceStrategy(ResumeCadenceAfterFailureStrategy):
 
     def run(self):
         last_obs = self.dynamic_cadence.observation_group.observation_records.order_by('-created').first()
-        target = Target.objects.get(pk=self.dynamic_cadence.cadence_parameters['target_id'])
+        target = Target.objects.get(pk=self.dynamic_cadence.cadence_parameters['target_id'])\
 
         if last_obs is not None:
             facility = get_service_class(last_obs.facility)()
             facility.update_observation_status(last_obs.observation_id)
             last_obs.refresh_from_db()
             observation_payload = last_obs.parameters
+
+            # Boilerplate to get necessary properties for future calls
+            start_keyword, end_keyword = facility.get_start_end_keywords()
         else:
             # create an observation for the new cadence, as we do not have a previous one to use
             facility = get_service_class('Imager Calibrations')()
@@ -105,14 +108,17 @@ class ImagerCadenceStrategy(ResumeCadenceAfterFailureStrategy):
                 # As a result, we set observation_payload to form_data, so it can be further modified before form
                 # submission (this is specifically due to the FilterMultiValueField)
                 observation_payload = form_data
+
+                # Because we're using the form_data rather than the cleaned_data, the start/end values need to be
+                # converted to strings, or errors will be raised later on
+                start_keyword, end_keyword = facility.get_start_end_keywords()
+                observation_payload[start_keyword] = observation_payload[start_keyword].isoformat()
+                observation_payload[end_keyword] = observation_payload[end_keyword].isoformat()
             else:
                 logger.error(f'Unable to submit initial calibration for cadence {self.dynamic_cadence.id}', extra={
                     'tags': {'dynamic_cadence_id': self.dynamic_cadence.id, 'target': target.name}
                 })
                 raise forms.ValidationError(f'Unable to submit initial calibration for cadence {self.dynamic_cadence}')
-
-        # Boilerplate to get necessary properties for future calls
-        start_keyword, end_keyword = facility.get_start_end_keywords()
 
         # Cadence logic
         # If the observation hasn't finished, do nothing

@@ -54,7 +54,7 @@ class ImagerCadenceStrategy(ResumeCadenceAfterFailureStrategy):
 
     def run(self):
         last_obs = self.dynamic_cadence.observation_group.observation_records.order_by('-created').first()
-        target = Target.objects.get(pk=self.dynamic_cadence.cadence_parameters['target_id'])\
+        target = Target.objects.get(pk=self.dynamic_cadence.cadence_parameters['target_id'])
 
         if last_obs is not None:
             facility = get_service_class(last_obs.facility)()

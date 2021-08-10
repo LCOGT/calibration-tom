@@ -38,6 +38,17 @@ def css_color(filter_name, inst):
         return 'red'
 
 
+@register.filter
+def submitted_filters(obsr):
+    filters = []
+
+    for key, value in obsr.parameters.items():
+        if '_selected' in key and value == True:
+            filters.append(key.strip('_selected'))
+
+    return ', '.join(filters)
+
+
 @register.inclusion_tag('imager_calibrations/partials/instrument_filters_at_site.html')
 def instrument_filter_at_site(instrument):  # TODO: make this take context
     instrument_data = {'instrument': instrument, 'filter_data': {}}

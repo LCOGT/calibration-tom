@@ -1,3 +1,4 @@
+{% load imager_calibrations_extras %}
 <div>
     <table class="table">
         <tbody>
@@ -11,7 +12,7 @@
                         {{ obsr.scheduled_end }}
                     </td>
                     <td>
-                        {{ obsr.parameters }}
+                        {{ obsr|submitted_filters }}
                     </td>
                     <td>
                         {{ obsr.status }}

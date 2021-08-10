@@ -75,8 +75,8 @@ class ImagerCadenceStrategy(ResumeCadenceAfterFailureStrategy):
             form_data = {
                 'name': f'Photometric standard for {inst.code}',
                 'facility': 'Imager Calibrations',  # TODO: Do something better here
-                'proposal': 'standard',  # TODO: Do something better here
-                'ipp_value': 1.05,  # TODO: is this right?
+                'proposal': self.dynamic_cadence.cadence_parameters.get('proposal', 'standard'),  # TODO: Do something better here
+                'ipp_value': self.dynamic_cadence.cadence_parameters.get('ipp_value', 1.05),  # TODO: is this right?
                 'instrument_type': inst.type,
                 'observation_type': 'IMAGER',
                 'observation_mode': 'NORMAL',
@@ -86,11 +86,11 @@ class ImagerCadenceStrategy(ResumeCadenceAfterFailureStrategy):
                 'telescope': inst.telescope,
                 'instrument': inst.code,
                 'target_id': target.id,
-                'max_airmass': 3,  # TODO: revisit this
-                'min_lunar_distance': 10,  # TODO: revisit this
+                'max_airmass': self.dynamic_cadence.cadence_parameters.get('max_airmass', 3),
+                'min_lunar_distance': self.dynamic_cadence.cadence_parameters.get('min_lunar_distance', 20),
                 'start': datetime.now(),
-                'end': datetime.now() + timedelta(hours=40),  # TODO: this should be cadence frequency
-                'diffusers': 'Out',  # TODO: should we still have these?
+                'end': datetime.now() + timedelta(hours=self.dynamic_cadence.cadence_parameters['cadence_frequency']),
+                'diffusers': 'Out',  # TODO: should we still have these on the facility?
                 'g_diffuser': 'Out',
                 'r_diffuser': 'Out',
                 'i_diffuser': 'Out',

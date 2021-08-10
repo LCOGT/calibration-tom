@@ -72,7 +72,7 @@ class InstrumentFilter(models.Model):
             records = ObservationRecord.objects.all()
         else:
             records = observation_group.observation_records.all()
-        kwargs = {f'parameters__{self.filter.name}__contains': True}
+        kwargs = {f'parameters__{self.filter.name}_selected__contains': True, 'status': 'COMPLETED'}
         last_calibration = records.order_by('-created').filter(**kwargs).first()
         if last_calibration and last_calibration.scheduled_end:
             return (datetime.now(timezone.utc) - last_calibration.scheduled_end).days

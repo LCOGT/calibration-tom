@@ -45,10 +45,10 @@ class ImagerCadenceStrategy(ResumeCadenceAfterFailureStrategy):
         filters_by_calib_age = filter_dates[:2]  # change the name of "new filters" to "filter_by_age"
 
         for inst_filter in instrument.instrumentfilter_set.all():
-            observation_payload[inst_filter.filter.name][0] = False
+            observation_payload[f'{inst_filter.filter.name}_selected'] = False
 
         for f in filters_by_calib_age:
-            observation_payload[f[0].filter.name][0] = True
+            observation_payload[f'{f[0].filter.name}_selected'] = True
 
         return observation_payload
 

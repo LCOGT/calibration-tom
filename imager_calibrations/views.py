@@ -20,20 +20,7 @@ class ImagerCadenceView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # cadences = DynamicCadence.objects.filter(cadence_strategy='ImagerCadenceStrategy')
-        instrument_sites = InstrumentFilter.objects.values('instrument__site').distinct()
-        calibration_config_by_site = {}
-        for instrument_site in instrument_sites:
-            site = instrument_site['instrument__site']
-            calibration_config_by_site[site] = {}
-            calibration_config_by_site[site]['instruments'] = Instrument.objects.filter(site=site)
-            calibration_config_by_site[site]['filters'] = {}
-            available_filters = Filter.objects.all()
-            for f in available_filters:
-                calibration_config_by_site[site]['filters'][f.name] = InstrumentFilter.objects.filter(instrument__site=site, filter=f)
-
-        context['sites'] = Instrument.objects.values('site').distinct()
-        context['inst_filters'] = calibration_config_by_site
+        context['sites'] = Instrument.objects.distinct('site').values_list('site', flat=True)
         return context
 
 

@@ -1,31 +1,7 @@
 {% extends 'tom_common/index.html' %}
 {% load static bootstrap4 imager_calibrations_extras %}
 {% block content %}
-{% for site, site_data in inst_filters.items %}
-<div>
-    <h3><a href="{% url 'imager_calibrations:site_detail' site %}">{{ site }}</a></h3>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th></th>
-                {% for inst in site_data.instruments %}
-                <th>{{ inst.code }}</th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for f, filter_data in site_data.filters.items %}
-                <tr>
-                    <td>{{ f }}</td>
-                    {% for inst in site_data.instruments %}
-                        <td class="{{ f|css_color:inst }}">
-                            {{ filter_data|inst_in_filter_data:inst }}
-                        </td>
-                    {% endfor %}
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+{% for site in sites %}
+    {% instrument_filter_site_table site %}
 {% endfor %}
 {% endblock content %}

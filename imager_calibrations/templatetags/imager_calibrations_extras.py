@@ -2,7 +2,7 @@ from django import template
 from django.core.exceptions import ObjectDoesNotExist
 from tom_observations.models import DynamicCadence
 
-from calibrations.models import InstrumentFilter
+from calibrations.models import Instrument, InstrumentFilter
 
 
 register = template.Library()
@@ -11,23 +11,24 @@ register = template.Library()
 @register.filter
 def inst_in_filter_data(inst_filters, inst):  # TODO: rename this
     try:
-        last_calibration_age = inst_filters.get(instrument__code=inst.code).get_last_calibration_age()
-        if not last_calibration_age:
-            return 'Never'
-        return last_calibration_age
+        if inst.code == 'fa03':
+            print(inst.code)
+            last_calibration_age = inst_filters.get(instrument__code=inst.code).get_last_calibration_age()
+            if last_calibration_age is not None:
+                print(inst_filters.get(instrument__code=inst.code).instrument.site)
+                print(last_calibration_age)
+        else:
+            print(inst.code)
+            return None
+        # if not last_calibration_age:
+        #     return 'Never'
+        # return last_calibration_age
     except ObjectDoesNotExist:
         return ''
 
 
 @register.filter
-def css_color(filter_name, inst):
-    try:
-        calibration_age = InstrumentFilter.objects.get(
-                            instrument=inst, filter__name=filter_name
-                          ).get_last_calibration_age()
-    except ObjectDoesNotExist:
-        return ''
-
+def css_color(calibration_age):
     if not calibration_age:
         return ''
     elif calibration_age <= 6:
@@ -43,10 +44,33 @@ def submitted_filters(obsr):
     filters = []
 
     for key, value in obsr.parameters.items():
-        if '_selected' in key and value == True:
+        if '_selected' in key and value is True:
             filters.append(key.strip('_selected'))
 
     return ', '.join(filters)
+
+
+@register.inclusion_tag('imager_calibrations/partials/instrument_filter_site_table.html')
+def instrument_filter_site_table(site):
+    instruments_at_site = Instrument.objects.filter(site=site)
+    filters_at_site = InstrumentFilter.objects.filter(instrument__site=site).distinct('filter__name').values_list('filter__name', flat=True)
+    inst_filter_data = {}
+    for f in filters_at_site:
+        inst_filter_data[f] = []
+
+        for inst in instruments_at_site:
+            try:
+                inst_filter_data[f].append(
+                    InstrumentFilter.objects.get(instrument__code=inst.code, filter__name=f).get_last_calibration_age()
+                )
+            except ObjectDoesNotExist:
+                inst_filter_data[f].append('')
+
+    return {
+        'site': site,
+        'instruments_at_site': instruments_at_site,
+        'inst_filter_data': inst_filter_data
+    }
 
 
 @register.inclusion_tag('imager_calibrations/partials/instrument_filters_at_site.html')

@@ -65,6 +65,10 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
             facility.update_observation_status(last_obs.observation_id)  # Updates the DB record
             last_obs.refresh_from_db()  # Gets the record updates
             observation_payload = last_obs.parameters
+
+            # These boilerplate values have changed since initial observations were submitted, so we hardcode new ones
+            observation_payload['ipp_value'] = 1.0
+            observation_payload['proposal'] = 'NRES standards'
         else:
             # We need to create an observation for the new cadence, as we do not have a previous one to use
             # TODO: this should be its own method, put a bunch of defaults into lco_calibration_facility.py
@@ -82,8 +86,8 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
                 'site': site,
                 'target_id': self.dynamic_cadence.cadence_parameters['target_id'],
                 'facility': 'LCO Calibrations',
-                'proposal': 'ENG2017AB-001',
-                'ipp_value': 1.05,
+                'proposal': 'NRES standards',
+                'ipp_value': 1.0,
                 'filter': 'air',
                 'exposure_time': target.targetextra_set.filter(key='exp_time').first().value,
                 'exposure_count': target.targetextra_set.filter(key='exp_count').first().value,

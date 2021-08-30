@@ -17,7 +17,7 @@ class LCOCalibrationForm(LCOBaseObservationForm):
     # TODO: make a proper super-class out of this LCOCalibrationForm
 
     VALID_INSTRUMENT_CODES = ['1M0-NRES-SCICAM']  # TODO: Should this be in settings.py?
-    VALID_PROPOSAL_CODES = ['ENG2017AB-001']  # TODO: Should this be in settings.py?
+    VALID_PROPOSAL_CODES = ['ENG2017AB-001', 'NRES standards']  # TODO: Should this be in settings.py?
     # This needs to exist on both the NRESCalibrationForm and the NRESCadenceForm
     site = forms.CharField(widget=forms.HiddenInput())
 

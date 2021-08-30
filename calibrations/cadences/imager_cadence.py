@@ -66,7 +66,7 @@ class ImagerCadenceStrategy(ResumeCadenceAfterFailureStrategy):
             observation_payload = last_obs.parameters
 
             # These boilerplate values have changed since initial observations were submitted, so we hardcode new ones
-            observation_payload['ipp_value'] = 1
+            observation_payload['ipp_value'] = 1.0
             observation_payload['proposal'] = 'Photometric standards'
 
             # Boilerplate to get necessary properties for future calls
@@ -83,7 +83,7 @@ class ImagerCadenceStrategy(ResumeCadenceAfterFailureStrategy):
                 'name': f'Photometric standard for {inst.code}',
                 'facility': 'Imager Calibrations',  # TODO: Do something better here
                 'proposal': self.dynamic_cadence.cadence_parameters.get('proposal', 'standard'),  # TODO: Do something better here
-                'ipp_value': self.dynamic_cadence.cadence_parameters.get('ipp_value', 1),  # TODO: is this right?
+                'ipp_value': self.dynamic_cadence.cadence_parameters.get('ipp_value', 1.0),  # TODO: is this right?
                 'instrument_type': inst.type,
                 'observation_type': 'IMAGER',
                 'observation_mode': 'NORMAL',

@@ -65,6 +65,10 @@ class ImagerCadenceStrategy(ResumeCadenceAfterFailureStrategy):
             last_obs.refresh_from_db()
             observation_payload = last_obs.parameters
 
+            # These boilerplate values have changed since initial observations were submitted, so we hardcode new ones
+            observation_payload['ipp_value'] = 1
+            observation_payload['proposal'] = 'Photometric standards'
+
             # Boilerplate to get necessary properties for future calls
             start_keyword, end_keyword = facility.get_start_end_keywords()
         else:

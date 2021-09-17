@@ -322,4 +322,5 @@ CALIBRATION_TYPES = ('NRES', 'IMAGER', 'FLOYDS')
 try:
     from local_settings import *  # noqa
 except ImportError:
+    print('local_settings not found!!!')
     pass

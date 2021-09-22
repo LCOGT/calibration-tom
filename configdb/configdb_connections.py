@@ -36,7 +36,6 @@ class ConfigDBInterface(object):
             self.configdb_url += '/'
         self.get_site_info()
 
-    @deprecated()
     def get_site_info(self, force_update=False):
         """
         Update stored site for the ConfigDBInterface instance by doing the following:
@@ -88,7 +87,7 @@ class ConfigDBInterface(object):
     def get_active_telescopes_info(self, site_code='all'):  # noqa
         """ Returns set of telescopes that are currently active """
         active_telescopes = {}
-        for site in ConfigDBInterface.site_info:
+        for site in self.site_info:
             if (site['code'] == site_code or site_code == 'all') and site['active']:
                 for enclosure in site['enclosure_set']:
                     if enclosure['active']:
@@ -106,14 +105,13 @@ class ConfigDBInterface(object):
                                 }
         return active_telescopes
 
-    @deprecated()
     def get_instruments_types(self, site_code: str = 'all') -> list:  # noqa
         """Returns a list of InstrumentType dictionaries
         """
         # TODO: define an site.InstrumentType class
         instrument_types: dict = {}  # use a dict to keep values unique; avoiding duplicates
 
-        for site in ConfigDBInterface.site_info:
+        for site in self.site_info:
             if site['code'] == site_code or site_code == 'all':
                 for enclosure in site['enclosure_set']:
                     for telescope in enclosure['telescope_set']:

@@ -58,7 +58,7 @@ def instrument_observations_at_site(instrument):  # TODO: make this take context
 
 @register.inclusion_tag('imager_calibrations/partials/imager_targets_list.html')
 def imager_targets_list() -> dict:
-    imager_targets = Target.objects.filter(targetextra__key='standard_type', targetextra__value__in=['photometric:'])
+    imager_targets = Target.objects.filter(targetextra__key='standard_type', targetextra__value__in=['photometric'])
     # determine "last" observation
     # determine "next" observation
     # annotate target with the observation

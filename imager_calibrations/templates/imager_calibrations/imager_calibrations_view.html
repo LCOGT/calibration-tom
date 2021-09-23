@@ -1,18 +1,16 @@
 {% extends 'tom_common/index.html' %}
-{% load nres_calibrations_extras crispy_forms_tags %}
+{% load imager_calibrations_extras  crispy_forms_tags %}
 {% block content %}
-<h4>Imager Standard Calibration Manual Submission</h4>
+<h4>Place imager cadence list here</h4>
+<hr>
+<h4>Imager Standard Calibration Request Form</h4>
 {% csrf_token %}
 {% crispy form %}
-<hr/>
-<h4>imager cadence list here</h4>
-<!--{% nres_cadence_list %}-->
-<hr/>
-<h4>update imager cadence form here</h4>
-<hr/>
-<h4>imager target list here</h4>
-<!--{% nres_targets_list %}-->
-<hr/>
+<hr>
+<!--<h4>update imager cadence form here</h4>-->
+<!--<hr/>-->
+{% imager_targets_list %}
+<hr>
 <p></p>
     <a class="btn btn-primary" href="{% url 'nres_calibrations:instrument_type_list' %}">View ConfigDB Instruments -></a>
 </p>

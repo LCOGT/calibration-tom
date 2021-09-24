@@ -4,6 +4,7 @@ from tom_observations.models import DynamicCadence
 
 from calibrations.models import Instrument, InstrumentFilter
 
+from tom_targets.models import Target
 
 register = template.Library()
 
@@ -89,3 +90,20 @@ def instrument_observations_at_site(instrument):  # TODO: make this take context
         return {}  # TODO: make this more robust
     records = cadence.observation_group.observation_records.order_by('-created')[:10]
     return {'observation_records': records}
+
+@register.inclusion_tag('imager_calibrations/partials/imager_targets_list.html')
+def imager_targets_list() -> dict:
+    imager_targets = Target.objects.filter(targetextra__key='standard_type', targetextra__value__in=['photometric'])
+    # determine "last" observation
+    # determine "next" observation
+    # annotate target with the observation
+    # then, in the template extract these annotation for display in list
+
+    context = {'targets_data': [{
+        'target': imager_target,
+        'prev_obs': imager_target.observationrecord_set.filter(status='COMPLETED').order_by('-scheduled_end').first(),
+        'next_obs': imager_target.observationrecord_set.filter(status='PENDING').order_by('scheduled_start').first()
+    } for imager_target in imager_targets]}
+    return context
+
+

@@ -38,11 +38,11 @@ The following nav-item list elements (li) are included in the tom_common/base.ht
 </li>
 
 <li class="nav-item {% if 'user' in request.resolver_match.url_name %}active{% endif %}">
-    <a class="nav-link" href="{% url 'nres_calibrations:nres_home' %}">NRES</a>
+    <a class="nav-link" href="{% url 'nres_calibrations:nres_home' %}"><p style="text-align:center; margin:0; padding:0">NRES</p><p style="text-align:center; margin:0; padding:0">Standards</p></a>
 </li>
 
 <li class="nav-item {% if 'user' in request.resolver_match.url_name %}active{% endif %}">
-    <a class="nav-link" href="{% url 'imager_calibrations:imager_cadences' %}">Photo. Standards</a>
+    <a class="nav-link" href="{% url 'imager_calibrations:imager_cadences' %}"><p style="text-align:center; margin:0; padding:0">Photometric</p><p style="text-align:center; margin:0; padding:0">Standards</p></a>
 </li>
 
 <li class="nav-item {% if 'user' in request.resolver_match.url_name %}active{% endif %}">

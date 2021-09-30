@@ -40,11 +40,20 @@ The following nav-item list elements (li) are included in the tom_common/base.ht
 <li class="nav-item {% if 'user' in request.resolver_match.url_name %}active{% endif %}">
     <a class="nav-link" href="{% url 'nres_calibrations:nres_home' %}"><p style="text-align:center; margin:0; padding:0">NRES</p><p style="text-align:center; margin:0; padding:0">Standards</p></a>
 </li>
-
-<li class="nav-item {% if 'user' in request.resolver_match.url_name %}active{% endif %}">
-    <a class="nav-link" href="{% url 'imager_calibrations:imager_cadences' %}"><p style="text-align:center; margin:0; padding:0">Photometric</p><p style="text-align:center; margin:0; padding:0">Standards</p></a>
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" data-toggle="dropdown"><p style="text-align:center; margin:0; padding:0">Photometric</p><p style="text-align:center; margin:0; padding:0">Standards</p></a>
+    <ul class="dropdown-menu">
+        <li class="nav-item {% if request.resolver_match.namespace == 'imager' %}active{% endif %}">
+            <a class="nav-link" href="{% url 'imager_calibrations:imager_cadences' %}" style="color:black">Cadences</a>
+        </li>
+        <li class="nav-item {% if request.resolver_match.namespace == 'imager' %}active{% endif %}">
+            <a class="nav-link" href="{% url 'imager_calibrations:imager_form' %}" style="color:black">Request Form</a>
+        </li>
+        <li class="nav-item {% if request.resolver_match.namespace == 'imager' %}active{% endif %}">
+            <a class="nav-link" href="{% url 'imager_calibrations:imager_targets' %}" style="color:black">Fields</a>
+        </li>
+    </ul>
 </li>
-
 <li class="nav-item {% if 'user' in request.resolver_match.url_name %}active{% endif %}">
     <a class="nav-link" href="{% url 'calibrations:bias_home' %}">Bias</a>
 </li>

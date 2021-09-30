@@ -1,9 +1,7 @@
 {% extends 'tom_common/index.html' %}
 {% load imager_calibrations_extras  crispy_forms_tags %}
 {% block content %}
-<h4>Place imager cadence list here</h4>
-<hr>
-<h4>Imager Standard Calibration Request Form</h4>
+<h4>Photometric Standard Observation Request Form</h4>
 {% csrf_token %}
 {% crispy form %}
 <hr>

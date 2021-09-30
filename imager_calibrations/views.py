@@ -55,3 +55,41 @@ class ImagerCalibrationsView(FormView):
         initial = super().get_initial()
         initial.update({'facility': 'LCO Calibrations'})
         return initial
+
+class ImagerCalibrationsForm(FormView):
+    template_name = 'imager_calibrations/imager_calibrations_form.html'
+    form_class = ImagerCalibrationManualSubmissionForm
+    success_url = reverse_lazy('imager_calibrations:imager_home')
+
+    def form_invalid(self, form):
+        messages.error(self.request, f'The imager calibration submission form is invalid: {form.errors}.')
+        logger.error(f'Invalid form submission for imager manual submission: {form.errors}.')
+        return super().form_invalid(form)
+
+    def form_valid(self, form) -> HttpResponse:
+        # This method is called when valid form data has been POSTed.
+        return super().form_valid(form)
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial.update({'facility': 'LCO Calibrations'})
+        return initial
+
+class ImagerCalibrationsTargets(FormView):
+    template_name = 'imager_calibrations/imager_calibrations_targets.html'
+    form_class = ImagerCalibrationManualSubmissionForm
+    success_url = reverse_lazy('imager_calibrations:imager_home')
+
+    def form_invalid(self, form):
+        messages.error(self.request, f'The imager calibration submission form is invalid: {form.errors}.')
+        logger.error(f'Invalid form submission for imager manual submission: {form.errors}.')
+        return super().form_invalid(form)
+
+    def form_valid(self, form) -> HttpResponse:
+        # This method is called when valid form data has been POSTed.
+        return super().form_valid(form)
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial.update({'facility': 'LCO Calibrations'})
+        return initial

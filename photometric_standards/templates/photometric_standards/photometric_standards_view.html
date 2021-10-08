@@ -1,0 +1,13 @@
+{% extends 'tom_common/index.html' %}
+{% load photometric_standards_extras  crispy_forms_tags %}
+{% block content %}
+<h4>Photometric Standard Observation Request Form</h4>
+{% csrf_token %}
+{% crispy form %}
+<hr>
+{% photometric_standards_targets_list %}
+<hr>
+<p></p>
+    <a class="btn btn-primary" href="{% url 'nres_calibrations:instrument_type_list' %}">View ConfigDB Instruments -></a>
+</p>
+{% endblock content %}

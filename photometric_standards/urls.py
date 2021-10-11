@@ -1,6 +1,6 @@
 from django.urls import path
 
-from photometric_standards.views import PhotometricStandardsCadenceView, PhotometricStandardsCadenceSiteView, PhotometricStandardsCalibrationsView, PhotometricStandardsCalibrationsForm, PhotometricStandardsCalibrationsTargets
+from photometric_standards.views import PhotometricStandardsCadenceView, PhotometricStandardsCadenceSiteView, PhotometricStandardsView, PhotometricStandardsForm, PhotometricStandardsTargets
 
 app_name = 'photometric_standards'
 

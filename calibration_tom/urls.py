@@ -18,7 +18,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 urlpatterns = [
     path('', include('tom_common.urls')),
-    path('imager/', include('imager_calibrations.urls', namespace='imager_calibrations')),
+    path('photometric_standards/', include('photometric_standards.urls', namespace='photometric_standards')),
     path('nres/', include('nres_calibrations.urls', namespace='nres_calibrations')),
     path('calibrations/', include('calibrations.urls')),
     # admin comes from somewhere else

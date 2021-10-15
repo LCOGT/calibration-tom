@@ -314,6 +314,8 @@ THUMBNAIL_DEFAULT_SIZE = (200, 200)
 
 CONFIGDB_URL = os.getenv('CONFIGDB_URL', 'http://configdb-dev.lco.gtn')
 
+PHOTOMETRIC_STANDARDS_SITES = ('coj', 'cpt', 'tfn', 'lsc', 'elp', 'ogg')
+
 NRES_SITES = ('cpt', 'tlv', 'lsc', 'elp')
 NRES_INSTRUMENT_TYPE = '1M0-NRES-SCICAM'
 

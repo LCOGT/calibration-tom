@@ -93,3 +93,19 @@ class PhotometricStandardsTargets(FormView):
         initial = super().get_initial()
         initial.update({'facility': 'LCO Calibrations'})
         return initial
+
+class PhotometricStandardsCadenceToggleView(RedirectView):
+    pattern_name = 'photometric_standards:photometric_standards_cadences'
+
+    def get_redirect_url(self, *args, **kwargs):
+        cadence_id = kwargs.pop('pk', None)
+        dc = DynamicCadence.objects.get(pk=cadence_id)
+        dc.active = not dc.active
+        dc.save()
+        return super().get_redirect_url(*args, **kwargs)
+
+
+class PhotometricStandardsCadenceDeleteView(DeleteView):
+    model = DynamicCadence
+    success_url = reverse_lazy('photometric_standards:photometric_standards_cadences')
+    template_name = 'photoemtric_standards/dynamiccadence_confirm_delete.html'

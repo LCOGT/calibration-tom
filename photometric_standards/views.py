@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, RedirectView, DeleteView
 from django.views.generic.edit import FormView
 from tom_observations.models import DynamicCadence
 

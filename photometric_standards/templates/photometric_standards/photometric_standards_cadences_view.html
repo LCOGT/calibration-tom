@@ -1,6 +1,8 @@
 {% extends 'tom_common/index.html' %}
 {% load static bootstrap4 photometric_standards_extras %}
 {% block content %}
+{% photometric_standards_cadences_list %}
+<hr/>
 {% for site in sites %}
     {% instrument_filter_site_table site %}
 {% endfor %}

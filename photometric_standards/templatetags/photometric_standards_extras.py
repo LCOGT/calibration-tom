@@ -1,5 +1,8 @@
 from django import template
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import models
+from django.db.models.functions import Cast
+from django.db.models.fields.json import KeyTextTransform
 from tom_observations.models import DynamicCadence
 
 from calibrations.models import Instrument, InstrumentFilter
@@ -80,6 +83,27 @@ def instrument_filter_at_site(instrument):  # TODO: make this take context
     inst_filters = InstrumentFilter.objects.filter(instrument=instrument)
     instrument_data['filter_data'] = inst_filters
     return instrument_data
+
+
+@register.inclusion_tag('photometric_standards/partials/photometric_standards_cadences_list.html')
+def photometric_standards_cadences_list() -> dict:
+    photometric_standards_cadences = (DynamicCadence.objects.filter(cadence_strategy='PhotometricStandardsCadenceStrategy')
+                                      .annotate(site=Cast(KeyTextTransform('site','cadence_parameters'),models.TextField()))
+                                      .annotate(target_id=Cast(KeyTextTransform('target_id', 'cadence_parameters'),models.TextField()))
+                                      .order_by('site', '-target_id'))
+
+    cadences_data = []
+    for cadence in photometric_standards_cadences:
+        target = Target.objects.filter(pk=cadence.target_id).first()
+        cadences_data.append({
+            'cadence': cadence,
+            'target': target,
+            'prev_obs': cadence.observation_group.observation_records.filter(status='COMPLETED').order_by('-scheduled_end').first(),
+            'next_obs': cadence.observation_group.observation_records.filter(status='PENDING').order_by('scheduled_start').first()
+            })
+
+    context = {'cadences_data': cadences_data}
+    return context
 
 
 @register.inclusion_tag('photometric_standards/partials/instrument_observations_at_site.html')

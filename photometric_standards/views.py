@@ -15,8 +15,12 @@ from calibrations.models import Filter, Instrument, InstrumentFilter
 logger = logging.getLogger(__name__)
 
 
-class PhotometricStandardsCadenceView(TemplateView):
-    template_name = 'photometric_standards/photometric_standards_cadence_view.html'
+class PhotometricStandardsCadencesList(TemplateView):
+    template_name = 'photometric_standards/photometric_standards_cadences_list.html'
+
+    
+class PhotometricStandardsCadencesView(TemplateView):
+    template_name = 'photometric_standards/photometric_standards_cadences_view.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -24,8 +28,8 @@ class PhotometricStandardsCadenceView(TemplateView):
         return context
 
 
-class PhotometricStandardsCadenceSiteView(TemplateView):
-    template_name = 'photometric_standards/photometric_standards_cadence_site_view.html'
+class PhotometricStandardsCadencesSiteView(TemplateView):
+    template_name = 'photometric_standards/photometric_standards_cadences_site_view.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -108,4 +112,4 @@ class PhotometricStandardsCadenceToggleView(RedirectView):
 class PhotometricStandardsCadenceDeleteView(DeleteView):
     model = DynamicCadence
     success_url = reverse_lazy('photometric_standards:photometric_standards_cadences')
-    template_name = 'photoemtric_standards/dynamiccadence_confirm_delete.html'
+    template_name = 'photometric_standards/dynamiccadence_confirm_delete.html'

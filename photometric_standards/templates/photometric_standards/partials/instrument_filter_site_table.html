@@ -1,0 +1,29 @@
+{% load static bootstrap4 photometric_standards_extras %}
+<h3><a href="{% url 'photometric_standards:site_detail' site %}">{{ site }}</a></h3>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th></th>
+            {% for inst in instruments_at_site %}
+            <th>{{ inst.code }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for filter_name, filter_data in inst_filter_data.items %}
+            <tr>
+                <td>{{ filter_name }}</td>
+                {% for calibration_age in filter_data %}
+                    {% if calibration_age is not None and calibration_age != '' %}
+                        <td class="{{ calibration_age|css_color }}">{{ calibration_age }} days</td>
+                    {% elif calibration_age is None %}
+                        <td>{{ calibration_age }}</td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    </td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

@@ -8,15 +8,15 @@ from django.views.generic import TemplateView
 from django.views.generic.edit import FormView
 from tom_observations.models import DynamicCadence
 
-from calibrations.facilities.imager_calibration_facility import ImagerCalibrationManualSubmissionForm
+from calibrations.facilities.photometric_standards_facility import PhotometricStandardsManualSubmissionForm
 from calibrations.models import Filter, Instrument, InstrumentFilter
 
 
 logger = logging.getLogger(__name__)
 
 
-class ImagerCadenceView(TemplateView):
-    template_name = 'imager_calibrations/imager_cadence_view.html'
+class PhotometricStandardsCadenceView(TemplateView):
+    template_name = 'photometric_standards/photometric_standards_cadence_view.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -24,8 +24,8 @@ class ImagerCadenceView(TemplateView):
         return context
 
 
-class ImagerCadenceSiteView(TemplateView):
-    template_name = 'imager_calibrations/imager_cadence_site_view.html'
+class PhotometricStandardsCadenceSiteView(TemplateView):
+    template_name = 'photometric_standards/photometric_standards_cadence_site_view.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -36,15 +36,15 @@ class ImagerCadenceSiteView(TemplateView):
         return context
 
 
-# TODO: finish implementation of ImagerCalibrationsSubmissionView
-class ImagerCalibrationsView(FormView):
-    template_name = 'imager_calibrations/imager_calibrations_view.html'
-    form_class = ImagerCalibrationManualSubmissionForm
-    success_url = reverse_lazy('imager_calibrations:imager_home')
+# TODO: finish implementation of PhotometricStandardsSubmissionView
+class PhotometricStandardsView(FormView):
+    template_name = 'photometric_standards/photometric_standards_view.html'
+    form_class = PhotometricStandardsManualSubmissionForm
+    success_url = reverse_lazy('photometric_standards:photometric_standards_home')
 
     def form_invalid(self, form):
-        messages.error(self.request, f'The imager calibration submission form is invalid: {form.errors}.')
-        logger.error(f'Invalid form submission for imager manual submission: {form.errors}.')
+        messages.error(self.request, f'The photometric standards submission form is invalid: {form.errors}.')
+        logger.error(f'Invalid form submission for photometric standards manual submission: {form.errors}.')
         return super().form_invalid(form)
 
     def form_valid(self, form) -> HttpResponse:
@@ -56,14 +56,14 @@ class ImagerCalibrationsView(FormView):
         initial.update({'facility': 'LCO Calibrations'})
         return initial
 
-class ImagerCalibrationsForm(FormView):
-    template_name = 'imager_calibrations/imager_calibrations_form.html'
-    form_class = ImagerCalibrationManualSubmissionForm
-    success_url = reverse_lazy('imager_calibrations:imager_home')
+class PhotometricStandardsForm(FormView):
+    template_name = 'photometric_standards/photometric_standards_form.html'
+    form_class = PhotometricStandardsManualSubmissionForm
+    success_url = reverse_lazy('photometric_standards:photometric_standards_home')
 
     def form_invalid(self, form):
-        messages.error(self.request, f'The imager calibration submission form is invalid: {form.errors}.')
-        logger.error(f'Invalid form submission for imager manual submission: {form.errors}.')
+        messages.error(self.request, f'The photometric standards submission form is invalid: {form.errors}.')
+        logger.error(f'Invalid form submission for photometric standards manual submission: {form.errors}.')
         return super().form_invalid(form)
 
     def form_valid(self, form) -> HttpResponse:
@@ -75,14 +75,14 @@ class ImagerCalibrationsForm(FormView):
         initial.update({'facility': 'LCO Calibrations'})
         return initial
 
-class ImagerCalibrationsTargets(FormView):
-    template_name = 'imager_calibrations/imager_calibrations_targets.html'
-    form_class = ImagerCalibrationManualSubmissionForm
-    success_url = reverse_lazy('imager_calibrations:imager_home')
+class PhotometricStandardsTargets(FormView):
+    template_name = 'photometric_standards/photometric_standards_targets.html'
+    form_class = PhotometricStandardsManualSubmissionForm
+    success_url = reverse_lazy('photometric_standards:photometric_standards_home')
 
     def form_invalid(self, form):
-        messages.error(self.request, f'The imager calibration submission form is invalid: {form.errors}.')
-        logger.error(f'Invalid form submission for imager manual submission: {form.errors}.')
+        messages.error(self.request, f'The photometric standards submission form is invalid: {form.errors}.')
+        logger.error(f'Invalid form submission for photometric standards manual submission: {form.errors}.')
         return super().form_invalid(form)
 
     def form_valid(self, form) -> HttpResponse:

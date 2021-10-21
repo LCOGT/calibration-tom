@@ -51,7 +51,7 @@ def submitted_filters(obsr):
     return ', '.join(filters)
 
 
-@register.inclusion_tag('imager_calibrations/partials/instrument_filter_site_table.html')
+@register.inclusion_tag('photometric_standards/partials/instrument_filter_site_table.html')
 def instrument_filter_site_table(site):
     instruments_at_site = Instrument.objects.filter(site=site)
     filters_at_site = InstrumentFilter.objects.filter(instrument__site=site).distinct('filter__name').values_list('filter__name', flat=True)
@@ -74,7 +74,7 @@ def instrument_filter_site_table(site):
     }
 
 
-@register.inclusion_tag('imager_calibrations/partials/instrument_filters_at_site.html')
+@register.inclusion_tag('photometric_standards/partials/instrument_filters_at_site.html')
 def instrument_filter_at_site(instrument):  # TODO: make this take context
     instrument_data = {'instrument': instrument, 'filter_data': {}}
     inst_filters = InstrumentFilter.objects.filter(instrument=instrument)
@@ -82,7 +82,7 @@ def instrument_filter_at_site(instrument):  # TODO: make this take context
     return instrument_data
 
 
-@register.inclusion_tag('imager_calibrations/partials/instrument_observations_at_site.html')
+@register.inclusion_tag('photometric_standards/partials/instrument_observations_at_site.html')
 def instrument_observations_at_site(instrument):  # TODO: make this take context
     try:
         cadence = DynamicCadence.objects.get(active=True, cadence_parameters__instrument_code=instrument.code)
@@ -91,19 +91,19 @@ def instrument_observations_at_site(instrument):  # TODO: make this take context
     records = cadence.observation_group.observation_records.order_by('-created')[:10]
     return {'observation_records': records}
 
-@register.inclusion_tag('imager_calibrations/partials/imager_targets_list.html')
-def imager_targets_list() -> dict:
-    imager_targets = Target.objects.filter(targetextra__key='standard_type', targetextra__value__in=['photometric'])
+@register.inclusion_tag('photometric_standards/partials/photometric_standards_targets_list.html')
+def photometric_standards_targets_list() -> dict:
+    photometric_standards_targets = Target.objects.filter(targetextra__key='standard_type', targetextra__value__in=['photometric'])
     # determine "last" observation
     # determine "next" observation
     # annotate target with the observation
     # then, in the template extract these annotation for display in list
 
     context = {'targets_data': [{
-        'target': imager_target,
-        'prev_obs': imager_target.observationrecord_set.filter(status='COMPLETED').order_by('-scheduled_end').first(),
-        'next_obs': imager_target.observationrecord_set.filter(status='PENDING').order_by('scheduled_start').first()
-    } for imager_target in imager_targets]}
+        'target': photometric_standards_target,
+        'prev_obs': photometric_standards_target.observationrecord_set.filter(status='COMPLETED').order_by('-scheduled_end').first(),
+        'next_obs': photometric_standards_target.observationrecord_set.filter(status='PENDING').order_by('scheduled_start').first()
+    } for photometric_standards_target in photometric_standards_targets]}
     return context
 
 

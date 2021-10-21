@@ -60,19 +60,22 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
         target = Target.objects.get(pk=self.dynamic_cadence.cadence_parameters['target_id'])
 
         if last_obs is not None:
+            # this is an on-going (not first-run) cadence
             facility = get_service_class(last_obs.facility)()
             facility.update_observation_status(last_obs.observation_id)
             last_obs.refresh_from_db()
-            observation_payload = last_obs.parameters
+            observation_payload = last_obs.parameters  # copy the parameters from the previous observation
 
             # These boilerplate values have changed since initial observations were submitted, so we hardcode new ones
+            # (i.e. the parameters copied from the previous observation may be out of date. So, overwrite with new, correct values)
+            # TODO: these values should not be hardcoded into the source code!!
             observation_payload['ipp_value'] = 1.0
-            observation_payload['proposal'] = 'Photometric standards'
+            observation_payload['proposal'] = 'Photometric standards'  # see lco.py::LCOBaseForm.proposal_choices()
 
             # Boilerplate to get necessary properties for future calls
             start_keyword, end_keyword = facility.get_start_end_keywords()
         else:
-            # create an observation for the new cadence, as we do not have a previous one to use
+            # create an observation for the new cadence, as we do not have a previous one to copy parameters from
             facility = get_service_class('Photometric Standards')()
             form_class = facility.observation_forms['PHOTOMETRIC_STANDARDS']
 
@@ -82,7 +85,8 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
             form_data = {
                 'name': f'Photometric standard for {inst.code}',
                 'facility': 'Photometric Standards',  # TODO: Do something better here
-                'proposal': self.dynamic_cadence.cadence_parameters.get('proposal', 'standard'),  # TODO: Do something better here
+                # This proposal must match a 'current' proposal returned by lco.py::LCOBaseForm.proposal_choices()
+                'proposal': self.dynamic_cadence.cadence_parameters.get('proposal', 'Photometric standards'),  # TODO: Do something better here
                 'ipp_value': self.dynamic_cadence.cadence_parameters.get('ipp_value', 1.0),  # TODO: is this right?
                 'instrument_type': inst.type,
                 'observation_type': 'PHOTOMETRIC_STANDARDS',

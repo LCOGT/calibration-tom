@@ -89,6 +89,7 @@ def instrument_filter_at_site(instrument):  # TODO: make this take context
 def photometric_standards_cadences_list() -> dict:
     photometric_standards_cadences = (DynamicCadence.objects.filter(cadence_strategy='PhotometricStandardsCadenceStrategy')
                                       .annotate(site=Cast(KeyTextTransform('site','cadence_parameters'),models.TextField()))
+                                      .annotate(code=Cast(KeyTextTransform('code','cadence_parameters'),models.TextField()))
                                       .annotate(target_id=Cast(KeyTextTransform('target_id', 'cadence_parameters'),models.TextField()))
                                       .order_by('site', '-target_id'))
 
@@ -97,6 +98,7 @@ def photometric_standards_cadences_list() -> dict:
         target = Target.objects.filter(pk=cadence.target_id).first()
         cadences_data.append({
             'cadence': cadence,
+            'instrument': code,
             'target': target,
             'prev_obs': cadence.observation_group.observation_records.filter(status='COMPLETED').order_by('-scheduled_end').first(),
             'next_obs': cadence.observation_group.observation_records.filter(status='PENDING').order_by('scheduled_start').first()

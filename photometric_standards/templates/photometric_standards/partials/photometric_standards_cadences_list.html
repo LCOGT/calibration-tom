@@ -1,4 +1,4 @@
-{% load humanize bootstrap4 nres_calibrations_extras %}
+{% load humanize bootstrap4 photometric_standards_extras %}
 <h4>Photometric Standards Cadences</h4>
 <style type="text/css">
 .obs_header{ background-color: #0b3053; color: white }
@@ -12,7 +12,7 @@
         </tr>
         <tr>
             <th>Site</th>
-            <th>Calibration Type</th>
+            <th>Code</th>
             <th>Frequency</th>
             <th>Target</th>
             <th>Active</th>
@@ -28,19 +28,19 @@
     {% for cadence_data in cadences_data %}
     <tr>
         <td>{{ cadence_data.cadence.cadence_parameters.site }}</td>
-        <td>{{ cadence_data.standard_type }}</td>
+        <td>{{ cadence_data.cadence.cadence_parameters.code }}</td>
         <td>{{ cadence_data.cadence.cadence_parameters.cadence_frequency }}</td>
         <td>{{ cadence_data.target.name }}</td>
         <td>{{ cadence_data.cadence.active|yesno:"Active,Inactive" }}</td>
         <td>
         {% if cadence_data.cadence.active %}
-            <a href="{% url 'nres_calibrations:cadence_toggle' cadence_data.cadence.id %}" class="btn btn-warning">||</a>
+            <a href="{% url 'photometric_standards:cadence_toggle' cadence_data.cadence.id %}" class="btn btn-warning">||</a>
         {% else %}
-            <a href="{% url 'nres_calibrations:cadence_toggle' cadence_data.cadence.id %}" class="btn btn-success">></a>
+            <a href="{% url 'photometric_standards:cadence_toggle' cadence_data.cadence.id %}" class="btn btn-success">></a>
         {% endif %}
         </td>
         <td>
-            <a href="{% url 'nres_calibrations:cadence_delete' cadence_data.cadence.id %}" class="btn btn-danger">X</a>
+            <a href="{% url 'photometric_standards:cadence_delete' cadence_data.cadence.id %}" class="btn btn-danger">X</a>
         </td>
         <td>{{ cadence_data.cadence.modified|naturaltime }}</td>
 
@@ -81,7 +81,7 @@
     {% empty %}
     <tr>
         <td colspan="6">
-            No NRES targets available.
+            No targets available.
         </td>
     </tr>
     {% endfor %}

@@ -1,0 +1,88 @@
+{% load humanize bootstrap4 photometric_standards_extras %}
+<h4>Photometric Standards Cadences</h4>
+<style type="text/css">
+.obs_header{ background-color: #0b3053; color: white }
+.cadence_header{ background-color: lightgrey}
+</style>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th colspan="7" class="cadence_header">Cadence Information</th>
+            <th colspan="3" class="obs_header">Observation Information</th>
+        </tr>
+        <tr>
+            <!--<th>Site</th>-->
+            <th>Code</th>
+            <th>Frequency</th>
+            <th>Target</th>
+            <th>Active</th>
+            <th></th>
+            <th></th>
+            <th>Last modified</th>
+            <th>Latest Observation</th>
+            <th>Next Observation</th>
+            <th>History</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for cadence_data in cadences_data %}
+    <tr>
+        <!--<td>{{ cadence_data.cadence.cadence_parameters.site }}</td>-->
+        <td>{{ cadence_data.cadence.cadence_parameters.instrument_code }}</td>
+        <td>{{ cadence_data.cadence.cadence_parameters.cadence_frequency }}</td>
+        <td>{{ cadence_data.target.name }}</td>
+        <td>{{ cadence_data.cadence.active|yesno:"Active,Inactive" }}</td>
+        <td>
+        {% if cadence_data.cadence.active %}
+            <a href="{% url 'photometric_standards:cadence_toggle' cadence_data.cadence.id %}" class="btn btn-warning">||</a>
+        {% else %}
+            <a href="{% url 'photometric_standards:cadence_toggle' cadence_data.cadence.id %}" class="btn btn-success">></a>
+        {% endif %}
+        </td>
+        <td>
+            <a href="{% url 'photometric_standards:cadence_delete' cadence_data.cadence.id %}" class="btn btn-danger">X</a>
+        </td>
+        <td>{{ cadence_data.cadence.modified|naturaltime }}</td>
+
+            {% if cadence_data.prev_obs %}
+            <td>
+                <a href="{% url 'observations:detail' cadence_data.prev_obs.id %}">
+                    {{ cadence_data.prev_obs.target }} at {{ cadence_data.prev_obs.scheduled_start }}
+                </a>
+            </td>
+        {% else %}
+            <td>None</td>
+        {% endif %}
+        {% if cadence_data.next_obs %}
+            <td>
+                {% if cadence_data.next_obs.scheduled_start %}
+                <a href="{% url 'observations:detail' cadence_data.next_obs.id %}">
+                    {{ cadence_data.next_obs.target }} at {{ cadence_data.next_obs.scheduled_start }}
+                </a>
+                {% else %}
+                <a href="{% url 'observations:detail' cadence_data.next_obs.id %}">
+                    {{ cadence_data.next_obs.target }}, not scheduled
+                </a>
+                {% endif %}
+            </td>
+        {% else %}
+            <td>
+                <a href="http://logs.lco.gtn/app/kibana#/discover?_g=(refreshInterval:(display:Off,pause:!f,value:0),time:(from:now-24h,mode:quick,to:now))&_a=(columns:!(target,message),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'logstash-*',key:kubernetes.container_name,negate:!f,type:phrase,value:calibration-tom),query:(match:(kubernetes.container_name:(query:calibration-tom,type:phrase)))),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'logstash-*',key:kubernetes.pod_name,negate:!f,type:phrase,value:runcadencestrategies),query:(match:(kubernetes.pod_name:(query:runcadencestrategies,type:phrase))))),index:'logstash-*',interval:auto,query:(match_all:()),sort:!('@timestamp',desc))">
+                    Observation not submitted
+                </a>
+            </td>
+        {% endif %}
+        <td>
+            <a href="https://observe.lco.global/?name={{ cadence_data.cadence.observation_group.name }}&limit=20">
+                {{ cadence_data.cadence.observation_group.name }}
+            </a>
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="6">
+            No targets available.
+        </td>
+    </tr>
+    {% endfor %}
+</table>

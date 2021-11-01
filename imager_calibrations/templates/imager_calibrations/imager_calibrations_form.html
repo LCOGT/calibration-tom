@@ -1,8 +1,0 @@
-{% extends 'tom_common/index.html' %}
-{% load imager_calibrations_extras  crispy_forms_tags %}
-{% block content %}
-<h4>Photometric Standard Observation Request Form</h4>
-{% csrf_token %}
-{% crispy form %}
-<hr>
-{% endblock content %}

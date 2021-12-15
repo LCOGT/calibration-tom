@@ -151,6 +151,7 @@ class PhotometricStandardsManualSubmissionForm(LCOBaseObservationForm):
 
     def _build_configuration(self):
         configuration = super()._build_configuration()
+        configuration['type'] = 'STANDARD' # Photometric standard observation must have obstype STANDARD
         configuration['instrument_name'] = self.cleaned_data['instrument']
         configuration['min_lunar_distance'] = self.cleaned_data['min_lunar_distance']  # TODO: this needs to go into tom_base
 

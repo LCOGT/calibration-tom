@@ -45,6 +45,11 @@ class PhotometricStandardsManualSubmissionForm(LCOBaseObservationForm):
 
     instrument = forms.ChoiceField(choices=[])  # TODO: populate instrument choices from telescope choice
 
+    exposure_time_g = forms.FloatField(min_value=0, label='g')
+    exposure_time_r = forms.FloatField(min_value=0, label='r')
+    exposure_time_i = forms.FloatField(min_value=0, label='i')
+    exposure_time_z = forms.FloatField(min_value=0, label='z')
+
     diffusers = forms.ChoiceField(choices=[('In', 'In'), ('Out', 'Out')])
     g_diffuser = forms.ChoiceField(choices=[('In', 'In'), ('Out', 'Out')])
     r_diffuser = forms.ChoiceField(choices=[('In', 'In'), ('Out', 'Out')])
@@ -172,21 +177,56 @@ class PhotometricStandardsManualSubmissionForm(LCOBaseObservationForm):
         constructed into a list of instrument configurations as per the LCO API. This method constructs the
         instrument configurations in the appropriate manner.
         """
+        print("instrument = ", self.cleaned_data['instrument'])
+        print("instrument_type = ", self.cleaned_data['instrument_type'])
+        print("exposure_time_g")
+        print("exposure_time_g = ", self.cleaned_data['exposure_time_g'])
+        print("exposure_time_r")
         instrument_config = []
-        # TODO: this list of filters must be consistent with the FilterMultiValueField instances
-        #  created in the __init__
-        for f in self.optical_filters():
-            # check that field is selected (zero-th index is the checkbox)
-            if self.cleaned_data.get(f.name)[0]:
-                instrument_config.append({
-                    # this indexing must be consistent with the field order in decompress
-                    'exposure_count': self.cleaned_data[f.name][1],
-                    'exposure_time': self.cleaned_data[f.name][2],
-                    'optical_elements': {
-                        'filter': f.name
-                    }
-                })
-
+        if self.cleaned_data['instrument_type'] != '2M0-SCICAM-MUSCAT':
+            # TODO: this list of filters must be consistent with the FilterMultiValueField instances
+            #  created in the __init__
+            for f in self.optical_filters():
+                # check that field is selected (zero-th index is the checkbox)
+                if self.cleaned_data.get(f.name)[0]:
+                    instrument_config.append({
+                        # this indexing must be consistent with the field order in decompress
+                        'exposure_count': self.cleaned_data[f.name][1],
+                        'exposure_time': self.cleaned_data[f.name][2],
+                        'optical_elements': {
+                            'filter': f.name
+                        }
+                    })
+        else:
+            extra_params = {
+                'exposure_mode' : 'SYNCHRONOUS',
+                'exposure_time_g' : self.cleaned_data['exposure_time_g'],
+                'exposure_time_r' : self.cleaned_data['exposure_time_r'],
+                'exposure_time_i' : self.cleaned_data['exposure_time_i'],
+                'exposure_time_z' : self.cleaned_data['exposure_time_z'],
+                "offset_ra": 0,
+                "offset_dec": 0,
+                "defocus": 0
+            }
+            instrument_config.append({
+                'exposure_count' : self.cleaned_data['exposure_count'][1],
+                'exposure_time' : max(
+                    exposure_time_g,
+                    exposure_time_r,
+                    exposure_time_i,
+                    exposure_time_z
+                ),
+                "mode": "MUSCAT_FAST",
+                "rotator_mode": "",
+                'optical_elements': {
+                    'diffuser_g_position': self.cleaned_data['diffuser_g_position'],
+                    'diffuser_r_position': self.cleaned_data['diffuser_r_position'],
+                    'diffuser_i_position': self.cleaned_data['diffuser_i_position'],
+                    'diffuser_z_position': self.cleaned_data['diffuser_z_position']
+                },
+                "extra_params": extra_params,
+            })
+        print("instrument_config = ", instrument_config)
         return instrument_config
 
     def _build_location(self):

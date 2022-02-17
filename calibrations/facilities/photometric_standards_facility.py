@@ -170,9 +170,10 @@ class PhotometricStandardsManualSubmissionForm(LCOBaseObservationForm):
 
         This method constructs the instrument configurations in the appropriate manner.
         """
-        #print("instrument = ", self.cleaned_data['instrument'])
-        #print("instrument_type = ", self.cleaned_data['instrument_type'])
-        #print("exposure_time_g = ", self.cleaned_data['g'][2])
+        
+        #logger.debug(f"instrument = {self.cleaned_data['instrument']}\n") 
+        #logger.debug(f"instrument_type = {self.cleaned_data['instrument_type']}\n")
+        #logger.debug(f"exposure_time_g = {self.cleaned_data['g'][2]}\n")
         instrument_config = []
         if self.cleaned_data['instrument_type'] != '2M0-SCICAM-MUSCAT':
             # TODO: this list of filters must be consistent with the FilterMultiValueField instances
@@ -217,7 +218,7 @@ class PhotometricStandardsManualSubmissionForm(LCOBaseObservationForm):
                 },
                 "extra_params": extra_params,
             })
-        #print("instrument_config = ", instrument_config)
+        #logger.debug(f'instrument_config = {instrument_config}\n')
         return instrument_config
 
     def _build_location(self):

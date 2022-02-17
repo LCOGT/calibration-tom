@@ -60,7 +60,7 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
         target = Target.objects.get(pk=self.dynamic_cadence.cadence_parameters['target_id'])
 
         if last_obs is not None:
-            #print("Progress flag: last_obs is not None")
+            #logger.debug(f'Progress flag: last_obs is not None\n')
             #This is an on-going (not first-run) cadence
             facility = get_service_class(last_obs.facility)()
             
@@ -87,7 +87,7 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
 
             inst = Instrument.objects.get(code=self.dynamic_cadence.cadence_parameters['instrument_code'])
             inst_filters = inst.instrumentfilter_set.all()
-            #print("inst_filters = ",inst_filters) # e.g. mc03 - g
+            #logger.debug(f'inst_filters = {inst_filters}\n') # e.g. mc03 - g
 
             form_data = {
                 'name': f'Photometric standard for {inst.code}',
@@ -117,19 +117,19 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
 
             for f in inst_filters:
                 form_data[f'{f.filter.name}_exposure_count'] = f.filter.exposure_count
-                #print("exposure count = ",form_data[f'{f.filter.name}_exposure_count'])
+                #logger.debug(f"exposure count = {form_data[f'{f.filter.name}_exposure_count']}\n")
                 form_data[f'{f.filter.name}_exposure_time'] = f.filter.exposure_time
-                #print("exposure time = ",form_data[f'{f.filter.name}_exposure_time'])
+                #logger.debug(f"exposure time = {form_data[f'{f.filter.name}_exposure_time']}\n")
             form_data[f'{inst_filters[0].filter.name}_selected'] = True
 
-            #print("Progress flag: Form data created.")
+            #logger.debug(f'Progress flag: Form data created.\n')
 
-            #print("Progress flag: Here's the first form validity check")
+            #logger.debug(f"Progress flag: Here's the first form validity check\n")
             form = form_class(data=form_data)
-            #print("form = ",form)
+            
             form.is_valid()
             if form.is_valid():
-                #print("Progress flag: Passed first form validity check")
+                #logger.debug(f"Progress flag: Passed first form validity check\n")
                 # form.is_valid() produces cleaned_data, but cleaned_data modifies the structure of the data
                 # As a result, we set observation_payload to form_data, so it can be further modified before form
                 # submission (this is specifically due to the FilterMultiValueField)
@@ -149,10 +149,10 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
         # Cadence logic
         # If the observation hasn't finished, do nothing
         if last_obs is not None and not last_obs.terminal:
-            #print("Progress flag: last_obs is still not None")
+            #logger.debug(f"Progress flag: last_obs is still not None\n")
             return
         elif last_obs is not None and last_obs.failed:  # If the observation failed
-            #print("Progress flag: last_obs is really still not None")
+            #logger.debug(f"Progress flag: last_obs is really still not None\n")
             # Submit next observation to be taken as soon as possible with the same window length
             window_length = parse(observation_payload[end_keyword]) - parse(observation_payload[start_keyword])
             observation_payload[start_keyword] = datetime.now().isoformat()
@@ -168,16 +168,16 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
 
         # Submission of the new observation to the facility
         form = facility.get_form('PHOTOMETRIC_STANDARDS')(observation_payload)
-        #print("observation_payload 1 =", observation_payload) 
+        #logger.debug(f"observation_payload 1 = {observation_payload}\n")
         logger.info(f'Observation form data to be submitted for {self.dynamic_cadence.id}: {observation_payload}',
                     extra={'tags': {
                         'dynamic_cadence_id': self.dynamic_cadence.id,
                         'target': target.name
                     }})
-        #print("Progress flag: Here's the second form validity check")
-        #print("Valid2? = ", form.is_valid())        
+        #logger.debug(f"Progress flag: Here's the second form validity check\n")
+        # logger.debug(f'Valid2? = {form.is_valid()}\n')        
         if form.is_valid():
-            #print("Progress flag: Passed second form validity check")
+            #logger.debug(f"Progress flag: Passed second form valiity check\n")
             observation_ids = facility.submit_observation(form.observation_payload())
         else:
             logger.error(f'Unable to submit next cadenced observation: {form.errors}',

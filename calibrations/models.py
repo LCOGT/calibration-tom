@@ -49,10 +49,10 @@ class Filter(models.Model):
 
 
 class Instrument(models.Model):
-    code = models.CharField(max_length=20, unique=True)
-    enclosure = models.CharField(max_length=20)
     site = models.CharField(max_length=3)
+    enclosure = models.CharField(max_length=20)
     telescope = models.CharField(max_length=20)
+    code = models.CharField(max_length=20, unique=True)
     type = models.CharField(max_length=50, null=True, blank=True)
 
     def update_from_configdb(self):

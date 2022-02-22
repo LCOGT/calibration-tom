@@ -61,7 +61,7 @@ INSTALLED_APPS = [
     'tom_observations',
     'tom_dataproducts',
     'nres_calibrations',
-    'imager_calibrations',
+    'photometric_standards',
     'calibrations',
 ]
 
@@ -251,7 +251,7 @@ DATA_PROCESSORS = {
 }
 
 TOM_FACILITY_CLASSES = [
-    'calibrations.facilities.imager_calibration_facility.ImagerCalibrationFacility',
+    'calibrations.facilities.photometric_standards_facility.PhotometricStandardsFacility',
     'calibrations.facilities.lco_calibration_facility.LCOCalibrationFacility'
 ]
 
@@ -259,7 +259,7 @@ TOM_ALERT_CLASSES = []
 
 TOM_CADENCE_STRATEGIES = [
     'calibrations.cadences.nres_cadence.NRESCadenceStrategy',
-    'calibrations.cadences.imager_cadence.ImagerCadenceStrategy'
+    'calibrations.cadences.photometric_standards_cadence.PhotometricStandardsCadenceStrategy'
 ]
 
 BROKER_CREDENTIALS = {}
@@ -315,12 +315,15 @@ THUMBNAIL_DEFAULT_SIZE = (200, 200)
 
 CONFIGDB_URL = os.getenv('CONFIGDB_URL', 'http://configdb-dev.lco.gtn')
 
+PHOTOMETRIC_STANDARDS_SITES = ('coj', 'cpt', 'tfn', 'lsc', 'elp', 'ogg')
+
 NRES_SITES = ('cpt', 'tlv', 'lsc', 'elp')
 NRES_INSTRUMENT_TYPE = '1M0-NRES-SCICAM'
 
-CALIBRATION_TYPES = ('NRES', 'IMAGER', 'FLOYDS')
+CALIBRATION_TYPES = ('NRES', 'PHOTOMETRIC_STANDARDS', 'FLOYDS')
 
 try:
     from local_settings import *  # noqa
 except ImportError:
+    print('local_settings not found!!!')
     pass

@@ -16,7 +16,7 @@ from calibrations.models import Filter, Instrument, InstrumentFilter
 logger = logging.getLogger(__name__)
 
 
-class ImagerCadenceForm(BaseCadenceForm):
+class PhotometricStandardsCadenceForm(BaseCadenceForm):
     instrument_code = forms.ChoiceField(required=True, choices=[])
 
     def __init__(self, *args, **kwargs):
@@ -25,9 +25,9 @@ class ImagerCadenceForm(BaseCadenceForm):
         self.cadence_fields.update(['instrument_code', 'target_id'])
 
 
-class ImagerCadenceStrategy(ResumeCadenceAfterFailureStrategy):
-    name = 'Imager Cadence Strategy'
-    form = ImagerCadenceForm
+class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
+    name = 'Photometric Standards Cadence Strategy'
+    form = PhotometricStandardsCadenceForm
     config_db = ConfigDBInterface(settings.CONFIGDB_URL)
 
     def update_observation_payload(self, observation_payload):
@@ -60,32 +60,36 @@ class ImagerCadenceStrategy(ResumeCadenceAfterFailureStrategy):
         target = Target.objects.get(pk=self.dynamic_cadence.cadence_parameters['target_id'])
 
         if last_obs is not None:
+            # this is an on-going (not first-run) cadence
             facility = get_service_class(last_obs.facility)()
             facility.update_observation_status(last_obs.observation_id)
             last_obs.refresh_from_db()
-            observation_payload = last_obs.parameters
+            observation_payload = last_obs.parameters  # copy the parameters from the previous observation
 
             # These boilerplate values have changed since initial observations were submitted, so we hardcode new ones
+            # (i.e. the parameters copied from the previous observation may be out of date. So, overwrite with new, correct values)
+            # TODO: these values should not be hardcoded into the source code!!
             observation_payload['ipp_value'] = 1.0
-            observation_payload['proposal'] = 'Photometric standards'
+            observation_payload['proposal'] = 'Photometric standards'  # see lco.py::LCOBaseForm.proposal_choices()
 
             # Boilerplate to get necessary properties for future calls
             start_keyword, end_keyword = facility.get_start_end_keywords()
         else:
-            # create an observation for the new cadence, as we do not have a previous one to use
-            facility = get_service_class('Imager Calibrations')()
-            form_class = facility.observation_forms['IMAGER']
+            # create an observation for the new cadence, as we do not have a previous one to copy parameters from
+            facility = get_service_class('Photometric Standards')()
+            form_class = facility.observation_forms['PHOTOMETRIC_STANDARDS']
 
             inst = Instrument.objects.get(code=self.dynamic_cadence.cadence_parameters['instrument_code'])
             inst_filters = inst.instrumentfilter_set.all()
 
             form_data = {
                 'name': f'Photometric standard for {inst.code}',
-                'facility': 'Imager Calibrations',  # TODO: Do something better here
-                'proposal': self.dynamic_cadence.cadence_parameters.get('proposal', 'standard'),  # TODO: Do something better here
+                'facility': 'Photometric Standards',  # TODO: Do something better here
+                # This proposal must match a 'current' proposal returned by lco.py::LCOBaseForm.proposal_choices()
+                'proposal': self.dynamic_cadence.cadence_parameters.get('proposal', 'Photometric standards'),  # TODO: Do something better here
                 'ipp_value': self.dynamic_cadence.cadence_parameters.get('ipp_value', 1.0),  # TODO: is this right?
                 'instrument_type': inst.type,
-                'observation_type': 'IMAGER',
+                'observation_type': 'PHOTOMETRIC_STANDARDS',
                 'observation_mode': 'NORMAL',
                 'cadence_frequency': self.dynamic_cadence.cadence_parameters['cadence_frequency'],
                 'site': inst.site,
@@ -146,7 +150,7 @@ class ImagerCadenceStrategy(ResumeCadenceAfterFailureStrategy):
         observation_payload = self.update_observation_payload(observation_payload)
 
         # Submission of the new observation to the facility
-        form = facility.get_form('IMAGER')(observation_payload)
+        form = facility.get_form('PHOTOMETRIC_STANDARDS')(observation_payload)
         logger.info(f'Observation form data to be submitted for {self.dynamic_cadence.id}: {observation_payload}',
                     extra={'tags': {
                         'dynamic_cadence_id': self.dynamic_cadence.id,

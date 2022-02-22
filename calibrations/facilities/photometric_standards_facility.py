@@ -28,7 +28,7 @@ def enum_to_choices(emum_class) -> [()]:
 # TODO: what's the deal with Diffusers?
 #    (diffusers are part of MUSCat, I think) (from David: this is correct)
 # TODO: according to doc, photometric standards window is open at a certain time--should this be pre-filled into the form?
-class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
+class PhotometricStandardsManualSubmissionForm(LCOBaseObservationForm):
     """Form for submission of photometric standards to imagers.
 
     This is loosely based on the options to the calibration_util submit_calibration script.
@@ -151,6 +151,7 @@ class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
 
     def _build_configuration(self):
         configuration = super()._build_configuration()
+        configuration['type'] = 'STANDARD' # Photometric standard observation must have obstype STANDARD
         configuration['instrument_name'] = self.cleaned_data['instrument']
         configuration['min_lunar_distance'] = self.cleaned_data['min_lunar_distance']  # TODO: this needs to go into tom_base
 
@@ -226,12 +227,12 @@ class ImagerCalibrationManualSubmissionForm(LCOBaseObservationForm):
     #     return valid
 
 
-class ImagerCalibrationFacility(LCOFacility):
-    name = 'Imager Calibrations'
+class PhotometricStandardsFacility(LCOFacility):
+    name = 'Photometric Standards'
 
     # these key-values appear as tabs in the Observations/create template
     observation_forms = {
-        'IMAGER': ImagerCalibrationManualSubmissionForm,
+        'PHOTOMETRIC_STANDARDS': PhotometricStandardsManualSubmissionForm,
     }
 
     EXCLUDED_FRAME_SUFFIXES = (

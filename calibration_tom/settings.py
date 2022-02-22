@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'django_filters',
     'django_gravatar',
     'rest_framework',
+    'rest_framework.authtoken',
     'tom_targets',
     'tom_alerts',
     'tom_catalogs',

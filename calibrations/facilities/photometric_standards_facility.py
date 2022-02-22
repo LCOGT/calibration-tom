@@ -169,25 +169,57 @@ class PhotometricStandardsManualSubmissionForm(LCOBaseObservationForm):
               }
           }
 
-        Because the photometric sequence form provides form inputs for 10 different filters, they must be
-        constructed into a list of instrument configurations as per the LCO API. This method constructs the
-        instrument configurations in the appropriate manner.
+        This method constructs the instrument configurations in the appropriate manner.
         """
+        
+        #logger.debug(f"instrument = {self.cleaned_data['instrument']}\n") 
+        #logger.debug(f"instrument_type = {self.cleaned_data['instrument_type']}\n")
+        #logger.debug(f"exposure_time_g = {self.cleaned_data['g'][2]}\n")
         instrument_config = []
-        # TODO: this list of filters must be consistent with the FilterMultiValueField instances
-        #  created in the __init__
-        for f in self.optical_filters():
-            # check that field is selected (zero-th index is the checkbox)
-            if self.cleaned_data.get(f.name)[0]:
-                instrument_config.append({
-                    # this indexing must be consistent with the field order in decompress
-                    'exposure_count': self.cleaned_data[f.name][1],
-                    'exposure_time': self.cleaned_data[f.name][2],
-                    'optical_elements': {
-                        'filter': f.name
-                    }
-                })
-
+        if self.cleaned_data['instrument_type'] != '2M0-SCICAM-MUSCAT':
+            # TODO: this list of filters must be consistent with the FilterMultiValueField instances
+            #  created in the __init__
+            for f in self.optical_filters():
+                # check that field is selected (zero-th index is the checkbox)
+                if self.cleaned_data.get(f.name)[0]:
+                    instrument_config.append({
+                        # this indexing must be consistent with the field order in decompress
+                        'exposure_count': self.cleaned_data[f.name][1],
+                        'exposure_time': self.cleaned_data[f.name][2],
+                        'optical_elements': {
+                            'filter': f.name
+                        }
+                    })
+        else:
+            extra_params = {
+                'exposure_mode' : 'SYNCHRONOUS',
+                'exposure_time_g' : self.cleaned_data['g'][2],
+                'exposure_time_r' : self.cleaned_data['r'][2],
+                'exposure_time_i' : self.cleaned_data['i'][2],
+                'exposure_time_z' : self.cleaned_data['z'][2],
+                "offset_ra": 0,
+                "offset_dec": 0,
+                "defocus": 0
+            }
+            instrument_config.append({
+                'exposure_count' : self.cleaned_data['g'][1],
+                'exposure_time' : max(
+                    self.cleaned_data['g'][2],
+                    self.cleaned_data['r'][2],
+                    self.cleaned_data['i'][2],
+                    self.cleaned_data['z'][2]
+                ),
+                "mode": "MUSCAT_FAST",
+                "rotator_mode": "",
+                'optical_elements': {
+                    'diffuser_g_position': "out",
+                    'diffuser_r_position': "out",
+                    'diffuser_i_position': "out",
+                    'diffuser_z_position': "out"
+                },
+                "extra_params": extra_params,
+            })
+        #logger.debug(f'instrument_config = {instrument_config}\n')
         return instrument_config
 
     def _build_location(self):

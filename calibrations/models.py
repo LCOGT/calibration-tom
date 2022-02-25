@@ -20,7 +20,7 @@ def target_is_in_season(self, query_date: datetime = datetime.utcnow()):
     # Adjust months in case of end of year roll-over
     if seasonal_start > seasonal_end:
         seasonal_end += 12
-        if current_month != seasonal_start:
+        if current_month < seasonal_start:
             current_month += 12
 
     return seasonal_start <= current_month <= seasonal_end

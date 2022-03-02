@@ -15,8 +15,15 @@ def target_is_in_season(self, query_date: datetime = datetime.utcnow()):
     """
     seasonal_start = int(self.targetextra_set.filter(key='seasonal_start').first().float_value)
     seasonal_end = int(self.targetextra_set.filter(key='seasonal_end').first().float_value)
+    current_month = query_date.month
 
-    return seasonal_start <= query_date.month <= seasonal_end
+    # Adjust months in case of end of year roll-over
+    if seasonal_start > seasonal_end:
+        seasonal_end += 12
+        if current_month < seasonal_start:
+            current_month += 12
+
+    return seasonal_start <= current_month <= seasonal_end
 setattr(Target, 'target_is_in_season', target_is_in_season)  # noqa - add method to Target class
 
 

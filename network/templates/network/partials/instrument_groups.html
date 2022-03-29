@@ -1,0 +1,37 @@
+<h4>Groups</h4>
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Total Instruments</th>
+        <th>Remove</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for group in groups %}
+    <tr>
+        <td>
+            <form action="{% url 'instruments:list' %}" method="GET">
+                <button type="submit" class="btn btn-link" name="instrumentlist__name" value="{{group.id}}" title="View Group">{{ group.name }}</button>
+            </form> 
+        </td>
+        <td valign="middle">{{ group.instruments.count }}</td>        
+        <td>
+            <form action="{% url 'instruments:add-remove-grouping' %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" title="Remove Instrument from Group" class="btn btn-danger" name="remove">Remove</button>
+                <input type="hidden" name="selected-instrument" value="{{ instrument.id }}"/>
+                <input type="hidden" name="grouping" value="{{ group.id }}"/>
+            </form>
+        </td>
+        
+    </tr>
+    {% empty %}
+    <tr>
+        <td>Not in any groups</td>
+        <td></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+

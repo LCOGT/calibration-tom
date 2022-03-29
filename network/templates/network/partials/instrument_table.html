@@ -1,0 +1,42 @@
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <th><input type="checkbox" id="selectPage" onClick="select_page(this, {{ instruments|length }})" /></th>
+      <th>Name</th>
+      <th>Type</th>
+      {% if request.GET.type == 'SIDEREAL' %}
+      <th>RA</th>
+      <th>Dec</th>
+      {% endif %}
+      <th>Observations</th>
+      <th>Saved Data</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for instrument in instruments %}
+    <tr>
+      <td><input type="checkbox" name="selected-instrument" value="{{ instrument.id }}" onClick="single_select()"/></td>
+      <td>
+          <a href="{% url 'instruments:detail' instrument.id %}" title="{{ instrument.name }}">{{ instrument.names|join:", " }}</a>
+      </td>
+      <td>{{ instrument.get_type_display }}</td>
+      {% if request.GET.type == 'SIDEREAL' %}
+      <td>{{ instrument.ra }}</td>
+      <td>{{ instrument.dec }}</td>
+      {% endif %}
+      <td>{{ instrument.observationrecord_set.count }}</td>
+      <td>{{ instrument.dataproduct_set.count }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="5">
+        {% if instrument_count == 0 and not query_string %}
+        No instruments yet. You might want to <a href="{% url 'network:create' %}">create an instrument manually</a>
+        {% else %}
+        No instruments match those filters.
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>

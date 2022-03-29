@@ -17,7 +17,7 @@ from django.urls import path, include
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 urlpatterns = [
-    path('network/', include('tom_network.urls', namespace='network')),
+    path('network/', include('network.urls', namespace='network')),
     path('', include('tom_common.urls')),
     path('photometric_standards/', include('photometric_standards.urls', namespace='photometric_standards')),
     path('nres/', include('nres_calibrations.urls', namespace='nres_calibrations')),

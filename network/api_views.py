@@ -4,7 +4,7 @@ from guardian.shortcuts import get_objects_for_user
 from rest_framework.mixins import DestroyModelMixin, RetrieveModelMixin
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
-from tom_network.serializers import InstrumentSerializer
+from network.serializers import InstrumentSerializer
 
 
 permissions_map = {  # TODO: Use the built-in DRF mapping or just switch to DRF entirely.
@@ -43,6 +43,6 @@ class InstrumentViewSet(ModelViewSet, PermissionListMixin):
 
     def get_queryset(self):
         permission_required = permissions_map.get(self.request.method)
-        return get_objects_for_user(self.request.user, f'tom_network.{permission_required}')
+        return get_objects_for_user(self.request.user, f'network.{permission_required}')
 
 

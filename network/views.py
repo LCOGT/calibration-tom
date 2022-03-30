@@ -34,12 +34,12 @@ from tom_observations.models import ObservationTemplate
 
 from configdb.configdb_connections import ConfigDBInterface
 
-from tom_network.groups import (
+from network.groups import (
     add_all_to_group, add_selected_to_group, remove_all_from_group, remove_selected_from_group,
     move_all_to_group, move_selected_to_group
 )
-from tom_network.models import Instrument, InstrumentList
-from tom_network.utils import import_instruments, export_instruments
+from network.models import Instrument, InstrumentList
+from network.utils import import_instruments, export_instruments
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +51,7 @@ class InstrumentListView(ListView):
     """
     View for listing instruments in the Calibration-TOM. Requires authorization.
     """
-    template_name = 'tom_network/instrument_list.html'
+    template_name = 'network/instrument_list.html'
     #paginate_by = 25
     #strict = False
     model = Instrument
@@ -122,7 +122,7 @@ class InstrumentDetailView(DetailView):
     """
     View that handles the display of the instrument details. Requires authorization.
     """
-    #permission_required = 'tom_network.view_instrument'
+    #permission_required = 'network.view_instrument'
     model = Instrument
 
     def get_context_data(self, *args, **kwargs):
@@ -165,7 +165,7 @@ class InstrumentDetailView(DetailView):
                               'Did you know updating observation statuses can be automated? Learn how in'
                               '<a href=https://tom-toolkit.readthedocs.io/en/stable/customization/automation.html>'
                               ' the docs.</a>'))
-            return redirect(reverse('tom_network:detail', args=(instrument_id,)))
+            return redirect(reverse('network:detail', args=(instrument_id,)))
 
         obs_template_form = ApplyObservationTemplateForm(request.GET)
         if obs_template_form.is_valid():
@@ -185,7 +185,7 @@ class InstrumentDetailView(DetailView):
 #    """
 #    View that handles the import of instruments from a CSV. Requires authentication.
 #    """
-#    template_name = 'tom_network/instrument_import.html'
+#    template_name = 'network/instrument_import.html'
 
 #    def post(self, request):
 #        """
@@ -203,7 +203,7 @@ class InstrumentDetailView(DetailView):
 #        )
 #        for error in result['errors']:
 #            messages.warning(request, error)
-#        return redirect(reverse('tom_network:list'))
+#        return redirect(reverse('network:list'))
 
 
 #class InstrumentExportView(InstrumentListView):
@@ -249,10 +249,10 @@ class InstrumentDetailView(DetailView):
 #            group_object = InstrumentList.objects.get(pk=group_id)
 #        except Exception as e:
 #            messages.error(request, 'Cannot find the instrument group with id={}; {}'.format(group_id, e))
-#            return redirect(reverse('tom_network:list') + '?' + query_string)
-#        if not request.user.has_perm('tom_network.view_instrumentlist', group_object):
+#            return redirect(reverse('network:list') + '?' + query_string)
+#        if not request.user.has_perm('network.view_instrumentlist', group_object):
 #            messages.error(request, 'Permission denied.')
-#            return redirect(reverse('tom_network:list') + '?' + query_string)
+#            return redirect(reverse('network:list') + '?' + query_string)
 
 #        if 'add' in request.POST:
 #            if request.POST.get('isSelectAll') == 'True':
@@ -273,15 +273,15 @@ class InstrumentDetailView(DetailView):
 #                instrument_ids = request.POST.getlist('selected-instrument')
 #                move_selected_to_group(instrument_ids, group_object, request)
 
-#        return redirect(reverse('tom_network:list') + '?' + query_string)
+#        return redirect(reverse('network:list') + '?' + query_string)
 
 
 class InstrumentGroupView(PermissionListMixin, ListView):
     """
     View that handles the display of ``InstrumentList`` objects, also known as instrument groups. Requires authorization.
     """
-    #permission_required = 'tom_network.view_instrumentlist'
-    template_name = 'tom_network/instrument_group.html'
+    #permission_required = 'network.view_instrumentlist'
+    template_name = 'network/instrument_group.html'
     model = InstrumentList
     paginate_by = 25
 
@@ -290,7 +290,7 @@ class InstrumentGroupView(PermissionListMixin, ListView):
 #    """
 #    View that handles the deletion of ``InstrumentList`` objects, also known as instrument groups. Requires authorization.
 #    """
-#    permission_required = 'tom_network.delete_instrumentlist'
+#    permission_required = 'network.delete_instrumentlist'
 #    model = InstrumentList
 #    success_url = reverse_lazy('instruments:instrumentgroup')
 
@@ -312,7 +312,7 @@ class InstrumentGroupView(PermissionListMixin, ListView):
 #        """
 #        obj = form.save(commit=False)
 #        obj.save()
-#        assign_perm('tom_network.view_instrumentlist', self.request.user, obj)
-#        assign_perm('tom_network.change_instrumentlist', self.request.user, obj)
-#        assign_perm('tom_network.delete_instrumentlist', self.request.user, obj)
+#        assign_perm('network.view_instrumentlist', self.request.user, obj)
+#        assign_perm('network.change_instrumentlist', self.request.user, obj)
+#        assign_perm('network.delete_instrumentlist', self.request.user, obj)
 #        return super().form_valid(form)

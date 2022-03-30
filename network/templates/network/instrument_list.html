@@ -19,13 +19,19 @@
             </tr>
             </thead>
             <tbody>
-            {% for instrument in object_list %}
+            {% for instrument_index in object_list %}
             <tr>
                 <td>
-                    <a href="{% url 'network:instrument_list' %}">{{instrument.code}}</a>
+                    <a href="{% url 'network:instrument_list' %}">{{instrument_index.instrument}}</a>
                 </td>
                 <td>
-                {{instrument.instrument_type}}
+                    <a href="{% url 'network:instrument_list' %}">{{instrument_index.code}}</a>
+                </td>
+                <td>
+                    {{instrument_index.instrument_type}}
+                </td>
+                <td>
+                    {{instrument_index.state}}
                 </td>
             </tr>
             {% endfor %}

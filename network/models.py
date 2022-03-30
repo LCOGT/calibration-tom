@@ -39,6 +39,9 @@ class Instrument(models.Model):
     :param code: The code identifying the instrument, e.g. kb95
     :type code: str
 
+    :param instrument: The full site.enc.tel.inst designation of the instrument, e.g. coj.clma.0m4a.kb24
+    :type code: str
+
     :param instrument_type: The type of instrument, e.g. 0m4-SciCam-SBIG.
     :type instrument_type: str
 
@@ -62,6 +65,10 @@ class Instrument(models.Model):
 
     code = models.CharField(
         max_length=10, default='', verbose_name='Code', help_text='The code identifying the instrument e.g. kb95',
+        unique=True
+    )
+    instrument = models.CharField(
+        max_length=100, default='', verbose_name='Instrument', help_text='The full site.enclosure.telescope.code designation of the instrument e.g. coj.clma.0m4a.kb24',
         unique=True
     )
     instrument_type = models.CharField(

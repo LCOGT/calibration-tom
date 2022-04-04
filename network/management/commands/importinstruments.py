@@ -54,7 +54,7 @@ class Command(BaseCommand):
                 print(inst['__str__'])
                 site, enclosure, telescope, code = inst['__str__'].split('.')
                 instrument = inst['__str__']
-                instrument_type = inst['instrument_type']['code']
+                instrument_type = inst['instrument_type']['code'].upper() # ConfigDB uses mixed-case. Calibration-TOM uses ALL CAPS.
                 print(instrument_type)
                 state = inst['state']
                 if site == 'sor' or any(x in code for x in ['mc', 'xx']):  # TODO: include MuSCAT, exclude guide cameras
@@ -62,7 +62,7 @@ class Command(BaseCommand):
                 # instrument_fields values come from Calibration-TOM database
                 #instrument_fields, _ = Instrument.objects.get_or_create(code=code, site=site, enclosure=enclosure, telescope=telescope)
                 #instrument_fields, _ = Instrument.objects.get_or_create(code=code, instrument=instrument, instrument_type=instrument_type, state=state)
-                instrument_fields, _ = Instrument.objects.get_or_create(code=code)
+                instrument_fields, _ = Instrument.objects.get_or_create(code=code) # Use only the code to retrieve the Instrument from Calibration-TOM
                 instrument_fields.instrument = instrument
                 instrument_fields.instrument_type = instrument_type
                 instrument_fields.state = state

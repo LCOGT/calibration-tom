@@ -9,7 +9,7 @@ from django.urls import reverse
 
 from tom_common.hooks import run_hook
 
-INSTRUMENT_FIELDS = ['code', 'instrument_type', 'state']
+INSTRUMENT_FIELDS = ['code', 'instrument', 'instrument_type', 'state']
 
 INSTRUMENT_TYPES = (
     ('2M0-SCICAM-SPECTRAL', '2m0-SciCam-Spectral'),

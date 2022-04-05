@@ -51,11 +51,11 @@ class Command(BaseCommand):
             # TODO: filter SOAR
             if inst.get('instrument_type', {})['instrument_category'] == 'IMAGE' and inst.get('state') == 'SCHEDULABLE':  # get info for schedulable imagers
                 # TODO: include COMMISSIONING
-                print(inst['__str__'])
+                #print(inst['__str__'])
                 site, enclosure, telescope, code = inst['__str__'].split('.')
                 instrument = inst['__str__']
                 instrument_type = inst['instrument_type']['code'].upper() # ConfigDB uses mixed-case. Calibration-TOM uses ALL CAPS.
-                print(instrument_type)
+                #print(instrument_type)
                 state = inst['state']
                 if site == 'sor' or any(x in code for x in ['mc', 'xx']):  # TODO: include MuSCAT, exclude guide cameras
                     continue

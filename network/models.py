@@ -28,10 +28,6 @@ INSTRUMENT_STATES = (
     ('SCHEDULABLE', 'Schedulable')
 )
 
-#TELESCOPE_FIELDS = INSTRUMENT_FIELDS + [
-#    'telescope', 'lat', 'lon'
-#]
-
 class Instrument(models.Model):
     """
     Class representing an instrument in the Calibration-TOM
@@ -133,7 +129,6 @@ class Instrument(models.Model):
         :returns: Dictionary of key/value pairs representing instrument attributes
         :rtype: dict
         """
-        #fields_for_type = TELESCOPE_FIELDS
         fields_for_type = INSTRUMENT_FIELDS
 
         return model_to_dict(self, fields=fields_for_type)

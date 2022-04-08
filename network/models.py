@@ -81,7 +81,7 @@ class Instrument(models.Model):
         auto_now_add=True, verbose_name='Time Created', help_text='The time at which the instrument was created in the Calibration-TOM.'
     )
     modified = models.DateTimeField(
-        auto_now=True, verbose_name='Last Modified', help_text='The time at which the instrument was changed in the Calibration-TOM.'
+        auto_now=True, verbose_name='Last Modified', help_text='The time at which the instrument was last updated in the Calibration-TOM.'
     )
     #telescope = models.CharField(
     #    max_length=100, default='', verbose_name='Telescope', help_text='The telescope on which the instrument is installed, e.g. coj.doma.1m0a.'

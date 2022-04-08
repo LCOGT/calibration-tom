@@ -48,7 +48,7 @@ configdb = ConfigDBInterface(settings.CONFIGDB_URL)  # TODO: rethink how we stor
 
 class InstrumentListView(ListView):
     """
-    View for listing instruments in the Calibration-TOM. Requires authorization.
+    View for listing instruments in the Calibration-TOM.
     """
     template_name = 'network/instrument_list.html'
     #paginate_by = 25
@@ -119,7 +119,7 @@ class InstrumentListView(ListView):
 
 class InstrumentDetailView(DetailView):
     """
-    View that handles the display of the instrument details. Requires authorization.
+    View that handles the display of the instrument details.
     """
     #permission_required = 'network.view_instrument'
     model = Instrument
@@ -182,7 +182,7 @@ class InstrumentDetailView(DetailView):
 
 class InstrumentGroupView(PermissionListMixin, ListView):
     """
-    View that handles the display of ``InstrumentList`` objects, also known as instrument groups. Requires authorization.
+    View that handles the display of ``InstrumentList`` objects, also known as instrument groups.
     """
     #permission_required = 'network.view_instrumentlist'
     template_name = 'network/instrument_group.html'

@@ -315,7 +315,8 @@ THUMBNAIL_MAX_SIZE = (0, 0)
 
 THUMBNAIL_DEFAULT_SIZE = (200, 200)
 
-CONFIGDB_URL = os.getenv('CONFIGDB_URL', 'http://configdb-dev.lco.gtn')
+#CONFIGDB_URL = os.getenv('CONFIGDB_URL', 'http://configdb-dev.lco.gtn')
+CONFIGDB_URL = os.getenv('CONFIGDB_URL', 'http://configdb.lco.gtn')
 
 PHOTOMETRIC_STANDARDS_SITES = ('coj', 'cpt', 'tfn', 'lsc', 'elp', 'ogg')
 

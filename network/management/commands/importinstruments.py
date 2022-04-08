@@ -26,9 +26,7 @@ class Command(BaseCommand):
 
         # for _, dome_instruments in instruments_info.items():
         #     for inst in dome_instruments:
-        #         print(inst['code'])
-        #         print(inst['site'])
-        #         print(inst)
+        #
         #         i = Instrument.objects.get_or_create(code=inst['code'], site=inst['site'], telescope=inst['telescope'],
         #                                              enclosure=inst['observatory'])
 
@@ -39,10 +37,9 @@ class Command(BaseCommand):
         #     for optical_element in instrument_info.get('optical_elements', []):
         #         if optical_element.get('type') == 'filters':
         #             for oe in optical_element.get('optical_elements', []):
-        #                 print(i.code)
-        #                 print(oe['code'])
+        
         #                 if Filter.objects.filter(name=oe['code']).exists():
-        #                     print(oe['code'])
+        #
         #                     inst_filter = InstrumentFilter.objects.create(instrument=i,
         #                                                                   filter=Filter.objects.get(name=oe['code']))
 
@@ -51,11 +48,9 @@ class Command(BaseCommand):
             # TODO: filter SOAR
             if inst.get('instrument_type', {})['instrument_category'] == 'IMAGE' and inst.get('state') == 'SCHEDULABLE':  # get info for schedulable imagers
                 # TODO: include COMMISSIONING
-                #print(inst['__str__'])
                 site, enclosure, telescope, code = inst['__str__'].split('.')
                 instrument = inst['__str__']
                 instrument_type = inst['instrument_type']['code'].upper() # ConfigDB uses mixed-case. Calibration-TOM uses ALL CAPS.
-                #print(instrument_type)
                 state = inst['state']
                 if site == 'sor' or any(x in code for x in ['mc', 'xx']):  # TODO: include MuSCAT, exclude guide cameras
                     continue
@@ -67,10 +62,6 @@ class Command(BaseCommand):
                 instrument_fields.instrument_type = instrument_type
                 instrument_fields.state = state
                 instrument_fields.save()
-                #print(inst['state'])
-                #print(inst['instrument_type']['code'])
-                #print(instrument_fields.code)
-                #print(inst['science_cameras'])
                 #for camera in inst['science_cameras']:
                 #    if camera['code'] == instrument_fields.code:
                 #        instrument_fields.type = camera.get('camera_type', {}).get('code').upper()

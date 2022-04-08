@@ -46,7 +46,6 @@ logger = logging.getLogger(__name__)
 configdb = ConfigDBInterface(settings.CONFIGDB_URL)  # TODO: rethink how we store this property
 
 
-#class InstrumentListView(PermissionListMixin, FilterView):
 class InstrumentListView(ListView):
     """
     View for listing instruments in the Calibration-TOM. Requires authorization.
@@ -181,101 +180,6 @@ class InstrumentDetailView(DetailView):
         return super().get(request, *args, **kwargs)
 
 
-#class InstrumentImportView(LoginRequiredMixin, TemplateView):
-#    """
-#    View that handles the import of instruments from a CSV. Requires authentication.
-#    """
-#    template_name = 'network/instrument_import.html'
-
-#    def post(self, request):
-#        """
-#        Handles the POST requests to this view. Creates a StringIO object and passes it to ``import_instruments``.
-
-#        :param request: the request object passed to this view
-#        :type request: HTTPRequest
-#        """
-#        csv_file = request.FILES['instrument_csv']
-#        csv_stream = StringIO(csv_file.read().decode('utf-8'), newline=None)
-#        result = import_instruments(csv_stream)
-#        messages.success(
-#            request,
-#            'Instruments created: {}'.format(len(result['instruments']))
-#        )
-#        for error in result['errors']:
-#            messages.warning(request, error)
-#        return redirect(reverse('network:list'))
-
-
-#class InstrumentExportView(InstrumentListView):
-#    """
-#    View that handles the export of instruments to a CSV. Only exports selected instruments.
-#    """
-#    def render_to_response(self, context, **response_kwargs):
-#        """
-#        Returns a response containing the exported CSV of selected instruments.
-
-#        :param context: Context object for this view
-#        :type context: dict
-
-#        :returns: response class with CSV
-#        :rtype: StreamingHttpResponse
-#        """
-#        qs = context['filter'].qs.values()
-#        file_buffer = export_instruments(qs)
-#        file_buffer.seek(0)  # goto the beginning of the buffer
-#        response = StreamingHttpResponse(file_buffer, content_type="text/csv")
-#        filename = "instruments-{}.csv".format(slugify(datetime.utcnow()))
-#        response['Content-Disposition'] = 'attachment; filename="{}"'.format(filename)
-#        return response
-
-
-#class InstrumentAddRemoveGroupView(LoginRequiredMixin, View):
-#    """
-#    View that handles addition and removal of instruments to instrument groups. Requires authentication.
-#    """
-
-#    def post(self, request, *args, **kwargs):
-#        """
-#        Handles the POST requests to this view. Routes the information from the request and query parameters to the
-#        appropriate utility method in ``groups.py``.
-
-#        :param request: the request object passed to this view
-#        :type request: HTTPRequest
-#        """
-#        query_string = request.POST.get('query_string', '')
-#        group_id = request.POST.get('group')
-#        filter_data = QueryDict(query_string)
-#        try:
-#            group_object = InstrumentList.objects.get(pk=group_id)
-#        except Exception as e:
-#            messages.error(request, 'Cannot find the instrument group with id={}; {}'.format(group_id, e))
-#            return redirect(reverse('network:list') + '?' + query_string)
-#        if not request.user.has_perm('network.view_instrumentlist', group_object):
-#            messages.error(request, 'Permission denied.')
-#            return redirect(reverse('network:list') + '?' + query_string)
-
-#        if 'add' in request.POST:
-#            if request.POST.get('isSelectAll') == 'True':
-#                add_all_to_group(filter_data, group_object, request)
-#            else:
-#                instruments_ids = request.POST.getlist('selected-instrument')
-#                add_selected_to_group(instruments_ids, group_object, request)
-#        if 'remove' in request.POST:
-#            if request.POST.get('isSelectAll') == 'True':
-#                remove_all_from_group(filter_data, group_object, request)
-#            else:
-#                instruments_ids = request.POST.getlist('selected-instrument')
-#                remove_selected_from_group(instruments_ids, group_object, request)
-#        if 'move' in request.POST:
-#            if request.POST.get('isSelectAll') == 'True':
-#                move_all_to_group(filter_data, group_object, request)
-#            else:
-#                instrument_ids = request.POST.getlist('selected-instrument')
-#                move_selected_to_group(instrument_ids, group_object, request)
-
-#        return redirect(reverse('network:list') + '?' + query_string)
-
-
 class InstrumentGroupView(PermissionListMixin, ListView):
     """
     View that handles the display of ``InstrumentList`` objects, also known as instrument groups. Requires authorization.
@@ -285,34 +189,3 @@ class InstrumentGroupView(PermissionListMixin, ListView):
     model = InstrumentList
     paginate_by = 25
 
-
-#class InstrumentGroupDeleteView(DeleteView):
-#    """
-#    View that handles the deletion of ``InstrumentList`` objects, also known as instrument groups. Requires authorization.
-#    """
-#    permission_required = 'network.delete_instrumentlist'
-#    model = InstrumentList
-#    success_url = reverse_lazy('instruments:instrumentgroup')
-
-
-#class InstrumentGroupCreateView(LoginRequiredMixin, CreateView):
-#    """
-#    View that handles the creation of ``InstrumentList`` objects, also known as instrument groups. Requires authentication.
-#    """
-#    model = InstrumentList
-#    fields = ['name']
-#    success_url = reverse_lazy('instruments:instrumentgroup')
-
-#    def form_valid(self, form):
-#        """
-#        Runs after form validation. Saves the instrument group and assigns the user's permissions to the group.
-
-#        :param form: Form data for instrument creation
-#        :type form: django.forms.ModelForm
-#        """
-#        obj = form.save(commit=False)
-#        obj.save()
-#        assign_perm('network.view_instrumentlist', self.request.user, obj)
-#        assign_perm('network.change_instrumentlist', self.request.user, obj)
-#        assign_perm('network.delete_instrumentlist', self.request.user, obj)
-#        return super().form_valid(form)

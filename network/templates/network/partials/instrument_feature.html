@@ -1,0 +1,7 @@
+{% load cache %}
+<h3>{{ instrument.name }}</h3>
+{% if instrument.featured_image %}
+{% cache None featured_image instrument.id %}
+<img src="{{ instrument.featured_image.get_preview }}" id="featured-image" onerror="this.style.display='none'">
+{% endcache %}
+{% endif %}

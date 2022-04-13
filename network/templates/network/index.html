@@ -1,0 +1,18 @@
+{% extends 'tom_common/index.html' %}
+{% block content %}
+  {% block breadcrumbs %}
+  <a href="{% url 'network:instrument_list' %}">LCO Instruments Home</a>
+  {% endblock breadcrumbs %}
+
+<h1>LCO Instruments Index Page</h1>
+{% comment %}
+TODO: this should loop through a context or queryset supplied list of instrument types
+and link to a ListView of Instruments for that InstrumentType
+TODO: this is
+<a href="{% url 'nres_calibrations:instrument_type_list' %}">Instrument Type List (instrument_type to be listed)</a>
+<p/>
+<a href="{% url 'nres_calibrations:instrument_type_list' %}">Instrument List (instrument_type to be listed)</a>
+{% endcomment %}
+
+<!-- endblock content -->
+{% endblock content %}

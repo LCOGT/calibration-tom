@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'tom_observations',
     'tom_dataproducts',
     'network',
+    'bias_calibrations',
     'nres_calibrations',
     'photometric_standards',
     'calibrations',

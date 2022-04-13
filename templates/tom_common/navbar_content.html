@@ -66,8 +66,8 @@ The following nav-item list elements (li) are included in the tom_common/base.ht
 <li class="nav-item dropdown">
     <a class="nav-link dropdown-toggle" data-toggle="dropdown"><p style="text-align:center; margin:0; padding:0">Bias</p></a>
     <ul class="dropdown-menu">
-        <li class="nav-item {% if request.resolver_match.namespace == 'bias' %}active{% endif %}">
-            <a class="nav-link" href="{% url 'bias:bias_form' %}" style="color:black">Request Form</a>
+        <li class="nav-item {% if request.resolver_match.namespace == 'bias_calibrations' %}active{% endif %}">
+            <a class="nav-link" href="{% url 'bias_calibrations:bias_form' %}" style="color:black">Request Form</a>
         </li>
     </ul>
 </li>

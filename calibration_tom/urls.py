@@ -19,6 +19,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 urlpatterns = [
     path('network/', include('network.urls', namespace='network')),
     path('', include('tom_common.urls')),
+    path('bias/', include('bias_calibrations.urls', namespace='bias_calibrations')),
     path('photometric_standards/', include('photometric_standards.urls', namespace='photometric_standards')),
     path('nres/', include('nres_calibrations.urls', namespace='nres_calibrations')),
     path('calibrations/', include('calibrations.urls')),

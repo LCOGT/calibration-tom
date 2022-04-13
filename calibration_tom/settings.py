@@ -326,7 +326,7 @@ PHOTOMETRIC_STANDARDS_SITES = ('coj', 'cpt', 'tfn', 'lsc', 'elp', 'ogg')
 NRES_SITES = ('cpt', 'tlv', 'lsc', 'elp')
 NRES_INSTRUMENT_TYPE = '1M0-NRES-SCICAM'
 
-CALIBRATION_TYPES = ('NRES', 'PHOTOMETRIC_STANDARDS', 'FLOYDS')
+CALIBRATION_TYPES = ('BIAS', 'NRES', 'PHOTOMETRIC_STANDARDS', 'FLOYDS')
 
 try:
     from local_settings import *  # noqa

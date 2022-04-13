@@ -33,6 +33,16 @@ crontrigger:
       cpu: 1000m
       memory: 1024Mi
 
+importinstruments:
+  enabled: true
+  resources:
+    requests:
+      cpu: 10m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 1024Mi
+
 
 lcoServices:
   configdbURL: "http://configdb.lco.gtn"

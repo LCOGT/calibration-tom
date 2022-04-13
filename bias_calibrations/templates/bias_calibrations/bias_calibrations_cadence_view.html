@@ -1,0 +1,7 @@
+{% extends 'tom_common/index.html' %}
+{% load static bootstrap4 bias_calibrations_extras %}
+{% block content %}
+{% for site in sites %}
+    {% instrument_filter_site_table site %}
+{% endfor %}
+{% endblock content %}

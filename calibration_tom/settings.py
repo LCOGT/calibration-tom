@@ -253,6 +253,7 @@ DATA_PROCESSORS = {
 }
 
 TOM_FACILITY_CLASSES = [
+    'calibrations.facilities.bias_calibrations_facility.BiasCalibrationsFacility',
     'calibrations.facilities.photometric_standards_facility.PhotometricStandardsFacility',
     'calibrations.facilities.lco_calibration_facility.LCOCalibrationFacility'
 ]
@@ -260,6 +261,7 @@ TOM_FACILITY_CLASSES = [
 TOM_ALERT_CLASSES = []
 
 TOM_CADENCE_STRATEGIES = [
+    'calibrations.cadences.bias_calibrations_cadence.BiasCalibrationsCadenceStrategy'
     'calibrations.cadences.nres_cadence.NRESCadenceStrategy',
     'calibrations.cadences.photometric_standards_cadence.PhotometricStandardsCadenceStrategy'
 ]

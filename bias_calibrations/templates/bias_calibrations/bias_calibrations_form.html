@@ -1,0 +1,8 @@
+{% extends 'tom_common/index.html' %}
+{% load bias_calibrations_extras  crispy_forms_tags %}
+{% block content %}
+<h4>Bias Observation Request Form</h4>
+{% csrf_token %}
+{% crispy form %}
+<hr>
+{% endblock content %}

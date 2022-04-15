@@ -27,7 +27,7 @@ class BiasCalibrationsCadenceForm(BaseCadenceForm):
 
 class BiasCalibrationsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
     name = 'Bias Calibrations Cadence Strategy'
-    form = BiasCalilbrationsCadenceForm
+    form = BiasCalibrationsCadenceForm
     config_db = ConfigDBInterface(settings.CONFIGDB_URL)
 
     def update_observation_payload(self, observation_payload):

@@ -259,7 +259,7 @@ class BiasCalibrationsManualSubmissionForm(LCOBaseObservationForm):
     #     return valid
 
 
-class BiasCalibrationFacility(LCOFacility):
+class BiasCalibrationsFacility(LCOFacility):
     name = 'Bias Calibrations'
 
     # these key-values appear as tabs in the Observations/create template

@@ -261,7 +261,7 @@ TOM_FACILITY_CLASSES = [
 TOM_ALERT_CLASSES = []
 
 TOM_CADENCE_STRATEGIES = [
-    'calibrations.cadences.bias_calibrations_cadence.BiasCalibrationsCadenceStrategy'
+    'calibrations.cadences.bias_calibrations_cadence.BiasCalibrationsCadenceStrategy',
     'calibrations.cadences.nres_cadence.NRESCadenceStrategy',
     'calibrations.cadences.photometric_standards_cadence.PhotometricStandardsCadenceStrategy'
 ]

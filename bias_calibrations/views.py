@@ -81,7 +81,7 @@ class BiasCalibrationsForm(FormView):
 
 class BiasCalibrationsTargets(FormView):
     template_name = 'bias_calibrations/bias_calibrations_targets.html'
-    form_class = BiasCalibationsManualSubmissionForm
+    form_class = BiasCalibrationsManualSubmissionForm
     success_url = reverse_lazy('bias_calibrations:bias_calibrations_home')
 
     def form_invalid(self, form):

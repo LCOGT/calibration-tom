@@ -2,7 +2,11 @@
 {% load bias_calibrations_extras  crispy_forms_tags %}
 {% block content %}
 <h4>Bias Observation Request Form</h4>
-{% csrf_token %}
+This is above the hr.
+{% csrf_token %} <!-- The csrf_token is invisible.-->
+This is above the form.
 {% crispy form %}
+This is below the "Submit Request" button.
 <hr>
+This is at the bottom of the page.
 {% endblock content %}

@@ -3,10 +3,12 @@ from crispy_forms.layout import ButtonHolder, Column, Layout, Row, Submit
 from django import forms
 from django.conf import settings
 from django.urls import reverse
+from django.contrib.auth.models import Group
 
-from tom_targets.models import Target, CoordinateField
+from tom_targets.models import Target
+from tom_targets.forms import CoordinateField
 
-from .models import HOUR_ANGLE_FIELDS, REQUIRED_HOUR_ANGLE_FIELDS
+from .models import BiasTarget, BiasTargetExtra, HOUR_ANGLE_FIELDS, REQUIRED_HOUR_ANGLE_FIELDS
 
 
 
@@ -28,7 +30,7 @@ class BiasCalibrationsCadenceSubmissionForm(forms.Form):
         self.fields['target_id'] = forms.ChoiceField(  # Create choices for standard_types of targets currently in season
             choices=[(target.id,
                       f"{target.targetextra_set.filter(key='standard_type').first().value} (currently {target.name})")
-                     for target in Target.objects.filter(targetextra__key='calibration_type', targetextra__value='BIAS')
+                     for target in BiasTarget.objects.filter(targetextra__key='calibration_type', targetextra__value='BIAS')
                      if target.target_is_in_season()],
             label=False
         )
@@ -49,7 +51,7 @@ class BiasCalibrationsCadenceSubmissionForm(forms.Form):
             )
         )
 
-class BiasTargetForm(forms.ModelForm)
+class BiasTargetForm(forms.ModelForm):
     groups = forms.ModelMultipleChoiceField(Group.objects.none(), required=False, widget=forms.CheckboxSelectMultiple)
 
     def __init__(self, *args, **kwargs):
@@ -92,12 +94,12 @@ class BiasTargetForm(forms.ModelForm)
 
     class Meta:
         abstract = True
-        model = Target
+        model = BiasTarget
         fields = '__all__'
         widgets = {'type': forms.HiddenInput()}
 
 
-class HourAngleTargetCreateForm(TargetForm)
+class HourAngleTargetCreateForm(BiasTargetForm):
     ha = CoordinateField(required=True, label='Hour Angle', c_type='ha',
                          help_text='Hour Angle, in decimal or sexagesimal hours. See '
                                    'https://docs.astropy.org/en/stable/api/astropy.coordinates.Angle.html for '
@@ -112,7 +114,7 @@ class HourAngleTargetCreateForm(TargetForm)
         for field in REQUIRED_HOUR_ANGLE_FIELDS:
             self.fields[field].required = True
 
-    class Meta(TargetForm.Meta):
+    class Meta(BiasTargetForm.Meta):
         fields = HOUR_ANGLE_FIELDS
 
 

@@ -4,6 +4,12 @@ from tom_common.hooks import run_hook
 
 # Create your models here.
 
+GLOBAL_TARGET_FIELDS = ['name', 'type']
+
+HOUR_ANGLE_FIELDS = GLOBAL_TARGET_FIELDS + ['hour_angle', 'dec']
+
+REQUIRED_HOUR_ANGLE_FIELDS = ['hour_angle', 'dec']
+
 class BiasTarget(models.Model):
     """
     Class representing a fake target for a bias calibration.

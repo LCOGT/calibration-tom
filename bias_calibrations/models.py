@@ -55,3 +55,81 @@ class BiasTarget(models.Model):
     def __str__(self):
         return str(self.name)
 
+class BiasTargetExtra(models.Model):
+    """
+    Class representing extra fields for bias target in a TOM.
+
+    :param target: The ``Target`` object this ``TargetExtra`` is associated with.
+
+    :param key: Denotation of the value represented by this ``TargetExtra`` object.
+    :type key: str
+
+    :param value: Value of the field stored in this object.
+    :type value: str
+
+    :param float_value: Float representation of the ``value`` field for this object, if applicable.
+    :type float_value: float
+
+    :param bool_value: Boolean representation of the ``value`` field for this object, if applicable.
+    :type bool_value: bool
+
+    :param time_value: Datetime representation of the ``value`` field for this object, if applicable.
+    :type time_value: datetime
+    """
+    target = models.ForeignKey(BiasTarget, on_delete=models.CASCADE)
+    key = models.CharField(max_length=200)
+    value = models.TextField(blank=True, default='')
+    float_value = models.FloatField(null=True, blank=True)
+    bool_value = models.BooleanField(null=True, blank=True)
+    time_value = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ['target', 'key']
+
+    def __str__(self):
+        return f'{self.key}: {self.value}'
+
+    def save(self, *args, **kwargs):
+        """
+        Saves BiasTargetExtra model data to the database. In the process, converts the string value of the ``BiasTargetExtra``
+        to the appropriate type, and stores it in the corresponding field as well.
+        """
+        try:
+            self.float_value = float(self.value)
+        except (TypeError, ValueError, OverflowError):
+            self.float_value = None
+        try:
+            self.bool_value = bool(self.value)
+        except (TypeError, ValueError, OverflowError):
+            self.bool_value = None
+        try:
+            if isinstance(self.value, datetime):
+                self.time_value = self.value
+            else:
+                self.time_value = parse(self.value)
+        except (TypeError, ValueError, OverflowError):
+            self.time_value = None
+
+        super().save(*args, **kwargs)
+
+    def typed_value(self, type_val):
+        """
+        Returns the value of this ``BiasTargetExtra`` in the corresponding type provided by the caller. If the type is
+        invalid, returns the string representation.
+
+        :param type_val: Requested type of the ``BiasTargetExtra`` ``value`` field
+        :type type_val: str
+
+        :returns: Requested typed value field of this object
+        :rtype: float, boolean, datetime, or str
+        """
+        if type_val == 'number':
+            return self.float_value
+        if type_val == 'boolean':
+            return self.bool_value
+        if type_val == 'datetime':
+            return self.time_value
+
+        return self.value
+
+

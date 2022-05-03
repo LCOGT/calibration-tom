@@ -229,6 +229,8 @@ HINTS_ENABLED = False
 HINT_LEVEL = 20
 TARGET_TYPE = 'SIDEREAL'
 
+BIAS_TARGET_TYPE = 'HOUR_ANGLE'
+
 FACILITIES = {
     'LCO': {
         'portal_url': os.getenv('OBSERVATION_PORTAL_URL', 'http://observation-portal-dev.lco.gtn'),
@@ -277,6 +279,12 @@ BROKER_CREDENTIALS = {}
 #     {'name': 'eligible', 'type': 'boolean'},
 #     {'name': 'dicovery_date', 'type': 'datetime'}
 # ]
+BIAS_EXTRA_FIELDS = [
+    {'name': 'exp_time', 'type': 'number'},
+    {'name': 'exp_count', 'type': 'number'},
+    {'name': 'calibration_type', 'type': 'string', 'default': None}
+]
+
 EXTRA_FIELDS = [
     # {'name': 'site', 'type': 'string'},  # for FLOYDS targets
     {'name': 'seasonal_start', 'type': 'number'},  # First of this month number the target becomes visible

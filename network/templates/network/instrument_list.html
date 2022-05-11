@@ -1,0 +1,54 @@
+{% extends 'network/index.html' %}
+
+{% block content %}
+
+{% comment %}
+{% block breadcrumbs %}
+    {{ block.super }} &raquo;
+    <a href="{% url 'network:instrument_list' %}">Instrument Types</a>
+{% endblock breadcrumbs%}
+{% endcomment %}
+
+<h1>Instrument Types</h1>
+    <div>
+        <table class='table table-striped'>
+            <thead>
+            <tr>
+                <th scope="col">Instrument</th>
+                <th scope="col">Code</th>
+                <th scope="col">Instrument Type</th>
+                <th scope="col">State</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for instrument_index in object_list %}
+            <tr>
+                <td>
+                    <a href="{% url 'network:instrument_list' %}">{{instrument_index.instrument}}</a>
+                </td>
+                <td>
+                    <a href="{% url 'network:instrument_list' %}">{{instrument_index.code}}</a>
+                </td>
+                <td>
+                    {{instrument_index.instrument_type}}
+                </td>
+                <td>
+                    {{instrument_index.state}}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+<hr/>
+
+
+{% comment %}
+<h3>debug info:</h3>
+<p>get_context_data kwargs: {{ kwargs }}</p>
+<p>object_list: {{ object_list }}</p>
+<p>instrument_types: {{ instrument_types }}</p>
+{% endcomment %}
+
+<!-- endblock content -->
+{% endblock content %}

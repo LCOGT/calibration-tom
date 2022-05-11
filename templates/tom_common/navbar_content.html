@@ -6,6 +6,14 @@ The following nav-item list elements (li) are included in the tom_common/base.ht
     <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
 </li>
 <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" data-toggle="dropdown">Network</a>
+    <ul class="dropdown-menu">
+        <li class="nav-item {% if request.resolver_match.namespace == 'network' %}active{% endif %}">
+            <a class="nav-link" href="{% url 'network:instrument_list' %}"><font color="black">Instruments</font></a>
+        </li>
+    </ul>
+</li>
+<li class="nav-item dropdown">
     <a class="nav-link dropdown-toggle" data-toggle="dropdown">Targets</a>
     <ul class="dropdown-menu">
         <li class="nav-item {% if request.resolver_match.namespace == 'targets' %}active{% endif %}">

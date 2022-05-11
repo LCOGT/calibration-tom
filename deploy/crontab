@@ -1,0 +1,6 @@
+# command must be run within tom_env
+
+# Fields are: minute hour (day of month) month (day of week)
+
+*/15 * * * * cd /Users/nvolgenau/LCOGT/cal_obs_scheduling/calibration-tom && /Users/nvolgenau/LCOGT/cal_obs_scheduling/calibration-tom/tom_env/bin/python3 /Users/nvolgenau/LCOGT/cal_obs_scheduling/calibration-tom/manage.py importinstruments
+

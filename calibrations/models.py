@@ -24,6 +24,7 @@ def target_is_in_season(self, query_date: datetime = datetime.utcnow()):
             current_month += 12
 
     return seasonal_start <= current_month <= seasonal_end
+
 setattr(Target, 'target_is_in_season', target_is_in_season)  # noqa - add method to Target class
 
 

@@ -1,0 +1,23 @@
+<table class="table">
+  <thead><tr><th>ID</th><th>Modified</th></tr></thead>
+  <tbody>
+    {% for instrument in instruments %}
+    <tr>
+      <td>
+        <a href="{% url 'instruments:detail' instrument.id %}" title="Detail for {{ instrument.name }}">
+          {{ instrument.name }}
+        </a>
+      </td>
+      <td>
+        {{ instrument.modified|date }}
+      </td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="2">
+        No instruments. <a href="{% url 'network:create' %}">Create an instrument</a>.
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>

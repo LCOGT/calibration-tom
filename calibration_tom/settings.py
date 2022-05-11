@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'tom_catalogs',
     'tom_observations',
     'tom_dataproducts',
+    'network',
     'nres_calibrations',
     'photometric_standards',
     'calibrations',
@@ -302,6 +303,7 @@ OPEN_URLS = []
 
 HOOKS = {
     'target_post_save': 'tom_common.hooks.target_post_save',
+    'instrument_post_save': 'tom_common.hooks.instrument_post_save',
     # 'observation_change_state': 'tom_common.hooks.observation_change_state',
     'observation_change_state': 'calibrations.hooks.observation_change_state',
     'data_product_post_upload': 'tom_dataproducts.hooks.data_product_post_upload',
@@ -313,7 +315,8 @@ THUMBNAIL_MAX_SIZE = (0, 0)
 
 THUMBNAIL_DEFAULT_SIZE = (200, 200)
 
-CONFIGDB_URL = os.getenv('CONFIGDB_URL', 'http://configdb-dev.lco.gtn')
+#CONFIGDB_URL = os.getenv('CONFIGDB_URL', 'http://configdb-dev.lco.gtn')
+CONFIGDB_URL = os.getenv('CONFIGDB_URL', 'http://configdb.lco.gtn')
 
 PHOTOMETRIC_STANDARDS_SITES = ('coj', 'cpt', 'tfn', 'lsc', 'elp', 'ogg')
 

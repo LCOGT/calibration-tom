@@ -13,11 +13,15 @@ crontrigger:
   schedule: "*/11 * * * *"
   resources: {}
 
+importinstruments:
+  enabled: true
+  schedule: "*/15 * * * *" # every 15 minutes
+  resources: {}
+
 updatestatus:
   enabled: true
   schedule: "*/11 * * * *"  # 'every 11th minute'
   resources: {}
-
 
 runcadencestrategies:
   enabled: true

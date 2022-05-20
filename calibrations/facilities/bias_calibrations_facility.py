@@ -56,11 +56,6 @@ class BiasCalibrationsManualSubmissionForm(LCOBaseObservationForm):
     i_diffuser = forms.ChoiceField(choices=[('In', 'In'), ('Out', 'Out')])
     z_diffuser = forms.ChoiceField(choices=[('In', 'In'), ('Out', 'Out')])
 
-    target_id = forms.ChoiceField(required=True, # these choices must be defined at runtime (after the database is accessible)
-                                  choices=[('No targets found in database', 'No targets found in database')],
-                                  label='Standard Field')
-
-
     #start_time = forms.CharField(widget=forms.TextInput(attrs={'type': 'datetime'}))
     start_time = forms.DateTimeField(widget=forms.DateTimeInput(attrs={'type': 'datetime'}), help_text="input format = %Y-%m-%d %H:%M:%S")
 
@@ -137,6 +132,7 @@ class BiasCalibrationsManualSubmissionForm(LCOBaseObservationForm):
         self.fields['instrument'].choices = self.instrument_granular_choices()
         self.fields['readout_mode'].choices = self.readout_mode_choices()
         self.fields['filter'].choices = self.optical_element_choices() 
+        self.fields['max_airmass'].initial = 20
 
         self.helper = FormHelper()
         self.helper.form_method = 'post'
@@ -189,12 +185,21 @@ class BiasCalibrationsManualSubmissionForm(LCOBaseObservationForm):
             Row(Column(ButtonHolder(Submit('submit', 'Submit Request')))),
         )
 
+    def _build_target_fields(self):
+        target_fields = {
+            'name': 'Bias target',
+            'type': 'HOUR_ANGLE',
+            'hour_angle': 1,
+            'dec': 0
+        }
+
+        return target_fields
 
 
     def _build_configuration(self):
         configuration = super()._build_configuration()
         #configuration['name'] = 'LCOGT', # Irrelevant for bias observations, but LCOGT is historical
-        configuration['target'] = biastarget, # Make the target for the configuration the biastarget
+        #configuration['target'] = biastarget, # Make the target for the configuration the biastarget
         #configuration['proposal'] = 'calibrate', # 'calibrate' propid requests are DIRECTly scheduled
         configuration['type'] = 'BIAS' # Bias observation must have obstype BIAS
         #configuration['observation_mode'] = 'Normal' # Bias observation is neither TC nor RR
@@ -234,10 +239,10 @@ class BiasCalibrationsManualSubmissionForm(LCOBaseObservationForm):
                         #'optical_elements': {
                         #    'filter': f.name
                         #}
-                'mode': self.cleaned_data[readout_mode],
-                'exposure_count': self.cleaned_data[exposure_count],
+                'mode': self.cleaned_data['readout_mode'],
+                'exposure_count': self.cleaned_data['exposure_count'],
                 'optical_elements': {
-                    'filter': self.cleaned_data[filter]
+                    'filter': self.cleaned_data['filter']
                 }
                         # Adding the 'mode' element below. How do I know if it's in "cleaned_data"? How do I add it if not?
                         #'mode': self.cleaned_data['mode'],

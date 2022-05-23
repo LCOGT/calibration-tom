@@ -36,7 +36,7 @@ class BiasCalibrationsManualSubmissionForm(LCOBaseObservationForm):
 
     config_db = ConfigDBInterface(settings.CONFIGDB_URL) # CONFIGDB_URL is set in calibration_tom/settings.py
 
-    # set up the self.fields dict of form.xFields; dict key is property name (i.e. 'target_id')
+    # set up the self.fields dict of form.xFields; dict key is property name (i.e. 'site')
     site = forms.ChoiceField(required=True, #  choices=enum_to_choices(SiteCode), # enum_to_choices is never used
                              choices=[],
                              label='Site')
@@ -57,10 +57,10 @@ class BiasCalibrationsManualSubmissionForm(LCOBaseObservationForm):
     z_diffuser = forms.ChoiceField(choices=[('In', 'In'), ('Out', 'Out')])
 
     #start_time = forms.CharField(widget=forms.TextInput(attrs={'type': 'datetime'}))
-    start_time = forms.DateTimeField(widget=forms.DateTimeInput(attrs={'type': 'datetime'}), help_text="input format = %Y-%m-%d %H:%M:%S")
+    start_time = forms.CharField(widget=forms.DateTimeInput(attrs={'type': 'datetime', 'format': '%Y-%m-%d $H:%M:%S'}), help_text="input format = %Y-%m-%d %H:%M:%S")
 
     #end_time = forms.CharField(widget=forms.TextInput(attrs={'type': 'datetime'}))
-    end_time = forms.DateTimeField(widget=forms.DateTimeInput(attrs={'type': 'datetime'}), help_text="input format = %Y-%m-%d %H:%M:%S")
+    #end_time = forms.CharField(widget=forms.DateTimeInput(attrs={'type': 'datetime', 'format': '%Y-%m-%d %H:%M:%S'}), help_text="input format = %Y-%m-%d %H:%M:%S")
 
     exposure_count = forms.IntegerField(widget=forms.NumberInput(attrs={'type': 'integer'}), help_text="minimum = 1")
 
@@ -132,7 +132,19 @@ class BiasCalibrationsManualSubmissionForm(LCOBaseObservationForm):
         self.fields['instrument'].choices = self.instrument_granular_choices()
         self.fields['readout_mode'].choices = self.readout_mode_choices()
         self.fields['filter'].choices = self.optical_element_choices() 
+        #
+        self.fields['name'].initial = 'LCOGT'
+        self.fields['name'].widget = forms.HiddenInput()
+        self.fields['proposal'].initial = 'calibrate'
+        self.fields['proposal'].widget = forms.HiddenInput()
+        self.fields['ipp_value'].initial = 1.0
+        self.fields['ipp_value'].widget = forms.HiddenInput()
+        self.fields['observation_mode'].initial = 'NORMAL'
+        self.fields['observation_mode'].widget = forms.HiddenInput()
+        self.fields['exposure_time'].initial = 0.0
+        self.fields['exposure_time'].widget = forms.HiddenInput()
         self.fields['max_airmass'].initial = 20
+        self.fields['max_airmass'].widget = forms.HiddenInput()
 
         self.helper = FormHelper()
         self.helper.form_method = 'post'
@@ -181,6 +193,9 @@ class BiasCalibrationsManualSubmissionForm(LCOBaseObservationForm):
             HTML("<hr/>"),  # Diffuser and Slit section
             Row(Column('diffusers'), Column('g_diffuser'), Column('r_diffuser'), Column('i_diffuser'), Column('z_diffuser')),
 
+            # include hidden fields
+            Row(Column('name'), Column('proposal'), Column('ipp_value'), Column('observation_mode'), Column('exposure_time'), Column('max_airmass')),
+
             HTML("<hr/>"),  # Submit section
             Row(Column(ButtonHolder(Submit('submit', 'Submit Request')))),
         )
@@ -206,15 +221,8 @@ class BiasCalibrationsManualSubmissionForm(LCOBaseObservationForm):
         #configuration['ipp_value'] = 1.0 # IPP default = 1.0
         configuration['instrument_name'] = self.cleaned_data['instrument']
         configuration['constraints']: {
-            'max_airmass': 20,
+            #'max_airmass': 20,
             'min_lunar_phase': 0,
-        }
-        configuration['requests']: {
-            'windows': [
-                {
-                    'start': self.cleaned_data['start_time'],
-                }
-            ],
         }
 
         return configuration
@@ -324,16 +332,16 @@ class BiasCalibrationsManualSubmissionForm(LCOBaseObservationForm):
             'proposal': 'calibrate',
             'ipp_value': 1.0,
             'operator': 'SINGLE',
-            'observation_type': 'NORMAL',
+            'observation_mode': 'NORMAL',
             'requests': [
                 {
                     'configurations': [self._build_configuration()],
-                    #'windows': [
-                    #    {
-                    #        'start': self.cleaned_data['start'],
-                    #        'end': self.cleaned_data['end']
-                    #    }
-                    #],
+                    'windows': [
+                        {
+                            'start': self.cleaned_data['start_time'],
+                            #'end': self.cleaned_data['end']
+                        }
+                    ],
                     'location': self._build_location()
                 }
             ]

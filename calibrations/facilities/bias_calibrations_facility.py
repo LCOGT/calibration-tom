@@ -1,5 +1,6 @@
 
 import logging
+from datetime import datetime
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import ButtonHolder, Column, HTML, Layout, Row, Submit
@@ -9,8 +10,8 @@ from tom_observations.facilities.lco import LCOBaseObservationForm, LCOFacility
 from tom_observations.widgets import FilterField
 
 from configdb.configdb_connections import ConfigDBInterface
-#from calibrations.fields import FilterMultiValueField
-#from calibrations.models import Filter
+# from calibrations.fields import FilterMultiValueField
+# from calibrations.models import Filter
 
 logger = logging.getLogger(__name__)
 logger.level = logging.DEBUG
@@ -34,10 +35,10 @@ class BiasCalibrationsManualSubmissionForm(LCOBaseObservationForm):
     This is loosely based on the options to the calibration_util submit_calibration script.
     """
 
-    config_db = ConfigDBInterface(settings.CONFIGDB_URL) # CONFIGDB_URL is set in calibration_tom/settings.py
+    config_db = ConfigDBInterface(settings.CONFIGDB_URL)  # CONFIGDB_URL is set in calibration_tom/settings.py
 
     # set up the self.fields dict of form.xFields; dict key is property name (i.e. 'site')
-    site = forms.ChoiceField(required=True, #  choices=enum_to_choices(SiteCode), # enum_to_choices is never used
+    site = forms.ChoiceField(required=True,  # choices=enum_to_choices(SiteCode), # enum_to_choices is never used
                              choices=[],
                              label='Site')
     enclosure = forms.ChoiceField(choices=[])
@@ -46,9 +47,9 @@ class BiasCalibrationsManualSubmissionForm(LCOBaseObservationForm):
 
     instrument = forms.ChoiceField(choices=[])  # TODO: populate instrument choices from telescope choice
 
-    readout_mode = forms.ChoiceField(choices=[]) #
+    readout_mode = forms.ChoiceField(choices=[])  # TODO: populate readout_mode choices from telescope choice
 
-    filter = forms.ChoiceField(choices=[]) #
+    filter = forms.ChoiceField(choices=[])  # TODO: populate filter choices from telescope choice
 
     diffusers = forms.ChoiceField(choices=[('In', 'In'), ('Out', 'Out')])
     g_diffuser = forms.ChoiceField(choices=[('In', 'In'), ('Out', 'Out')])
@@ -56,23 +57,22 @@ class BiasCalibrationsManualSubmissionForm(LCOBaseObservationForm):
     i_diffuser = forms.ChoiceField(choices=[('In', 'In'), ('Out', 'Out')])
     z_diffuser = forms.ChoiceField(choices=[('In', 'In'), ('Out', 'Out')])
 
-    #start_time = forms.CharField(widget=forms.TextInput(attrs={'type': 'datetime'}))
-    start_time = forms.CharField(widget=forms.DateTimeInput(attrs={'type': 'datetime', 'format': '%Y-%m-%d $H:%M:%S'}), help_text="input format = %Y-%m-%d %H:%M:%S")
+    # start_time = forms.CharField(initial=datetime.utcnow(),
+    #                              widget=forms.DateTimeInput(attrs={'type': 'datetime', 'format': '%Y-%m-%d $H:%M:%S'}),
+    #                              help_text="input format = %Y-%m-%d %H:%M:%S")
 
-    #end_time = forms.CharField(widget=forms.TextInput(attrs={'type': 'datetime'}))
-    #end_time = forms.CharField(widget=forms.DateTimeInput(attrs={'type': 'datetime', 'format': '%Y-%m-%d %H:%M:%S'}), help_text="input format = %Y-%m-%d %H:%M:%S")
+    # end_time = forms.CharField(widget=forms.DateTimeInput(attrs={'type': 'datetime', 'format': '%Y-%m-%d %H:%M:%S'}),
+    #                            help_text="input format = %Y-%m-%d %H:%M:%S")
 
     exposure_count = forms.IntegerField(widget=forms.NumberInput(attrs={'type': 'integer'}), help_text="minimum = 1")
 
-    #exposure_time = forms.FloatField(widget=forms.NumberInput(attrs={'type': 'integer'}), help_text="seconds")
+    # exposure_time = forms.FloatField(widget=forms.NumberInput(attrs={'type': 'integer'}), help_text="seconds")
 
-    # Save this as an example of how the label an be displayed on the form.
-    #target_id = forms.ChoiceField(required=True, 
+    # Save this as an example of how the label can be displayed on the form.
+    # target_id = forms.ChoiceField(required=True,
     #                              # these choices must be defined at runtime (after the database is accessible)
     #                              choices=[('No targets found in database', 'No targets found in database')],
     #                              label='This label is for target selection.')
-
-    #name = forms.CharField(initial="LCOGT", widget=forms.HiddenInput())
 
     def enclosure_choices(self):
         enclosures = set()
@@ -89,7 +89,6 @@ class BiasCalibrationsManualSubmissionForm(LCOBaseObservationForm):
         for dome_values in self.config_db.get_active_instruments_info().values():
             for instrument_index in dome_values:
                 instruments.add((instrument_index['code'], instrument_index['code']))
-                #instruments.add(instrument_index['code'])
 
         return sorted(instruments)
 
@@ -99,7 +98,7 @@ class BiasCalibrationsManualSubmissionForm(LCOBaseObservationForm):
         for active_instrument_values in self.config_db.get_active_instruments_info().values():
             for instrument_value in active_instrument_values:
                 for readout_mode_details in instrument_value['named_readout_modes']:
-                    readout_modes.add((readout_mode_details['code'], readout_mode_details['code']))
+                    readout_modes.add((readout_mode_details['code'], readout_mode_details['name']))
     
         return sorted(readout_modes)
 
@@ -118,29 +117,28 @@ class BiasCalibrationsManualSubmissionForm(LCOBaseObservationForm):
         super().__init__(*args, **kwargs)
         # set up the form field choices that must be assigned at run-time (not when byte-compiling the class definition)
 
-        biastarget = { # from JC (2022-05-11): don't use class BiasTarget from bias_calibrations/models.py.
-            'name': 'Bias target',
-            'type': 'HOUR_ANGLE',
-            'hour_angle': 1,
-            'dec': 0
-        }
-        # This is the NULL_TARGET from calibration_type.py
-
         self.fields['site'].choices = [(site['code'], site['code']) for site in self.config_db.site_info]
         self.fields['enclosure'].choices = self.enclosure_choices()
         self.fields['telescope'].choices = sorted(set([(dome.split('.')[-1], dome.split('.')[-1]) for dome, _ in self.config_db.get_active_instruments_info().items()]))
         self.fields['instrument'].choices = self.instrument_granular_choices()
         self.fields['readout_mode'].choices = self.readout_mode_choices()
-        self.fields['filter'].choices = self.optical_element_choices() 
-        #
+        self.fields['filter'].choices = self.optical_element_choices()
+
+        # Add constant fields for Biases
+        self.fields['start'].initial = datetime.utcnow()
+        self.fields['start'].widget = forms.DateTimeInput(attrs={'type': 'datetime', 'format': '%Y-%m-%d $H:%M:%S'})
+        self.fields['end'].initial = datetime.utcnow()
+        self.fields['end'].widget = forms.HiddenInput()
         self.fields['name'].initial = 'LCOGT'
         self.fields['name'].widget = forms.HiddenInput()
+        self.fields['proposal'].choices = [('calibrate', 'calibrate')]
         self.fields['proposal'].initial = 'calibrate'
         self.fields['proposal'].widget = forms.HiddenInput()
         self.fields['ipp_value'].initial = 1.0
         self.fields['ipp_value'].widget = forms.HiddenInput()
         self.fields['observation_mode'].initial = 'NORMAL'
         self.fields['observation_mode'].widget = forms.HiddenInput()
+        self.fields['exposure_time'].min_value = 0.0
         self.fields['exposure_time'].initial = 0.0
         self.fields['exposure_time'].widget = forms.HiddenInput()
         self.fields['max_airmass'].initial = 20
@@ -153,7 +151,7 @@ class BiasCalibrationsManualSubmissionForm(LCOBaseObservationForm):
         # self.helper.form_action = reverse('nres_calibrations:imager_submission')
 
         # TODO: until we have cadences, we don't need a cadence_frequency in this form
-        #if 'cadence_frequency' in self.fields:
+        # if 'cadence_frequency' in self.fields:
         #    self.fields['cadence_frequency'].required = False
 
         self.helper.layout = Layout(
@@ -169,32 +167,26 @@ class BiasCalibrationsManualSubmissionForm(LCOBaseObservationForm):
             HTML("minimum lunar distance = 0<br>"),
             HTML("<hr/>"),
             self.common_layout,
-            #'name' = 'LCOGT', # Irrelevant for bias requests?
-            #'proposal', # Fix to CALIBRATE for BIAS requests
-            #'ipp_value', # irrelevant for DIRECT scheduled observations
-            #'observation_mode', # irrelevant for DIRECT observations
-            #'instrument_type', # typically a specific instrument, rather than an instrument_type
-            #'max_airmass', # irrelevant for DIRECT observations
-            #'min_lunar_distance', # irrelevant for DIRECT observations
 
-            #HTML("<hr/>"),  # Site.Enclosure.Telescope.Instrument section
-            #Row(Column('site'), Column('enclosure'), Column('telescope'), Column('instrument_type'), Column('instrument')),
-            Row(Column('site'), Column('enclosure'), Column('telescope'), Column('instrument_type'), Column('instrument')),
+            # HTML("<hr/>"),  # Site.Enclosure.Telescope.Instrument section
+            Row(Column('site'), Column('enclosure'), Column('telescope'), Column('instrument_type'),
+                Column('instrument')),
 
             Row(Column('readout_mode'), Column('filter'), Column('exposure_count')),
 
-            'start_time',
-            #'end_time',
+            'start',
+            # 'end_time',
 
-            HTML("<hr/>"),  # new Filter section
-
-            #*tuple([Row(Column(f.name)) for f in Filter.objects.all()]),
+            # HTML("<hr/>"),  # new Filter section
+            # *tuple([Row(Column(f.name)) for f in Filter.objects.all()]),
 
             HTML("<hr/>"),  # Diffuser and Slit section
-            Row(Column('diffusers'), Column('g_diffuser'), Column('r_diffuser'), Column('i_diffuser'), Column('z_diffuser')),
+            Row(Column('diffusers'), Column('g_diffuser'), Column('r_diffuser'), Column('i_diffuser'),
+                Column('z_diffuser')),
 
             # include hidden fields
-            Row(Column('name'), Column('proposal'), Column('ipp_value'), Column('observation_mode'), Column('exposure_time'), Column('max_airmass')),
+            Row(Column('name'), Column('proposal'), Column('ipp_value'), Column('observation_mode'),
+                Column('exposure_time'), Column('max_airmass'), Column('end'),),
 
             HTML("<hr/>"),  # Submit section
             Row(Column(ButtonHolder(Submit('submit', 'Submit Request')))),
@@ -210,66 +202,42 @@ class BiasCalibrationsManualSubmissionForm(LCOBaseObservationForm):
 
         return target_fields
 
-
     def _build_configuration(self):
         configuration = super()._build_configuration()
-        #configuration['name'] = 'LCOGT', # Irrelevant for bias observations, but LCOGT is historical
-        #configuration['target'] = biastarget, # Make the target for the configuration the biastarget
-        #configuration['proposal'] = 'calibrate', # 'calibrate' propid requests are DIRECTly scheduled
-        configuration['type'] = 'BIAS' # Bias observation must have obstype BIAS
-        #configuration['observation_mode'] = 'Normal' # Bias observation is neither TC nor RR
-        #configuration['ipp_value'] = 1.0 # IPP default = 1.0
+        configuration['type'] = 'BIAS'  # Bias observation must have obstype BIAS
         configuration['instrument_name'] = self.cleaned_data['instrument']
-        configuration['constraints']: {
-            #'max_airmass': 20,
+        configuration['constraints'] = {
+            'max_airmass': self.cleaned_data['max_airmass'],
             'min_lunar_phase': 0,
         }
 
         return configuration
 
     def _build_instrument_config(self):
-        
-        #logger.debug(f"instrument = {self.cleaned_data['instrument']}\n") 
-        #logger.debug(f"instrument_type = {self.cleaned_data['instrument_type']}\n")
-        #logger.debug(f"exposure_time_g = {self.cleaned_data['g'][2]}\n")
         instrument_config = []
         if self.cleaned_data['instrument_type'] != '2M0-SCICAM-MUSCAT':
-            # TODO: this list of filters must be consistent with the FilterMultiValueField instances
-            #  created in the __init__
-            #for f in self.optical_filters():
-                # check that field is selected (zero-th index is the checkbox)
-                #if self.cleaned_data.get(f.name)[0]:
-                    #instrument_config.append({
             instrument_config.append({
-                        # this indexing must be consistent with the field order in decompress
-                        #'exposure_count': self.cleaned_data[f.name][1],
-                        #'exposure_time': self.cleaned_data[f.name][2],
-                        #'optical_elements': {
-                        #    'filter': f.name
-                        #}
                 'mode': self.cleaned_data['readout_mode'],
                 'exposure_count': self.cleaned_data['exposure_count'],
                 'optical_elements': {
                     'filter': self.cleaned_data['filter']
                 }
-                        # Adding the 'mode' element below. How do I know if it's in "cleaned_data"? How do I add it if not?
-                        #'mode': self.cleaned_data['mode'],
-                    #})
             })
         else:
+            # Will need some work before ready for MUSCAT Bias
             extra_params = {
-                'exposure_mode' : 'SYNCHRONOUS',
-                'exposure_time_g' : self.cleaned_data['g'][2],
-                'exposure_time_r' : self.cleaned_data['r'][2],
-                'exposure_time_i' : self.cleaned_data['i'][2],
-                'exposure_time_z' : self.cleaned_data['z'][2],
+                'exposure_mode': 'SYNCHRONOUS',
+                'exposure_time_g': self.cleaned_data['g'][2],
+                'exposure_time_r': self.cleaned_data['r'][2],
+                'exposure_time_i': self.cleaned_data['i'][2],
+                'exposure_time_z': self.cleaned_data['z'][2],
                 "offset_ra": 0,
                 "offset_dec": 0,
                 "defocus": 0
             }
             instrument_config.append({
-                'exposure_count' : self.cleaned_data['g'][1],
-                'exposure_time' : max(
+                'exposure_count': self.cleaned_data['g'][1],
+                'exposure_time': max(
                     self.cleaned_data['g'][2],
                     self.cleaned_data['r'][2],
                     self.cleaned_data['i'][2],
@@ -285,7 +253,7 @@ class BiasCalibrationsManualSubmissionForm(LCOBaseObservationForm):
                 },
                 "extra_params": extra_params,
             })
-        #logger.debug(f'instrument_config = {instrument_config}\n')
+        # logger.debug(f'instrument_config = {instrument_config}\n')
         return instrument_config
 
     def _build_location(self):
@@ -297,24 +265,10 @@ class BiasCalibrationsManualSubmissionForm(LCOBaseObservationForm):
 
         return location
 
-    # def observation_payload(self):
-    #     # TODO: remove me when logger.debug messages are not useful
-    #     observation_payload = super().observation_payload()
-    #     logger.debug(f'observation_payload: {observation_payload}\n')
-    #     return observation_payload
-
-    def clean(self):
-        cleaned_data = super().clean()
-        # logger.debug(f'cleaned_data: {cleaned_data}')  # TODO: remove logger.debug
-        # check that at least one filter is marked for inclusion in the instrument config
-        # by finding the value of the filter.name key (which is the decompress)
-        # and the zero-th item is the checkbox
-        #for f in self.optical_filters():
-        #    if cleaned_data[f.name][0] is True:
-        #        break
-        #else:
-        #    raise forms.ValidationError('At least one filter must be included in the request.')
-        #return cleaned_data
+    # def clean(self):
+    #     cleaned_data = super().clean()
+    #     print(cleaned_data)
+    #     return cleaned_data
 
     # def is_valid(self):
     #     # TODO: remove me when logger.debug messages are not useful
@@ -325,28 +279,27 @@ class BiasCalibrationsManualSubmissionForm(LCOBaseObservationForm):
     #     return valid
 
     def observation_payload(self):
-
-        #payload = super().observation_payload()
-        payload = {
-            'name': 'LCOGT',
-            'proposal': 'calibrate',
-            'ipp_value': 1.0,
-            'operator': 'SINGLE',
-            'observation_mode': 'NORMAL',
-            'requests': [
-                {
-                    'configurations': [self._build_configuration()],
-                    'windows': [
-                        {
-                            'start': self.cleaned_data['start_time'],
-                            #'end': self.cleaned_data['end']
-                        }
-                    ],
-                    'location': self._build_location()
-                }
-            ]
-        }
-        #if self.cleaned_data.get('period') and self.cleaned_data.get('jitter'):
+        payload = super().observation_payload()
+        # payload = {
+        #     'name': 'LCOGT',
+        #     'proposal': 'calibrate',
+        #     'ipp_value': 1.0,
+        #     'operator': 'SINGLE',
+        #     'observation_type': 'NORMAL',
+        #     'requests': [
+        #         {
+        #             'configurations': [self._build_configuration()],
+        #             'windows': [
+        #                 {
+        #                     'start': self.cleaned_data['start'],
+        #                     # 'end': self.cleaned_data['end']
+        #                 }
+        #             ],
+        #             'location': self._build_location()
+        #         }
+        #     ]
+        # }
+        # # if self.cleaned_data.get('period') and self.cleaned_data.get('jitter'):
         #    payload = self._expand_cadence_request(payload)
 
         return payload

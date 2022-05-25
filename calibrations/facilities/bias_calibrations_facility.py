@@ -304,6 +304,17 @@ class BiasCalibrationsManualSubmissionForm(LCOBaseObservationForm):
 
         return payload
 
+    def submit_observation(self, observation_payload):
+
+        response = super().submit_observation()
+        response = make_request(
+            'POST',
+            PORTAL_URL + '/api/schedule/',
+            json=observation_payload,
+            headers=self._portal_headers()
+        )
+        return [r['id'] for r in response.json()['requests']]
+
 
 class BiasCalibrationsFacility(LCOFacility):
     name = 'Bias Calibrations'

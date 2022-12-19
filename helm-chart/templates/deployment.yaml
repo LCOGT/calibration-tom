@@ -72,7 +72,7 @@ spec:
               readOnly: false
             - name: astropy
               mountPath: /.astropy
-              readonly: false
+              readOnly: false
         {{- end }}
     {{- with .Values.imagePullSecrets }}
       imagePullSecrets:

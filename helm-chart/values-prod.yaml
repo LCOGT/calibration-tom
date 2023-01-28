@@ -13,7 +13,7 @@ djangoDebug: false
 # Production mode: use production PostgreSQL database server
 useDockerizedDatabase: false
 postgresql:
-  hostname: "postgres1-cluster.cluster-cple9sjsskrf.us-west-2.rds.amazonaws.com"
+  hostname: "prod-postgres1-cluster-writer-pgbouncer.prod-db-proxy.svc.cluster.local"
   postgresqlDatabase: "calibration-tom"
   postgresqlUsername: "calibration-tom"
   postgresqlPassword: "overridden"

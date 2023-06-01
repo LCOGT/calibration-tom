@@ -51,7 +51,7 @@ INSTALLED_APPS = [
     'django_comments',
     'bootstrap4',
     'crispy_forms',
-    'crispy_bootstrap4,
+    'crispy_bootstrap4',
     'django_filters',
     'django_gravatar',
     'rest_framework',

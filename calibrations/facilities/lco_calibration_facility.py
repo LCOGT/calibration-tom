@@ -4,7 +4,7 @@ import logging
 
 from django import forms
 from django.core.exceptions import ValidationError
-from tom_observations.facilities.ocs import OCSBaseObservationForm, OCSFacility
+from tom_observations.facilities.ocs import OCSBaseObservationForm, OCSFacility, OCSSettings
 from tom_targets.models import Target
 
 import configdb.site
@@ -126,6 +126,11 @@ class LCOCalibrationFacility(OCSFacility):
     EXCLUDED_FRAME_SUFFIXES = (
         'e91',  # e91 frames are NRES Autoguider images and are not desirable to download
     )
+
+
+    def __init__(self, facility_settings=OCSSettings('LCO')):
+        super().__init__(facility_settings=facility_settings)
+
 
     def data_products(self, observation_id, product_id=None):
         products = []

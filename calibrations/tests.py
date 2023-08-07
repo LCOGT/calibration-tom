@@ -1,6 +1,13 @@
 from django.test import TestCase
 
+# for TestCadenceTargetSelection
 from tom_targets.models import Target
+
+# for TestFacilityConfiguration
+from calibrations.facilities.photometric_standards_facility import PhotometricStandardsFacility
+from calibrations.facilities.lco_calibration_facility import LCOCalibrationFacility
+from django.conf import settings
+
 
 test_targets = [
     # Name, RA, Dec, seasonal_start, seasonal_end
@@ -52,3 +59,30 @@ class TestCadenceTargetSelection(TestCase):
         # valid seasonal end, next year
         # invalid seasonal end, next year
         # test seasonal start as well
+
+
+class TestFacilityConfiguration(TestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        # get the facility base URL from settings.py::FACILITY dictionary
+        self.expected = settings.FACILITIES['LCO']['portal_url']
+
+
+    def test_phometric_standards_facility_url(self):
+        """test that the PhotometricStandardsFacility is configured and can
+         construct it's request URL properly.
+         """
+        # get the facility base URL from the instanciated Facility object
+        photometric_standards_facility = PhotometricStandardsFacility()
+        actual = photometric_standards_facility.facility_settings.get_setting('portal_url')
+        self.assertEqual(self.expected, actual)
+
+
+    def test_NRES_standards_facility_url(self):
+        """test that the PhotometricStandardsFacility is configured and can
+         construct it's request URL properly.
+         """
+        # get the facility base URL from the instanciated Facility object
+        nres_calibration_facility = LCOCalibrationFacility()
+        actual = nres_calibration_facility.facility_settings.get_setting('portal_url')
+        self.assertEqual(self.expected, actual)

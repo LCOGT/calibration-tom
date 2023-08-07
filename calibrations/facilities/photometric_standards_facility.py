@@ -5,7 +5,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import ButtonHolder, Column, HTML, Layout, Row, Submit
 from django import forms
 from django.conf import settings
-from tom_observations.facilities.ocs import OCSBaseObservationForm, OCSFacility
+from tom_observations.facilities.ocs import OCSBaseObservationForm, OCSFacility, OCSSettings
 from tom_targets.models import Target
 
 from configdb.configdb_connections import ConfigDBInterface
@@ -270,6 +270,11 @@ class PhotometricStandardsFacility(OCSFacility):
     EXCLUDED_FRAME_SUFFIXES = (
         'e91',  # e91 frames are NRES Autoguider images and are not desirable to download
     )
+
+
+    def __init__(self, facility_settings=OCSSettings('LCO')):
+        super().__init__(facility_settings=facility_settings)
+
 
     def data_products(self, observation_id, product_id=None):
         products = []

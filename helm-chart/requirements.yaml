@@ -1,5 +1,4 @@
-dependencies:
-- name: postgresql
-  version: 11.9.13
-  repository: https://charts.bitnami.com/bitnami
-  condition: useDockerizedDatabase
+# dependencies moved to Chart.yaml for helm3
+# This file required for proper helmPipeline behaviour
+# Remove this file when helmPipeline.groovy::runHelmChartDependencies
+# is updated to return true if Chart.yaml has dependencies.

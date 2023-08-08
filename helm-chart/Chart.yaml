@@ -3,3 +3,13 @@ appVersion: "1.0"
 description: A Helm chart for Kubernetes
 name: calibration-tom
 version: 0.2.0
+
+# for helm3, dependencies should be here in Chart.yaml and
+# requirements.yaml (where depencencies were for helm2) should go away
+
+dependencies:
+- name: postgresql
+  # this is the version of the bitnami-packaged postgresql helm chart
+  version: 15.3.0
+  repository: https://charts.bitnami.com/bitnami
+  condition: useDockerizedDatabase

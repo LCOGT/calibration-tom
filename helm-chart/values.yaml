@@ -103,20 +103,29 @@ useDockerizedDatabase: true
 
 djangoDatabaseEngine: "django.db.backends.postgresql"
 postgresql:
-  # see templates/_helpers.tpl for hostname generation
-  hostname: ""
-  postgresqlUsername: "postgres"
-  postgresqlPassword: "changeme"
-  postgresqlDatabase: "postgres"
-  service:
-    port: "5432"
-  resources:
-    requests:
-      cpu: 50m
-      memory: 256Mi
-    limits:
-      cpu: 400m
-      memory: 512Mi
+  # updated according to bitnami-packaged postgresql helm chart
+  # see helm-chart/requirements.yaml and documentation for that chart
+  auth:
+    postgresPassword: "changeme"
+    username: "postgres"
+    password: "changeme"
+    database: "postgres"
+  primary:
+    initdb:
+      scripts:
+        init_postgis.sh: |
+          #!/bin/sh
+          PGPASSWORD=$POSTGRES_PASSWORD psql -U postgres -c "create extension if not exists postgis;"
+    service:
+      port:
+        postgresql: "5432"
+    resources:
+      requests:
+        cpu: 50m
+        memory: 256Mi
+      limits:
+        cpu: 400m
+        memory: 512Mi
 
 secretKey: "changeme"
 

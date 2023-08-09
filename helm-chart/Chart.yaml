@@ -10,6 +10,6 @@ version: 0.2.0
 dependencies:
 - name: postgresql
   # this is the version of the bitnami-packaged postgresql helm chart
-  version: 15.2.0
+  version: 12.15.0
   repository: https://charts.bitnami.com/bitnami
   condition: useDockerizedDatabase

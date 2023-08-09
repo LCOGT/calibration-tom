@@ -116,16 +116,16 @@ postgresql:
         init_postgis.sh: |
           #!/bin/sh
           PGPASSWORD=$POSTGRES_PASSWORD psql -U postgres -c "create extension if not exists postgis;"
-    service:
-      port:
-        postgresql: "5432"
-    resources:
-      requests:
-        cpu: 50m
-        memory: 256Mi
-      limits:
-        cpu: 400m
-        memory: 512Mi
+  service:
+    port:
+      postgresql: "5432"
+  resources:
+    requests:
+      cpu: 50m
+      memory: 256Mi
+    limits:
+      cpu: 400m
+      memory: 512Mi
 
 secretKey: "changeme"
 

@@ -117,8 +117,7 @@ postgresql:
           #!/bin/sh
           PGPASSWORD=$POSTGRES_PASSWORD psql -U postgres -c "create extension if not exists postgis;"
   service:
-    port:
-      postgresql: "5432"
+    port: "5432"
   resources:
     requests:
       cpu: 50m

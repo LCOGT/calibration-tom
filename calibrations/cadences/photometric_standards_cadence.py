@@ -188,8 +188,9 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
         logger.debug(f'observation_payload 2: {observation_payload}')
 
         # Submission of the new observation to the facility
-        form = facility.get_form('PHOTOMETRIC_STANDARDS')(observation_payload)
-        #logger.debug(f"observation_payload 1 = {observation_payload}\n")
+        form = facility.get_form('PHOTOMETRIC_STANDARDS')(observation_payload,
+                                                          facility_settings=OCSSettings('LCO'))
+
         logger.info(f'Observation form data to be submitted for {self.dynamic_cadence.id}: {observation_payload}',
                     extra={'tags': {
                         'dynamic_cadence_id': self.dynamic_cadence.id,

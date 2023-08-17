@@ -9,6 +9,7 @@ from django.conf import settings
 from tom_observations.cadence import BaseCadenceForm
 from tom_observations.cadences.resume_cadence_after_failure import ResumeCadenceAfterFailureStrategy
 from tom_observations.facility import get_service_class
+from tom_observations.facilities.ocs import OCSSettings
 from tom_observations.models import ObservationRecord
 from tom_targets.models import Target
 
@@ -61,7 +62,7 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
 
         if last_obs is not None:
             # Make a call to the facility to get the current status of the observation
-            facility = get_service_class(last_obs.facility)()
+            facility = get_service_class(last_obs.facility)(facility_settings=OCSSettings('LCO'))
             facility.update_observation_status(last_obs.observation_id)  # Updates the DB record
             last_obs.refresh_from_db()  # Gets the record updates
             observation_payload = last_obs.parameters
@@ -72,7 +73,7 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
         else:
             # We need to create an observation for the new cadence, as we do not have a previous one to use
             # TODO: this should be its own method, put a bunch of defaults into lco_calibration_facility.py
-            facility = get_service_class('LCO Calibrations')()
+            facility = get_service_class('LCO Calibrations')(facility_settings=OCSSettings('LCO'))
             form_class = facility.observation_forms['NRES']
             standard_type = target.targetextra_set.filter(key='standard_type').first().value
             site = self.dynamic_cadence.cadence_parameters['site']
@@ -170,7 +171,7 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
                             'observation_id': observation.observation_id,
                         }})
             try:
-                facility = get_service_class(observation.facility)()
+                facility = get_service_class(observation.facility)(facility_settings=OCSSettings('LCO'))
                 facility.update_observation_status(observation.observation_id)
             except Exception as e:
                 logger.error(msg=f'Unable to update observation status for {observation}. Error: {e}')

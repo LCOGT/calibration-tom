@@ -7,6 +7,7 @@ from django.conf import settings
 from tom_observations.cadence import BaseCadenceForm
 from tom_observations.cadences.resume_cadence_after_failure import ResumeCadenceAfterFailureStrategy
 from tom_observations.facility import get_service_class
+from tom_observations.facilities.ocs import OCSSettings
 from tom_observations.models import ObservationRecord
 from tom_targets.models import Target
 
@@ -14,6 +15,7 @@ from configdb.configdb_connections import ConfigDBInterface
 from calibrations.models import Filter, Instrument, InstrumentFilter
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 class PhotometricStandardsCadenceForm(BaseCadenceForm):
@@ -56,14 +58,20 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
         return observation_payload
 
     def run(self):
+        logger.debug('Running Photometric Standards Cadence Strategy')
+
         last_obs = self.dynamic_cadence.observation_group.observation_records.order_by('-created').first()
         target = Target.objects.get(pk=self.dynamic_cadence.cadence_parameters['target_id'])
+
+        logger.debug(f'Running Photometric Standards Cadence Strategy - last_obs: {last_obs}')
+        logger.debug(f'Running Photometric Standards Cadence Strategy - target: {target}')
 
         if last_obs is not None:
             #logger.debug(f'Progress flag: last_obs is not None\n')
             #This is an on-going (not first-run) cadence
-            facility = get_service_class(last_obs.facility)()
-            
+            facility = get_service_class(last_obs.facility)(facility_settings=OCSSettings('LCO'))
+            logger.debu(f'facility for OLD cadence: {facility}')
+
             facility.update_observation_status(last_obs.observation_id)
             
             last_obs.refresh_from_db()
@@ -82,12 +90,19 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
             
         else:
             # create an observation for the new cadence, as we do not have a previous one to copy parameters from
-            facility = get_service_class('Photometric Standards')()
+
+            # TODO: the facility_settings for the service_class (the Facility) should be generalized
+            #       and not hard coded like it is here
+            facility = get_service_class('Photometric Standards')(facility_settings=OCSSettings('LCO'))
+            logger.debug(f'facility for NEW cadence: {facility}')
             form_class = facility.observation_forms['PHOTOMETRIC_STANDARDS']
 
-            inst = Instrument.objects.get(code=self.dynamic_cadence.cadence_parameters['instrument_code'])
+            instrument_code = self.dynamic_cadence.cadence_parameters['instrument_code']
+            inst = Instrument.objects.get(code=instrument_code)
+            logger.debug(f'inst code for NEW cadence: {instrument_code}')
+            logger.debug(f'inst for NEW cadence: {inst}')
             inst_filters = inst.instrumentfilter_set.all()
-            #logger.debug(f'inst_filters = {inst_filters}\n') # e.g. mc03 - g
+            logger.debug(f'inst_filters = {inst_filters}') # e.g. mc03 - g
 
             form_data = {
                 'name': f'Photometric standard for {inst.code}',
@@ -114,19 +129,24 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
                 'i_diffuser': 'Out',
                 'z_diffuser': 'Out'
             }
+            logger.debug(f'form_data 1:{form_data}')
 
             for f in inst_filters:
                 form_data[f'{f.filter.name}_exposure_count'] = f.filter.exposure_count
                 #logger.debug(f"exposure count = {form_data[f'{f.filter.name}_exposure_count']}\n")
                 form_data[f'{f.filter.name}_exposure_time'] = f.filter.exposure_time
                 #logger.debug(f"exposure time = {form_data[f'{f.filter.name}_exposure_time']}\n")
+
+            # if ist_filters[0] is NoneType, this is a problem.
             form_data[f'{inst_filters[0].filter.name}_selected'] = True
 
+            logger.debug(f'form_data 2:{form_data}')
             #logger.debug(f'Progress flag: Form data created.\n')
 
             #logger.debug(f"Progress flag: Here's the first form validity check\n")
             form = form_class(data=form_data)
-            
+            logger.debug(f'form: {form}')
+
             form.is_valid()
             if form.is_valid():
                 #logger.debug(f"Progress flag: Passed first form validity check\n")
@@ -140,6 +160,7 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
                 start_keyword, end_keyword = facility.get_start_end_keywords()
                 observation_payload[start_keyword] = observation_payload[start_keyword].isoformat()
                 observation_payload[end_keyword] = observation_payload[end_keyword].isoformat()
+                logger.debug(f'observation_payload 1: {observation_payload}')
             else:
                 logger.error(f'Unable to submit initial calibration for cadence {self.dynamic_cadence.id}', extra={
                     'tags': {'dynamic_cadence_id': self.dynamic_cadence.id, 'target': target.name}
@@ -165,6 +186,7 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
             observation_payload = self.update_observation_filters(observation_payload)
 
         observation_payload = self.update_observation_payload(observation_payload)
+        logger.debug(f'observation_payload 2: {observation_payload}')
 
         # Submission of the new observation to the facility
         form = facility.get_form('PHOTOMETRIC_STANDARDS')(observation_payload)
@@ -211,7 +233,7 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
                             'observation_id': observation.observation_id,
                         }})
             try:
-                facility = get_service_class(observation.facility)()
+                facility = get_service_class(observation.facility)(facility_settings=OCSSettings('LCO'))
                 facility.update_observation_status(observation.observation_id)
             except Exception as e:
                 logger.error(msg=f'Unable to update observation status for {observation}. Error: {e}')

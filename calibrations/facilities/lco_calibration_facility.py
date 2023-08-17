@@ -115,6 +115,7 @@ class LCOCalibrationForm(OCSBaseObservationForm):
         return payload
 
 
+# TODO: this should be renamed to NRESCalibrationFacility
 class LCOCalibrationFacility(OCSFacility):
     name = 'LCO Calibrations'
 

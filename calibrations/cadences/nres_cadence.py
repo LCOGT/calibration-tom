@@ -131,7 +131,8 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
         # Submission of the new observation to the facility
         # obs_type = last_obs.parameters.get('observation_type')
         # form = facility.get_form(obs_type)(observation_payload)
-        form = facility.get_form('NRES')(observation_payload)
+        form = facility.get_form('NRES')(observation_payload,
+                                         facility_settings=OCSSettings('LCO'))
         logger.info(f'Observation form data to be submitted for {self.dynamic_cadence.id}: {observation_payload}',
                     extra={'tags': {
                         'dynamic_cadence_id': self.dynamic_cadence.id,

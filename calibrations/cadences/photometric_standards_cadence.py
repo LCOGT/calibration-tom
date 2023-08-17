@@ -70,7 +70,6 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
             #logger.debug(f'Progress flag: last_obs is not None\n')
             #This is an on-going (not first-run) cadence
             facility = get_service_class(last_obs.facility)(facility_settings=OCSSettings('LCO'))
-            logger.debu(f'facility for OLD cadence: {facility}')
 
             facility.update_observation_status(last_obs.observation_id)
             

@@ -13,7 +13,7 @@ from calibrations.fields import FilterMultiValueField
 from calibrations.models import Filter
 
 logger = logging.getLogger(__name__)
-logger.level = logging.DEBUG
+#logger.level = logging.DEBUG
 
 
 def enum_to_choices(emum_class) -> [()]:
@@ -111,7 +111,6 @@ class PhotometricStandardsManualSubmissionForm(OCSBaseObservationForm):
         for field_name in ['filter', 'exposure_time', 'exposure_count']:
             if field_name in self.fields:
                 self.fields.pop(field_name)
-                logger.debug(f'PhotometricStandardsManualSubmissionForm - removing field: {field_name}')
 
         # TODO: until we have cadences, we don't need a cadence_frequency in this form
         if 'cadence_frequency' in self.fields:

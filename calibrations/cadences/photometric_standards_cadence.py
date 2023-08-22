@@ -141,6 +141,8 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
 
             logger.debug(f'form_data 2:{form_data}')
             #logger.debug(f'Progress flag: Form data created.\n')
+            # the form_class needs a facility_settings argument!!
+            form = form_class(data=form_data, facility_settings=OCSSettings('LCO'))
 
             #logger.debug(f"Progress flag: Here's the first form validity check\n")
             form = form_class(data=form_data)

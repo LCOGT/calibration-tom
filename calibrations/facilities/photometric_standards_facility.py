@@ -109,7 +109,9 @@ class PhotometricStandardsManualSubmissionForm(OCSBaseObservationForm):
 
         # remove (pop) unwanted fields from the self.fields
         for field_name in ['filter', 'exposure_time', 'exposure_count']:
-            self.fields.pop(field_name)
+            if field_name in self.fields:
+                self.fields.pop(field_name)
+                logger.debug(f'PhotometricStandardsManualSubmissionForm - removing field: {field_name}')
 
         # TODO: until we have cadences, we don't need a cadence_frequency in this form
         if 'cadence_frequency' in self.fields:

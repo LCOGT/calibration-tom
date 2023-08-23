@@ -93,15 +93,11 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
             # TODO: the facility_settings for the service_class (the Facility) should be generalized
             #       and not hard coded like it is here
             facility = get_service_class('Photometric Standards')(facility_settings=OCSSettings('LCO'))
-            logger.debug(f'facility for NEW cadence: {facility}')
             form_class = facility.observation_forms['PHOTOMETRIC_STANDARDS']
 
             instrument_code = self.dynamic_cadence.cadence_parameters['instrument_code']
             inst = Instrument.objects.get(code=instrument_code)
-            logger.debug(f'inst code for NEW cadence: {instrument_code}')
-            logger.debug(f'inst for NEW cadence: {inst}')
             inst_filters = inst.instrumentfilter_set.all()
-            logger.debug(f'inst_filters = {inst_filters}') # e.g. mc03 - g
 
             form_data = {
                 'name': f'Photometric standard for {inst.code}',
@@ -136,20 +132,14 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
                 form_data[f'{f.filter.name}_exposure_time'] = f.filter.exposure_time
                 #logger.debug(f"exposure time = {form_data[f'{f.filter.name}_exposure_time']}\n")
 
-            # if ist_filters[0] is NoneType, this is a problem.
             form_data[f'{inst_filters[0].filter.name}_selected'] = True
 
-            logger.debug(f'form_data 2:{form_data}')
-            #logger.debug(f'Progress flag: Form data created.\n')
             # the form_class needs a facility_settings argument!!
             form = form_class(data=form_data, facility_settings=OCSSettings('LCO'))
 
-            #logger.debug(f"Progress flag: Here's the first form validity check\n")
-            form = form_class(data=form_data)
-            logger.debug(f'form: {form}')
-
-            form.is_valid()
-            if form.is_valid():
+            form_is_valid = form.is_valid()
+            logger.debug(f'form.is_valid(): {form_is_valid}')
+            if form_is_valid:
                 #logger.debug(f"Progress flag: Passed first form validity check\n")
                 # form.is_valid() produces cleaned_data, but cleaned_data modifies the structure of the data
                 # As a result, we set observation_payload to form_data, so it can be further modified before form
@@ -161,7 +151,6 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
                 start_keyword, end_keyword = facility.get_start_end_keywords()
                 observation_payload[start_keyword] = observation_payload[start_keyword].isoformat()
                 observation_payload[end_keyword] = observation_payload[end_keyword].isoformat()
-                logger.debug(f'observation_payload 1: {observation_payload}')
             else:
                 logger.error(f'Unable to submit initial calibration for cadence {self.dynamic_cadence.id}', extra={
                     'tags': {'dynamic_cadence_id': self.dynamic_cadence.id, 'target': target.name}

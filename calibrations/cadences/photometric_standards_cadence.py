@@ -57,13 +57,10 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
         return observation_payload
 
     def run(self):
-        logger.debug('Running Photometric Standards Cadence Strategy')
-
         last_obs = self.dynamic_cadence.observation_group.observation_records.order_by('-created').first()
         target = Target.objects.get(pk=self.dynamic_cadence.cadence_parameters['target_id'])
 
-        logger.debug(f'Running Photometric Standards Cadence Strategy - last_obs: {last_obs}')
-        logger.debug(f'Running Photometric Standards Cadence Strategy - target: {target}')
+        logger.debug(f'Running PhotometricStandardsCadenceStrategy - last_obs: {last_obs}; target: {target}')
 
         if last_obs is not None:
             #logger.debug(f'Progress flag: last_obs is not None\n')
@@ -123,7 +120,6 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
                 'i_diffuser': 'Out',
                 'z_diffuser': 'Out'
             }
-            logger.debug(f'form_data 1:{form_data}')
 
             for f in inst_filters:
                 form_data[f'{f.filter.name}_exposure_count'] = f.filter.exposure_count

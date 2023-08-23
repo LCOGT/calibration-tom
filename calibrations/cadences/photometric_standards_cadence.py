@@ -7,7 +7,6 @@ from django.conf import settings
 from tom_observations.cadence import BaseCadenceForm
 from tom_observations.cadences.resume_cadence_after_failure import ResumeCadenceAfterFailureStrategy
 from tom_observations.facility import get_service_class
-from tom_observations.facilities.ocs import OCSSettings
 from tom_observations.models import ObservationRecord
 from tom_targets.models import Target
 
@@ -69,7 +68,7 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
         if last_obs is not None:
             #logger.debug(f'Progress flag: last_obs is not None\n')
             #This is an on-going (not first-run) cadence
-            facility = get_service_class(last_obs.facility)(facility_settings=OCSSettings('LCO'))
+            facility = get_service_class(last_obs.facility)()#(facility_settings=OCSSettings('LCO'))
 
             facility.update_observation_status(last_obs.observation_id)
             
@@ -92,7 +91,7 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
 
             # TODO: the facility_settings for the service_class (the Facility) should be generalized
             #       and not hard coded like it is here
-            facility = get_service_class('Photometric Standards')(facility_settings=OCSSettings('LCO'))
+            facility = get_service_class('Photometric Standards')()#(facility_settings=OCSSettings('LCO'))
             form_class = facility.observation_forms['PHOTOMETRIC_STANDARDS']
 
             instrument_code = self.dynamic_cadence.cadence_parameters['instrument_code']
@@ -133,9 +132,9 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
                 #logger.debug(f"exposure time = {form_data[f'{f.filter.name}_exposure_time']}\n")
 
             form_data[f'{inst_filters[0].filter.name}_selected'] = True
+            # the OCS form_class needs a facility_settings argument!!
+            form = form_class(data=form_data)#, facility_settings=OCSSettings('LCO'))
 
-            # the form_class needs a facility_settings argument!!
-            form = form_class(data=form_data, facility_settings=OCSSettings('LCO'))
 
             form_is_valid = form.is_valid()
             logger.debug(f'form.is_valid(): {form_is_valid}')
@@ -179,8 +178,8 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
         logger.debug(f'observation_payload 2: {observation_payload}')
 
         # Submission of the new observation to the facility
-        form = facility.get_form('PHOTOMETRIC_STANDARDS')(observation_payload,
-                                                          facility_settings=OCSSettings('LCO'))
+        form = facility.get_form('PHOTOMETRIC_STANDARDS')(observation_payload)#,
+                                                          #facility_settings=OCSSettings('LCO'))
 
         logger.info(f'Observation form data to be submitted for {self.dynamic_cadence.id}: {observation_payload}',
                     extra={'tags': {
@@ -224,7 +223,7 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
                             'observation_id': observation.observation_id,
                         }})
             try:
-                facility = get_service_class(observation.facility)(facility_settings=OCSSettings('LCO'))
+                facility = get_service_class(observation.facility)()#(facility_settings=OCSSettings('LCO'))
                 facility.update_observation_status(observation.observation_id)
             except Exception as e:
                 logger.error(msg=f'Unable to update observation status for {observation}. Error: {e}')

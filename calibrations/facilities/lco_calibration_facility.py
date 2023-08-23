@@ -4,7 +4,7 @@ import logging
 
 from django import forms
 from django.core.exceptions import ValidationError
-from tom_observations.facilities.ocs import OCSBaseObservationForm, OCSFacility, OCSSettings
+from tom_observations.facilities.lco import LCOOldStyleObservationForm, LCOFacility
 from tom_targets.models import Target
 
 import configdb.site
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 logger.level = logging.DEBUG
 
 
-class LCOCalibrationForm(OCSBaseObservationForm):
+class LCOCalibrationForm(LCOOldStyleObservationForm):
     # TODO: make a proper super-class out of this LCOCalibrationForm
 
     VALID_INSTRUMENT_CODES = ['1M0-NRES-SCICAM']  # TODO: Should this be in settings.py?
@@ -116,7 +116,7 @@ class LCOCalibrationForm(OCSBaseObservationForm):
 
 
 # TODO: this should be renamed to NRESCalibrationFacility
-class LCOCalibrationFacility(OCSFacility):
+class LCOCalibrationFacility(LCOFacility):
     name = 'LCO Calibrations'
 
     # these key-values appear as tabs in the Observations/create template
@@ -129,8 +129,8 @@ class LCOCalibrationFacility(OCSFacility):
     )
 
 
-    def __init__(self, facility_settings=OCSSettings('LCO')):
-        super().__init__(facility_settings=facility_settings)
+    #def __init__(self, facility_settings=OCSSettings('LCO')):
+    #    super().__init__(facility_settings=facility_settings)
 
 
     def data_products(self, observation_id, product_id=None):

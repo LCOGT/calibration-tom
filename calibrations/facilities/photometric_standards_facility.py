@@ -5,7 +5,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import ButtonHolder, Column, HTML, Layout, Row, Submit
 from django import forms
 from django.conf import settings
-from tom_observations.facilities.ocs import OCSBaseObservationForm, OCSFacility, OCSSettings
+from tom_observations.facilities.lco import LCOOldStyleObservationForm, LCOFacility
 from tom_targets.models import Target
 
 from configdb.configdb_connections import ConfigDBInterface
@@ -28,7 +28,7 @@ def enum_to_choices(emum_class) -> [()]:
 # TODO: what's the deal with Diffusers?
 #    (diffusers are part of MUSCat, I think) (from David: this is correct)
 # TODO: according to doc, photometric standards window is open at a certain time--should this be pre-filled into the form?
-class PhotometricStandardsManualSubmissionForm(OCSBaseObservationForm):
+class PhotometricStandardsManualSubmissionForm(LCOOldStyleObservationForm):
     """Form for submission of photometric standards to imagers.
 
     This is loosely based on the options to the calibration_util submit_calibration script.
@@ -260,7 +260,7 @@ class PhotometricStandardsManualSubmissionForm(OCSBaseObservationForm):
     #     return valid
 
 
-class PhotometricStandardsFacility(OCSFacility):
+class PhotometricStandardsFacility(LCOFacility):
     name = 'Photometric Standards'
 
     # these key-values appear as tabs in the Observations/create template
@@ -273,8 +273,8 @@ class PhotometricStandardsFacility(OCSFacility):
     )
 
 
-    def __init__(self, facility_settings=OCSSettings('LCO')):
-        super().__init__(facility_settings=facility_settings)
+    #def __init__(self, facility_settings=OCSSettings('LCO')):
+    #    super().__init__(facility_settings=facility_settings)
 
 
     def data_products(self, observation_id, product_id=None):

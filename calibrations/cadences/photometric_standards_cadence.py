@@ -127,7 +127,11 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
                 form_data[f'{f.filter.name}_exposure_time'] = f.filter.exposure_time
                 #logger.debug(f"exposure time = {form_data[f'{f.filter.name}_exposure_time']}\n")
 
-            form_data[f'{inst_filters[0].filter.name}_selected'] = True
+            if inst_filters:
+                form_data[f'{inst_filters[0].filter.name}_selected'] = True
+            else:
+                logger.warning(f'No instrument filters found for {inst.code}')
+
             # the OCS form_class needs a facility_settings argument!!
             form = form_class(data=form_data)#, facility_settings=OCSSettings('LCO'))
 

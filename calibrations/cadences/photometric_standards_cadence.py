@@ -135,11 +135,16 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
             # the OCS form_class needs a facility_settings argument!!
             form = form_class(data=form_data)#, facility_settings=OCSSettings('LCO'))
 
+            logger.debug(f'calling form.is_valid() with form_data: {form_data}')
+            form_is_valid = False
+            try:
+                form_is_valid = form.is_valid()
+            except Exception as e:
+                logger.error(f'Error validating initial calibration form: {type(e)} {e}')
+                logger.error(f'initial calibration form errors: {form.errors.as_data()}')
 
-            form_is_valid = form.is_valid()
-            logger.debug(f'form.is_valid(): {form_is_valid}')
             if form_is_valid:
-                #logger.debug(f"Progress flag: Passed first form validity check\n")
+                logger.debug(f'Passed first form validity check')
                 # form.is_valid() produces cleaned_data, but cleaned_data modifies the structure of the data
                 # As a result, we set observation_payload to form_data, so it can be further modified before form
                 # submission (this is specifically due to the FilterMultiValueField)

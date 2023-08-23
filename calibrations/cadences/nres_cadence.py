@@ -100,7 +100,16 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
                 form_data['min_lunar_distance'] = min_lunar_distance.value
 
             form = form_class(data=form_data)
-            if form.is_valid():
+
+            logger.debug(f'calling form.is_valid() with form_data: {form_data}')
+            form_is_valid = False
+            try:
+                form_is_valid = form.is_valid()
+            except Exception as e:
+                logger.error(f'Error validating calibration form: {type(e)} {e}')
+                logger.error(f'calibration form errors: {form.errors.as_data()}')
+
+            if form_is_valid:
                 observation_payload = form.cleaned_data
             else:
                 logger.error(f'Unable to submit initial calibration for cadence {self.dynamic_cadence.id}', extra={

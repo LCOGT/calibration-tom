@@ -110,6 +110,8 @@ postgresql:
     username: "postgres"
     password: "changeme"
     database: "postgres"
+  service:
+    port: 5432
 
   primary:
     resources:

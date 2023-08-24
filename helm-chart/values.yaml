@@ -105,11 +105,19 @@ djangoDatabaseEngine: "django.db.backends.postgresql"
 postgresql:
   # updated according to bitnami-packaged postgresql helm chart
   # see helm-chart/requirements.yaml and documentation for that chart
+
+  # this auth info is used by the postgres subchart
   auth:
     postgresPassword: "changeme"
     username: "postgres"
     password: "changeme"
     database: "postgres"
+  
+  # These are used by this chart for connecting to the database.
+  postgresqlUsername: "postgres"
+  postgresqlPassword: "changeme"
+  postgresqlDatabase: "postgres"
+  
   service:
     port: 5432
 

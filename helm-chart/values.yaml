@@ -110,21 +110,15 @@ postgresql:
     username: "postgres"
     password: "changeme"
     database: "postgres"
+
   primary:
-    initdb:
-      scripts:
-        init_postgis.sh: |
-          #!/bin/sh
-          PGPASSWORD=$POSTGRES_PASSWORD psql -U postgres -c "create extension if not exists postgis;"
-  service:
-    port: "5432"
-  resources:
-    requests:
-      cpu: 50m
-      memory: 256Mi
-    limits:
-      cpu: 400m
-      memory: 512Mi
+    resources:
+      requests:
+        cpu: 50m
+        memory: 256Mi
+      limits:
+        cpu: 400m
+        memory: 512Mi
 
 secretKey: "changeme"
 

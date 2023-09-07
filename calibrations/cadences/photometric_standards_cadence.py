@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from dateutil.parser import parse
 import logging
+import traceback
 
 from django import forms
 from django.conf import settings
@@ -63,9 +64,9 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
         logger.debug(f'Running PhotometricStandardsCadenceStrategy - last_obs: {last_obs}; target: {target}')
 
         if last_obs is not None:
-            #logger.debug(f'Progress flag: last_obs is not None\n')
+            logger.debug(f'last_obs exists {last_obs} (this is an on-going cadence - updating observation_payload')
             #This is an on-going (not first-run) cadence
-            facility = get_service_class(last_obs.facility)()#(facility_settings=OCSSettings('LCO'))
+            facility = get_service_class(last_obs.facility)()
 
             facility.update_observation_status(last_obs.observation_id)
             
@@ -84,6 +85,7 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
             start_keyword, end_keyword = facility.get_start_end_keywords()
             
         else:
+            logger.debug(f'No last_obs - creating a new cadenced observation')
             # create an observation for the new cadence, as we do not have a previous one to copy parameters from
 
             # TODO: the facility_settings for the service_class (the Facility) should be generalized
@@ -93,7 +95,6 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
 
             instrument_code = self.dynamic_cadence.cadence_parameters['instrument_code']
             inst = Instrument.objects.get(code=instrument_code)
-            inst_filters = inst.instrumentfilter_set.all()
 
             form_data = {
                 'name': f'Photometric standard for {inst.code}',
@@ -121,6 +122,7 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
                 'z_diffuser': 'Out'
             }
 
+            inst_filters = inst.instrumentfilter_set.all()
             for f in inst_filters:
                 form_data[f'{f.filter.name}_exposure_count'] = f.filter.exposure_count
                 #logger.debug(f"exposure count = {form_data[f'{f.filter.name}_exposure_count']}\n")
@@ -132,8 +134,7 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
             else:
                 logger.warning(f'No instrument filters found for {inst.code}')
 
-            # the OCS form_class needs a facility_settings argument!!
-            form = form_class(data=form_data)#, facility_settings=OCSSettings('LCO'))
+            form = form_class(data=form_data)
 
             logger.debug(f'calling form.is_valid() with form_data: {form_data}')
             form_is_valid = False
@@ -156,8 +157,12 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
                 observation_payload[start_keyword] = observation_payload[start_keyword].isoformat()
                 observation_payload[end_keyword] = observation_payload[end_keyword].isoformat()
             else:
-                logger.error(f'Unable to submit initial calibration for cadence {self.dynamic_cadence.id}', extra={
-                    'tags': {'dynamic_cadence_id': self.dynamic_cadence.id, 'target': target.name}
+                logger.error(f'Unable to submit initial calibration for cadence {self.dynamic_cadence.id}',
+                             extra={
+                                'tags': {
+                                    'dynamic_cadence_id': self.dynamic_cadence.id,
+                                    'target': target.name,
+                                    'form.errors': form.errors.as_data()}
                 })
                 raise forms.ValidationError(f'Unable to submit initial calibration for cadence {self.dynamic_cadence}')
 
@@ -183,26 +188,31 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
         logger.debug(f'observation_payload 2: {observation_payload}')
 
         # Submission of the new observation to the facility
-        form = facility.get_form('PHOTOMETRIC_STANDARDS')(observation_payload)#,
-                                                          #facility_settings=OCSSettings('LCO'))
+        form = facility.get_form('PHOTOMETRIC_STANDARDS')(observation_payload)
 
         logger.info(f'Observation form data to be submitted for {self.dynamic_cadence.id}: {observation_payload}',
                     extra={'tags': {
                         'dynamic_cadence_id': self.dynamic_cadence.id,
                         'target': target.name
                     }})
-        #logger.debug(f"Progress flag: Here's the second form validity check\n")
-        # logger.debug(f'Valid2? = {form.is_valid()}\n')        
-        if form.is_valid():
+
+        form_is_valid = False
+        try:
+            form_is_valid = form.is_valid()
+        except Exception as e:
+            logger.error(f'form.is_valid() raised {type(e)}: {e}')
+            logger.error(traceback.format_exc())
+
+        if form_is_valid:
             #logger.debug(f"Progress flag: Passed second form valiity check\n")
             observation_ids = facility.submit_observation(form.observation_payload())
         else:
-            logger.error(f'Unable to submit next cadenced observation: {form.errors}',
+            logger.error(f'Unable to submit next cadenced observation: {form.errors.as_data()}',
                          extra={'tags': {
                             'dynamic_cadence_id': self.dynamic_cadence.id,
                             'target': target.name
                          }})
-            raise Exception(f'Unable to submit next cadenced observation: {form.errors}')
+            raise Exception(f'Unable to submit next cadenced observation: {form.errors.as_data()}')
 
         # Creation of corresponding ObservationRecord objects for the observations
         new_observations = []

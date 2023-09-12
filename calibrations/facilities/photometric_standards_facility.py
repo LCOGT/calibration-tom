@@ -24,9 +24,7 @@ def enum_to_choices(emum_class) -> [()]:
 
 # TODO: clean up unnecessary superclass overrides
 
-# Diffusers, Slits, and Groups were part of the CLI of the calibration_utils submit_calibration script
-# TODO: what's the deal with Diffusers?
-#    (diffusers are part of MUSCat, I think) (from David: this is correct)
+# Narrowbands, Slits, and Groups were part of the CLI of the calibration_utils submit_calibration script
 # TODO: according to doc, photometric standards window is open at a certain time--should this be pre-filled into the form?
 class PhotometricStandardsManualSubmissionForm(LCOOldStyleObservationForm):
     """Form for submission of photometric standards to imagers.
@@ -45,11 +43,11 @@ class PhotometricStandardsManualSubmissionForm(LCOOldStyleObservationForm):
 
     instrument = forms.ChoiceField(choices=[])  # TODO: populate instrument choices from telescope choice
 
-    diffusers = forms.ChoiceField(choices=[('In', 'In'), ('Out', 'Out')])
-    g_diffuser = forms.ChoiceField(choices=[('In', 'In'), ('Out', 'Out')])
-    r_diffuser = forms.ChoiceField(choices=[('In', 'In'), ('Out', 'Out')])
-    i_diffuser = forms.ChoiceField(choices=[('In', 'In'), ('Out', 'Out')])
-    z_diffuser = forms.ChoiceField(choices=[('In', 'In'), ('Out', 'Out')])
+    narrowbands = forms.ChoiceField(choices=[('in', 'In'), ('out', 'Out')])
+    g_narrowband = forms.ChoiceField(choices=[('in', 'In'), ('out', 'Out')], initial='out')
+    r_narrowband = forms.ChoiceField(choices=[('in', 'In'), ('out', 'Out')], initial='out')
+    i_narrowband = forms.ChoiceField(choices=[('in', 'In'), ('out', 'Out')], initial='out')
+    z_narrowband = forms.ChoiceField(choices=[('in', 'In'), ('out', 'Out')], initial='out')
 
     target_id = forms.ChoiceField(required=True,
                                   # these choices must be defined at runtime (after the database is accessible)
@@ -143,8 +141,8 @@ class PhotometricStandardsManualSubmissionForm(LCOOldStyleObservationForm):
             ),
             *tuple([Row(Column(f.name)) for f in Filter.objects.all()]),
 
-            HTML("<hr/>"),  # Diffuser and Slit section
-            Row(Column('diffusers'), Column('g_diffuser'), Column('r_diffuser'), Column('i_diffuser'), Column('z_diffuser')),
+            HTML("<hr/>"),  # Narrow Band and Slit section
+            Row(Column('narrowbands'), Column('g_narrowband'), Column('r_narrowband'), Column('i_narrowband'), Column('z_narrowband')),
 
             HTML("<hr/>"),  # Submit section
             Row(Column(ButtonHolder(Submit('submit', 'Submit Request')))),
@@ -202,6 +200,7 @@ class PhotometricStandardsManualSubmissionForm(LCOOldStyleObservationForm):
                 "offset_dec": 0,
                 "defocus": 0
             }
+            narrowband_position = self.cleaned_data
             instrument_config.append({
                 'exposure_count' : self.cleaned_data['g'][1],
                 'exposure_time' : max(
@@ -213,10 +212,10 @@ class PhotometricStandardsManualSubmissionForm(LCOOldStyleObservationForm):
                 "mode": "MUSCAT_FAST",
                 "rotator_mode": "",
                 'optical_elements': {
-                    'diffuser_g_position': "out",
-                    'diffuser_r_position': "out",
-                    'diffuser_i_position': "out",
-                    'diffuser_z_position': "out"
+                    'narrowband_g_position': "out",
+                    'narrowband_r_position': "out",
+                    'narrowband_i_position': "out",
+                    'narrowband_z_position': "out"
                 },
                 "extra_params": extra_params,
             })

@@ -200,7 +200,9 @@ class PhotometricStandardsManualSubmissionForm(LCOOldStyleObservationForm):
                 "offset_dec": 0,
                 "defocus": 0
             }
-            narrowband_position = self.cleaned_data
+            base_narrowband_position = None
+            if 'narrobands' in self.cleaned_data and self.cleaned_data['narrowbands']:
+                base_narrowband_position = self.cleaned_data['narrowbands']
             instrument_config.append({
                 'exposure_count' : self.cleaned_data['g'][1],
                 'exposure_time' : max(
@@ -212,10 +214,10 @@ class PhotometricStandardsManualSubmissionForm(LCOOldStyleObservationForm):
                 "mode": "MUSCAT_FAST",
                 "rotator_mode": "",
                 'optical_elements': {
-                    'narrowband_g_position': "out",
-                    'narrowband_r_position': "out",
-                    'narrowband_i_position': "out",
-                    'narrowband_z_position': "out"
+                    'narrowband_g_position': base_narrowband_position if base_narrowband_position else self.cleaned_data['g_narrowband'],
+                    'narrowband_r_position': base_narrowband_position if base_narrowband_position else self.cleaned_data['r_narrowband'],
+                    'narrowband_i_position': base_narrowband_position if base_narrowband_position else self.cleaned_data['i_narrowband'],
+                    'narrowband_z_position': base_narrowband_position if base_narrowband_position else self.cleaned_data['z_narrowband']
                 },
                 "extra_params": extra_params,
             })

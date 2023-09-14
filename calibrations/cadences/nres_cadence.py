@@ -155,7 +155,7 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
                             'dynamic_cadence_id': self.dynamic_cadence.id,
                             'target': target.name
                          }})
-            raise Exception(f'Unable to submit next cadenced observation: {form.errors}')
+            raise Exception(f'Unable to submit next cadenced observation due form.errors: {form.errors.as_data()}')
 
         # Creation of corresponding ObservationRecord objects for the observations
         new_observations = []

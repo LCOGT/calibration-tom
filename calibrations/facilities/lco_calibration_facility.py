@@ -60,13 +60,14 @@ class LCOCalibrationForm(LCOOldStyleObservationForm):
         for field_name in ['period', 'jitter', 'filter']:
             self.fields.pop(field_name)
 
-    def _build_instrument_config(self):
+    def _build_instrument_configs(self):
         # According to ConfigDB, there are no available optical elements for NRES instruments.
         instrument_configs = []
         instrument_configs.append({
             'exposure_count': self.cleaned_data['exposure_count'],
             'exposure_time': self.cleaned_data['exposure_time']
         })
+        # FLOYDS can have a slit in the optical path. (this might have been for that?)
         # instrument_configs[0]['optical_elements']['slit'] = self.cleaned_data['filter']
 
         return instrument_configs

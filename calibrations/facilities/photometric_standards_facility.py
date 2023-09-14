@@ -13,7 +13,7 @@ from calibrations.fields import FilterMultiValueField
 from calibrations.models import Filter
 
 logger = logging.getLogger(__name__)
-#logger.level = logging.DEBUG
+logger.level = logging.DEBUG
 
 
 def enum_to_choices(emum_class) -> [()]:
@@ -110,7 +110,10 @@ class PhotometricStandardsManualSubmissionForm(LCOOldStyleObservationForm):
         # remove (pop) unwanted fields from the self.fields
         for field_name in ['filter', 'exposure_time', 'exposure_count']:
             if field_name in self.fields:
+                logger.debug(f'PhotometricStandardsManualSubmissionForm.__init__(): removing {field_name} from self.fields')
                 self.fields.pop(field_name)
+            else:
+                logger.debug(f'PhotometricStandardsManualSubmissionForm.__init__(): {field_name} not found in self.fields (so, not removed)')
 
         # TODO: until we have cadences, we don't need a cadence_frequency in this form
         if 'cadence_frequency' in self.fields:
@@ -151,6 +154,15 @@ class PhotometricStandardsManualSubmissionForm(LCOOldStyleObservationForm):
         )
 
     def _build_configuration(self):
+        # temporarily statisfy super requirements (these is just made up values)
+        logger.debug(f'**** self.cleaned_data: {self.cleaned_data}')
+        if 'exposure_count' not in self.cleaned_data:
+            self.cleaned_data['exposure_count'] = 1
+        if 'exposure_time' not in self.cleaned_data:
+            self.cleaned_data['exposure_time'] = 1
+        if 'filter' not in self.cleaned_data:
+            self.cleaned_data['filter'] = 'ip'
+
         configuration = super()._build_configuration()
         configuration['type'] = 'STANDARD' # Photometric standard observation must have obstype STANDARD
         configuration['instrument_name'] = self.cleaned_data['instrument']
@@ -173,9 +185,9 @@ class PhotometricStandardsManualSubmissionForm(LCOOldStyleObservationForm):
         This method constructs the instrument configurations in the appropriate manner.
         """
         
-        #logger.debug(f"instrument = {self.cleaned_data['instrument']}\n") 
-        #logger.debug(f"instrument_type = {self.cleaned_data['instrument_type']}\n")
-        #logger.debug(f"exposure_time_g = {self.cleaned_data['g'][2]}\n")
+        logger.debug(f"instrument = {self.cleaned_data['instrument']}\n") 
+        logger.debug(f"instrument_type = {self.cleaned_data['instrument_type']}\n")
+        logger.debug(f"exposure_time_g = {self.cleaned_data['g'][2]}\n")
         instrument_config = []
         if self.cleaned_data['instrument_type'] != '2M0-SCICAM-MUSCAT':
             # TODO: this list of filters must be consistent with the FilterMultiValueField instances

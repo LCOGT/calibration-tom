@@ -201,7 +201,7 @@ class PhotometricStandardsManualSubmissionForm(LCOOldStyleObservationForm):
                 "defocus": 0
             }
             base_narrowband_position = None
-            if 'narrobands' in self.cleaned_data and self.cleaned_data['narrowbands']:
+            if 'narrowbands' in self.cleaned_data and self.cleaned_data['narrowbands']:
                 base_narrowband_position = self.cleaned_data['narrowbands']
             instrument_config.append({
                 'exposure_count' : self.cleaned_data['g'][1],

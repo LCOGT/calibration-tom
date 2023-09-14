@@ -9,12 +9,11 @@ from django.conf import settings
 from tom_observations.cadence import BaseCadenceForm
 from tom_observations.cadences.resume_cadence_after_failure import ResumeCadenceAfterFailureStrategy
 from tom_observations.facility import get_service_class
-from tom_observations.facilities.ocs import OCSSettings
 from tom_observations.models import ObservationRecord
 from tom_targets.models import Target
 
 logger = logging.getLogger(__name__)
-
+logger.setLevel(logging.INFO)
 
 class NRESCadenceForm(BaseCadenceForm):
     # TODO: maybe initialize choices in the init in a try/except?
@@ -60,20 +59,11 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
         last_obs = self.dynamic_cadence.observation_group.observation_records.order_by('-created').first()
         target = Target.objects.get(pk=self.dynamic_cadence.cadence_parameters['target_id'])
 
+        logger.debug(f'NRESCadenceStrategy.run() last_obs: {last_obs}')
+
         if last_obs is not None:
             # Make a call to the facility to get the current status of the observation
-            facility = get_service_class(last_obs.facility)(facility_settings=OCSSettings('LCO'))
-            facility.update_observation_status(last_obs.observation_id)  # Updates the DB record
-            last_obs.refresh_from_db()  # Gets the record updates
-            observation_payload = last_obs.parameters
-
-            # These boilerplate values have changed since initial observations were submitted, so we hardcode new ones
-            observation_payload['ipp_value'] = 1.0
-            observation_payload['proposal'] = 'NRES standards'
-        else:
-            # We need to create an observation for the new cadence, as we do not have a previous one to use
-            # TODO: this should be its own method, put a bunch of defaults into lco_calibration_facility.py
-            facility = get_service_class('LCO Calibrations')(facility_settings=OCSSettings('LCO'))
+            facility = get_service_class(last_obs.facility)()
             form_class = facility.observation_forms['NRES']
             standard_type = target.targetextra_set.filter(key='standard_type').first().value
             site = self.dynamic_cadence.cadence_parameters['site']
@@ -99,6 +89,7 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
             if min_lunar_distance is not None:
                 form_data['min_lunar_distance'] = min_lunar_distance.value
 
+            # add the form_data to the form_class: form = form_class instanciated with form_data
             form = form_class(data=form_data)
 
             logger.debug(f'calling form.is_valid() with form_data: {form_data}')
@@ -140,8 +131,7 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
         # Submission of the new observation to the facility
         # obs_type = last_obs.parameters.get('observation_type')
         # form = facility.get_form(obs_type)(observation_payload)
-        form = facility.get_form('NRES')(observation_payload,
-                                         facility_settings=OCSSettings('LCO'))
+        form = facility.get_form('NRES')(observation_payload)
         logger.info(f'Observation form data to be submitted for {self.dynamic_cadence.id}: {observation_payload}',
                     extra={'tags': {
                         'dynamic_cadence_id': self.dynamic_cadence.id,
@@ -181,7 +171,7 @@ class NRESCadenceStrategy(ResumeCadenceAfterFailureStrategy):
                             'observation_id': observation.observation_id,
                         }})
             try:
-                facility = get_service_class(observation.facility)(facility_settings=OCSSettings('LCO'))
+                facility = get_service_class(observation.facility)()
                 facility.update_observation_status(observation.observation_id)
             except Exception as e:
                 logger.error(msg=f'Unable to update observation status for {observation}. Error: {e}')

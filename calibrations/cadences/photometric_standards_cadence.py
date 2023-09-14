@@ -90,7 +90,7 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
 
             # TODO: the facility_settings for the service_class (the Facility) should be generalized
             #       and not hard coded like it is here
-            facility = get_service_class('Photometric Standards')()#(facility_settings=OCSSettings('LCO'))
+            facility = get_service_class('Photometric Standards')()
             form_class = facility.observation_forms['PHOTOMETRIC_STANDARDS']
 
             instrument_code = self.dynamic_cadence.cadence_parameters['instrument_code']

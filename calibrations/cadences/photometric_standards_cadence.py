@@ -115,11 +115,10 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
                 'min_lunar_distance': self.dynamic_cadence.cadence_parameters.get('min_lunar_distance', 20),
                 'start': datetime.now(),
                 'end': datetime.now() + timedelta(hours=self.dynamic_cadence.cadence_parameters['cadence_frequency']),
-                'narrowbands': 'Out',  # TODO: should we still have these on the facility?
-                'g_narrowband': 'Out',
-                'r_narrowband': 'Out',
-                'i_narrowband': 'Out',
-                'z_narrowband': 'Out'
+                'g_narrowband': 'out',
+                'r_narrowband': 'out',
+                'i_narrowband': 'out',
+                'z_narrowband': 'out'
             }
 
             inst_filters = inst.instrumentfilter_set.all()

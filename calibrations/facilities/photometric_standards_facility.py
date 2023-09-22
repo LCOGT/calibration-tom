@@ -43,7 +43,7 @@ class PhotometricStandardsManualSubmissionForm(LCOOldStyleObservationForm):
 
     instrument = forms.ChoiceField(choices=[])  # TODO: populate instrument choices from telescope choice
 
-    narrowbands = forms.ChoiceField(required=False, choices=[('in', 'In'), ('out', 'Out')])
+    narrowbands = forms.ChoiceField(label='Force narrowbands in', required=False, choices=[(True, 'True'), (False, 'False')], initial=False)
     g_narrowband = forms.ChoiceField(required=False, choices=[('in', 'In'), ('out', 'Out')], initial='out')
     r_narrowband = forms.ChoiceField(required=False, choices=[('in', 'In'), ('out', 'Out')], initial='out')
     i_narrowband = forms.ChoiceField(required=False, choices=[('in', 'In'), ('out', 'Out')], initial='out')
@@ -212,9 +212,7 @@ class PhotometricStandardsManualSubmissionForm(LCOOldStyleObservationForm):
                 "offset_dec": 0,
                 "defocus": 0
             }
-            base_narrowband_position = None
-            if 'narrowbands' in self.cleaned_data and self.cleaned_data['narrowbands']:
-                base_narrowband_position = self.cleaned_data['narrowbands']
+            force_narrowbands_in = self.cleaned_data['narrowbands']
             instrument_config.append({
                 'exposure_count' : self.cleaned_data['g'][1],
                 'exposure_time' : max(
@@ -226,10 +224,10 @@ class PhotometricStandardsManualSubmissionForm(LCOOldStyleObservationForm):
                 "mode": "MUSCAT_FAST",
                 "rotator_mode": "",
                 'optical_elements': {
-                    'narrowband_g_position': base_narrowband_position if base_narrowband_position else self.cleaned_data['g_narrowband'],
-                    'narrowband_r_position': base_narrowband_position if base_narrowband_position else self.cleaned_data['r_narrowband'],
-                    'narrowband_i_position': base_narrowband_position if base_narrowband_position else self.cleaned_data['i_narrowband'],
-                    'narrowband_z_position': base_narrowband_position if base_narrowband_position else self.cleaned_data['z_narrowband']
+                    'narrowband_g_position': 'in' if force_narrowbands_in else self.cleaned_data['g_narrowband'],
+                    'narrowband_r_position': 'in' if force_narrowbands_in else self.cleaned_data['r_narrowband'],
+                    'narrowband_i_position': 'in' if force_narrowbands_in else self.cleaned_data['i_narrowband'],
+                    'narrowband_z_position': 'in' if force_narrowbands_in else self.cleaned_data['z_narrowband']
                 },
                 "extra_params": extra_params,
             })

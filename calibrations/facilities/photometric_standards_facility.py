@@ -153,13 +153,7 @@ class PhotometricStandardsManualSubmissionForm(LCOOldStyleObservationForm):
 
     def _build_configuration(self):
         # temporarily statisfy super requirements (these is just made up values)
-        logger.debug(f'**** self.cleaned_data: {self.cleaned_data}')
-        if 'exposure_count' not in self.cleaned_data:
-            self.cleaned_data['exposure_count'] = 1
-        if 'exposure_time' not in self.cleaned_data:
-            self.cleaned_data['exposure_time'] = 1
-        if 'filter' not in self.cleaned_data:
-            self.cleaned_data['filter'] = 'ip'
+        logger.debug(f'_build_configuration:: self.cleaned_data: {self.cleaned_data}')
 
         configuration = super()._build_configuration()
         configuration['type'] = 'STANDARD' # Photometric standard observation must have obstype STANDARD
@@ -168,7 +162,7 @@ class PhotometricStandardsManualSubmissionForm(LCOOldStyleObservationForm):
 
         return configuration
 
-    def _build_instrument_config(self):
+    def _build_instrument_configs(self):
         """
         For example:
         .. code:: python

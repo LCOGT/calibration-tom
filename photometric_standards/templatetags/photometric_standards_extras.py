@@ -93,7 +93,7 @@ def photometric_standards_cadences_list() -> dict:
                                       .annotate(target_id=Cast(KeyTextTransform('target_id', 'cadence_parameters'),models.TextField()))
                                       .order_by('site', '-target_id'))
     
-    print(f"photometric_standards_cadences : {photometric_standards_cadences}")
+    #print(f"photometric_standards_cadences : {photometric_standards_cadences}")
 
     cadences_data = []
     for cadence in photometric_standards_cadences:

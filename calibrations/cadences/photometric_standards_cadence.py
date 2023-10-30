@@ -87,9 +87,9 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
             
             observation_payload = last_obs.parameters  # copy the parameters from the previous observation
             
-
             # These boilerplate values have changed since initial observations were submitted, so we hardcode new ones
-            # (i.e. the parameters copied from the previous observation may be out of date. So, overwrite with new, correct values)
+            # (i.e. the parameters copied from the previous observation may be out of date.
+            # So, overwrite with new, correct values)
             # TODO: these values should not be hardcoded into the source code!!
             observation_payload['ipp_value'] = 1.0
             observation_payload['proposal'] = 'Photometric standards'  # see lco.py::LCOBaseForm.proposal_choices()
@@ -98,7 +98,7 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
             start_keyword, end_keyword = facility.get_start_end_keywords()
             
         else:
-            logger.debug(f'No last_obs - creating a new cadenced observation')
+            logger.debug('No last_obs - creating a new cadenced observation')
             # create an observation for the new cadence, as we do not have a previous one to copy parameters from
 
             # TODO: the facility_settings for the service_class (the Facility) should be generalized
@@ -137,9 +137,9 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
             inst_filters = inst.instrumentfilter_set.all()
             for f in inst_filters:
                 form_data[f'{f.filter.name}_exposure_count'] = f.filter.exposure_count
-                #logger.debug(f"exposure count = {form_data[f'{f.filter.name}_exposure_count']}\n")
+                # logger.debug(f"exposure count = {form_data[f'{f.filter.name}_exposure_count']}\n")
                 form_data[f'{f.filter.name}_exposure_time'] = f.filter.exposure_time
-                #logger.debug(f"exposure time = {form_data[f'{f.filter.name}_exposure_time']}\n")
+                # logger.debug(f"exposure time = {form_data[f'{f.filter.name}_exposure_time']}\n")
 
             if inst_filters:
                 form_data[f'{inst_filters[0].filter.name}_selected'] = True

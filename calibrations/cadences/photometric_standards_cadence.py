@@ -5,6 +5,7 @@ import traceback
 
 from django import forms
 from django.conf import settings
+import requests
 from tom_observations.cadence import BaseCadenceForm
 from tom_observations.cadences.resume_cadence_after_failure import ResumeCadenceAfterFailureStrategy
 from tom_observations.facility import get_service_class
@@ -65,18 +66,30 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
 
         if last_obs is not None:
             logger.debug(f'last_obs exists {last_obs} (this is an on-going cadence - updating observation_payload')
-            #This is an on-going (not first-run) cadence
-            facility = get_service_class(last_obs.facility)()
 
-            facility.update_observation_status(last_obs.observation_id)
-            
+            # Make sure the observation status hasn't changed at the facility since the last time we checked
+            facility = get_service_class(last_obs.facility)()
+            try:
+                facility.update_observation_status(last_obs.observation_id)
+            except requests.exceptions.HTTPError as e:
+                # We didn't find an observation with the given observation_id at the facility.
+                # This is proably a new cadence for a new instrument with a placeholder observation_id
+                # So, just log the warning and continue.
+                logger.warning(f'Could not find Observation with id:  {last_obs.observation_id}')
+                logger.warning(f'Error updating observation status for {last_obs}: {type(e)} {e}')
+                logger.warning(f'Continuing with most recent observation values from {last_obs.modified}')
+            except Exception as e:
+                logger.warning(f'Error updating observation status for {last_obs}: {type(e)} {e}')
+                logger.warning(traceback.format_exc())
+                logger.warning(f'Coninuing with most recent observation values from {last_obs.modified}')
+
             last_obs.refresh_from_db()
             
             observation_payload = last_obs.parameters  # copy the parameters from the previous observation
             
-
             # These boilerplate values have changed since initial observations were submitted, so we hardcode new ones
-            # (i.e. the parameters copied from the previous observation may be out of date. So, overwrite with new, correct values)
+            # (i.e. the parameters copied from the previous observation may be out of date.
+            # So, overwrite with new, correct values)
             # TODO: these values should not be hardcoded into the source code!!
             observation_payload['ipp_value'] = 1.0
             observation_payload['proposal'] = 'Photometric standards'  # see lco.py::LCOBaseForm.proposal_choices()
@@ -85,7 +98,7 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
             start_keyword, end_keyword = facility.get_start_end_keywords()
             
         else:
-            logger.debug(f'No last_obs - creating a new cadenced observation')
+            logger.debug('No last_obs - creating a new cadenced observation')
             # create an observation for the new cadence, as we do not have a previous one to copy parameters from
 
             # TODO: the facility_settings for the service_class (the Facility) should be generalized
@@ -124,9 +137,9 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
             inst_filters = inst.instrumentfilter_set.all()
             for f in inst_filters:
                 form_data[f'{f.filter.name}_exposure_count'] = f.filter.exposure_count
-                #logger.debug(f"exposure count = {form_data[f'{f.filter.name}_exposure_count']}\n")
+                # logger.debug(f"exposure count = {form_data[f'{f.filter.name}_exposure_count']}\n")
                 form_data[f'{f.filter.name}_exposure_time'] = f.filter.exposure_time
-                #logger.debug(f"exposure time = {form_data[f'{f.filter.name}_exposure_time']}\n")
+                # logger.debug(f"exposure time = {form_data[f'{f.filter.name}_exposure_time']}\n")
 
             if inst_filters:
                 form_data[f'{inst_filters[0].filter.name}_selected'] = True

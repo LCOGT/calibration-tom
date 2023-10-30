@@ -5,6 +5,7 @@ import traceback
 
 from django import forms
 from django.conf import settings
+import requests
 from tom_observations.cadence import BaseCadenceForm
 from tom_observations.cadences.resume_cadence_after_failure import ResumeCadenceAfterFailureStrategy
 from tom_observations.facility import get_service_class
@@ -65,11 +66,23 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
 
         if last_obs is not None:
             logger.debug(f'last_obs exists {last_obs} (this is an on-going cadence - updating observation_payload')
-            #This is an on-going (not first-run) cadence
-            facility = get_service_class(last_obs.facility)()
 
-            facility.update_observation_status(last_obs.observation_id)
-            
+            # Make sure the observation status hasn't changed at the facility since the last time we checked
+            facility = get_service_class(last_obs.facility)()
+            try:
+                facility.update_observation_status(last_obs.observation_id)
+            except requests.exceptions.HTTPError as e:
+                # We didn't find an observation with the given observation_id at the facility.
+                # This is proably a new cadence for a new instrument with a placeholder observation_id
+                # So, just log the warning and continue.
+                logger.warning(f'Could not find Observation with id:  {last_obs.observation_id}')
+                logger.warning(f'Error updating observation status for {last_obs}: {type(e)} {e}')
+                logger.warning(f'Continuing with most recent observation values from {last_obs.modified}')
+            except Exception as e:
+                logger.warning(f'Error updating observation status for {last_obs}: {type(e)} {e}')
+                logger.warning(traceback.format_exc())
+                logger.warning(f'Coninuing with most recent observation values from {last_obs.modified}')
+
             last_obs.refresh_from_db()
             
             observation_payload = last_obs.parameters  # copy the parameters from the previous observation

@@ -1,11 +1,12 @@
-
 import logging
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import ButtonHolder, Column, HTML, Layout, Row, Submit
 from django import forms
 from django.conf import settings
-from tom_observations.facilities.lco import LCOOldStyleObservationForm, LCOFacility
+from tom_observations.facilities.lco import (LCOFacility, LCOSettings,
+                                             LCOFullObservationForm)
+
 from tom_targets.models import Target
 
 from configdb.configdb_connections import ConfigDBInterface

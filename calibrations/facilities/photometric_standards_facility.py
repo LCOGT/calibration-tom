@@ -14,7 +14,6 @@ from calibrations.fields import FilterMultiValueField
 from calibrations.models import Filter
 
 logger = logging.getLogger(__name__)
-logger.level = logging.DEBUG
 
 
 def enum_to_choices(emum_class) -> [()]:
@@ -23,11 +22,11 @@ def enum_to_choices(emum_class) -> [()]:
     return [(e.value, e.name) for e in emum_class]
 
 
-# TODO: clean up unnecessary superclass overrides
-
 # Narrowbands, Slits, and Groups were part of the CLI of the calibration_utils submit_calibration script
-# TODO: according to doc, photometric standards window is open at a certain time--should this be pre-filled into the form?
-class PhotometricStandardsManualSubmissionForm(LCOOldStyleObservationForm):
+# TODO: according to doc, photometric standards window is open at a certain time
+#  --should this be pre-filled into the form?
+
+class PhotometricStandardsManualSubmissionForm(LCOFullObservationForm):
     """Form for submission of photometric standards to imagers.
 
     This is loosely based on the options to the calibration_util submit_calibration script.
@@ -103,16 +102,11 @@ class PhotometricStandardsManualSubmissionForm(LCOOldStyleObservationForm):
 
         self.helper = FormHelper()
         self.helper.form_method = 'post'
-        # TODO: define 'nres_calibrations:imager_submission'
-        # self.helper.form_action = reverse('nres_calibrations:imager_submission')
 
         # remove (pop) unwanted fields from the self.fields
         for field_name in ['filter', 'exposure_time', 'exposure_count']:
             if field_name in self.fields:
-                logger.debug(f'PhotometricStandardsManualSubmissionForm.__init__(): removing {field_name} from self.fields')
                 self.fields.pop(field_name)
-            else:
-                logger.debug(f'PhotometricStandardsManualSubmissionForm.__init__(): {field_name} not found in self.fields (so, not removed)')
 
         # TODO: until we have cadences, we don't need a cadence_frequency in this form
         if 'cadence_frequency' in self.fields:
@@ -177,10 +171,6 @@ class PhotometricStandardsManualSubmissionForm(LCOOldStyleObservationForm):
 
         This method constructs the instrument configurations in the appropriate manner.
         """
-        
-        logger.debug(f"instrument = {self.cleaned_data['instrument']}\n") 
-        logger.debug(f"instrument_type = {self.cleaned_data['instrument_type']}\n")
-        logger.debug(f"exposure_time_g = {self.cleaned_data['g'][2]}\n")
         instrument_config = []
         if self.cleaned_data['instrument_type'] != '2M0-SCICAM-MUSCAT':
             # TODO: this list of filters must be consistent with the FilterMultiValueField instances
@@ -226,7 +216,6 @@ class PhotometricStandardsManualSubmissionForm(LCOOldStyleObservationForm):
                 },
                 "extra_params": extra_params,
             })
-        #logger.debug(f'instrument_config = {instrument_config}\n')
         return instrument_config
 
     def _build_location(self):
@@ -238,15 +227,8 @@ class PhotometricStandardsManualSubmissionForm(LCOOldStyleObservationForm):
 
         return location
 
-    # def observation_payload(self):
-    #     # TODO: remove me when logger.debug messages are not useful
-    #     observation_payload = super().observation_payload()
-    #     logger.debug(f'observation_payload: {observation_payload}\n')
-    #     return observation_payload
-
     def clean(self):
         cleaned_data = super().clean()
-        # logger.debug(f'cleaned_data: {cleaned_data}')  # TODO: remove logger.debug
         # check that at least one filter is marked for inclusion in the instrument config
         # by finding the value of the filter.name key (which is the decompress)
         # and the zero-th item is the checkbox
@@ -257,31 +239,22 @@ class PhotometricStandardsManualSubmissionForm(LCOOldStyleObservationForm):
             raise forms.ValidationError('At least one filter must be included in the request.')
         return cleaned_data
 
-    # def is_valid(self):
-    #     # TODO: remove me when logger.debug messages are not useful
-    #     valid = super().is_valid()
-    #     print(self.validate_at_facility())
-    #     logger.debug(f'is_valid: {valid}')
-    #     logger.debug(f'is_valid: errors: {self.errors}')
-    #     return valid
 
 
 class PhotometricStandardsFacility(LCOFacility):
     name = 'Photometric Standards'
 
-    # these key-values appear as tabs in the Observations/create template
-    observation_forms = {
-        'PHOTOMETRIC_STANDARDS': PhotometricStandardsManualSubmissionForm,
-    }
-
     EXCLUDED_FRAME_SUFFIXES = (
         'e91',  # e91 frames are NRES Autoguider images and are not desirable to download
     )
 
-
-    #def __init__(self, facility_settings=OCSSettings('LCO')):
-    #    super().__init__(facility_settings=facility_settings)
-
+    def __init__(self, facility_settings=LCOSettings('LCO')):
+        super().__init__(facility_settings=facility_settings)
+        # these key-values appear as tabs in the Observations/create template
+        # do this in the init because we're calling update on the observation_forms dict
+        self.observation_forms.update({
+            'PHOTOMETRIC_STANDARDS': PhotometricStandardsManualSubmissionForm,
+        })
 
     def data_products(self, observation_id, product_id=None):
         products = []

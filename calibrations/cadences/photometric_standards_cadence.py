@@ -167,17 +167,15 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
                 observation_payload[start_keyword] = observation_payload[start_keyword].isoformat()
                 observation_payload[end_keyword] = observation_payload[end_keyword].isoformat()
             else:
-                logger.error(f'Unable to submit initial calibration for cadence {self.dynamic_cadence.id}',
-                             extra={
-                                'tags': {
+                logger.error(f'Unable to submit initial calibration for new cadence {self.dynamic_cadence.id}',
+                             extra={'tags': {
                                     'dynamic_cadence_id': self.dynamic_cadence.id,
                                     'target': target.name,
                                     'form.errors': form.errors.as_data()}
-                })
+                                    })
                 raise forms.ValidationError(f'Unable to submit initial calibration for cadence {self.dynamic_cadence}')
 
         # Cadence logic
-        # If the observation hasn't finished, do nothing
         if last_obs is not None and not last_obs.terminal:
             # If the observation hasn't finished, do nothing
             return
@@ -187,8 +185,9 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
             window_length = parse(observation_payload[end_keyword]) - parse(observation_payload[start_keyword])
             observation_payload[start_keyword] = datetime.now().isoformat()
             observation_payload[end_keyword] = (parse(observation_payload[start_keyword]) + window_length).isoformat()
-        else:  # If the observation succeeded
-            # Advance window normally according to cadence parameters
+        else:
+            # If the observation succeeded,
+            # then advance window normally according to cadence parameters
             observation_payload = self.advance_window(
                 observation_payload, start_keyword=start_keyword, end_keyword=end_keyword
             )
@@ -200,7 +199,7 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
         converted_observation_payload = form_class().convert_old_observation_payload_to_fields(observation_payload)
 
         # Submission of the new observation to the facility
-        form = facility.get_form('PHOTOMETRIC_STANDARDS')(observation_payload)
+        form = form_class(converted_observation_payload)
 
         logger.info((f'Observation form data to be validated and subitted for {self.dynamic_cadence.id}:'
                      f' {converted_observation_payload}'),

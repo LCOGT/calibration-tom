@@ -43,7 +43,9 @@ class PhotometricStandardsManualSubmissionForm(LCOFullObservationForm):
 
     instrument = forms.ChoiceField(choices=[])  # TODO: populate instrument choices from telescope choice
 
-    narrowbands = forms.ChoiceField(label='Force narrowbands in', required=False, choices=[(True, 'True'), (False, 'False')], initial=False)
+    narrowbands = forms.ChoiceField(
+        label='Force narrowbands in', required=False,
+        choices=[(True, 'True'), (False, 'False')], initial=False)
     g_narrowband = forms.ChoiceField(required=False, choices=[('in', 'In'), ('out', 'Out')], initial='out')
     r_narrowband = forms.ChoiceField(required=False, choices=[('in', 'In'), ('out', 'Out')], initial='out')
     i_narrowband = forms.ChoiceField(required=False, choices=[('in', 'In'), ('out', 'Out')], initial='out')

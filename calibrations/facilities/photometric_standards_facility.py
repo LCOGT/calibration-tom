@@ -146,18 +146,16 @@ class PhotometricStandardsManualSubmissionForm(LCOFullObservationForm):
             Row(Column(ButtonHolder(Submit('submit', 'Submit Request')))),
         )
 
-    def _build_configuration(self):
-        # temporarily statisfy super requirements (these is just made up values)
-        logger.debug(f'_build_configuration:: self.cleaned_data: {self.cleaned_data}')
+    def _build_configuration(self, build_id):
+        configuration = super()._build_configuration(build_id)
 
-        configuration = super()._build_configuration()
-        configuration['type'] = 'STANDARD' # Photometric standard observation must have obstype STANDARD
-        configuration['instrument_name'] = self.cleaned_data['instrument']
-        configuration['min_lunar_distance'] = self.cleaned_data['min_lunar_distance']  # TODO: this needs to go into tom_base
+        if configuration:
+            configuration['type'] = 'STANDARD'  # Photometric standard observation must have obstype STANDARD
+            configuration['instrument_name'] = self.cleaned_data['instrument']
 
         return configuration
 
-    def _build_instrument_configs(self):
+    def _build_instrument_configs(self, instrument_type, configuration_id):
         """
         For example:
         .. code:: python
@@ -172,9 +170,15 @@ class PhotometricStandardsManualSubmissionForm(LCOFullObservationForm):
         This method constructs the instrument configurations in the appropriate manner.
         """
         instrument_config = []
-        if self.cleaned_data['instrument_type'] != '2M0-SCICAM-MUSCAT':
+        if not instrument_type:
+            # early return because there's no instrument type
+            return instrument_config
+
+        if instrument_type != '2M0-SCICAM-MUSCAT':
             # TODO: this list of filters must be consistent with the FilterMultiValueField instances
             #  created in the __init__
+
+            # this is the normal non-MuSCAT case
             for f in self.optical_filters():
                 # check that field is selected (zero-th index is the checkbox)
                 if self.cleaned_data.get(f.name)[0]:

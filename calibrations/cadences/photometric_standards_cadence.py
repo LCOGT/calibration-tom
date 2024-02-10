@@ -62,10 +62,9 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
         last_obs = self.dynamic_cadence.observation_group.observation_records.order_by('-created').first()
         target = Target.objects.get(pk=self.dynamic_cadence.cadence_parameters['target_id'])
 
-        logger.debug(f'Running PhotometricStandardsCadenceStrategy - last_obs: {last_obs}; target: {target}')
+        logger.info(f'Running PhotometricStandardsCadenceStrategy - last_obs: {last_obs}; target: {target}')
 
         if last_obs is not None:
-            logger.debug(f'last_obs exists {last_obs} (this is an on-going cadence - updating observation_payload')
 
             # Make sure the observation status hasn't changed at the facility since the last time we checked
             facility = get_service_class(last_obs.facility)()
@@ -84,9 +83,9 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
                 logger.warning(f'Coninuing with most recent observation values from {last_obs.modified}')
 
             last_obs.refresh_from_db()
-            
+
             observation_payload = last_obs.parameters  # copy the parameters from the previous observation
-            
+
             # These boilerplate values have changed since initial observations were submitted, so we hardcode new ones
             # (i.e. the parameters copied from the previous observation may be out of date.
             # So, overwrite with new, correct values)
@@ -96,9 +95,9 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
 
             # Boilerplate to get necessary properties for future calls
             start_keyword, end_keyword = facility.get_start_end_keywords()
-            
+
         else:
-            logger.debug('No last_obs - creating a new cadenced observation')
+            logger.info('No last_obs - creating a new cadenced observation')
             # create an observation for the new cadence, as we do not have a previous one to copy parameters from
 
             # TODO: the facility_settings for the service_class (the Facility) should be generalized
@@ -137,18 +136,17 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
             inst_filters = inst.instrumentfilter_set.all()
             for f in inst_filters:
                 form_data[f'{f.filter.name}_exposure_count'] = f.filter.exposure_count
-                # logger.debug(f"exposure count = {form_data[f'{f.filter.name}_exposure_count']}\n")
                 form_data[f'{f.filter.name}_exposure_time'] = f.filter.exposure_time
-                # logger.debug(f"exposure time = {form_data[f'{f.filter.name}_exposure_time']}\n")
 
             if inst_filters:
                 form_data[f'{inst_filters[0].filter.name}_selected'] = True
             else:
                 logger.warning(f'No instrument filters found for {inst.code}')
 
+            # instanciate a new form with the form_data for the new cadence
             form = form_class(data=form_data)
 
-            logger.debug(f'calling form.is_valid() with form_data: {form_data}')
+            logger.info(f'calling form.is_valid() with form_data for a new cadence: {form_data}')
             form_is_valid = False
             try:
                 form_is_valid = form.is_valid()
@@ -181,11 +179,11 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
         # Cadence logic
         # If the observation hasn't finished, do nothing
         if last_obs is not None and not last_obs.terminal:
-            #logger.debug(f"Progress flag: last_obs is still not None\n")
+            # If the observation hasn't finished, do nothing
             return
-        elif last_obs is not None and last_obs.failed:  # If the observation failed
-            #logger.debug(f"Progress flag: last_obs is really still not None\n")
-            # Submit next observation to be taken as soon as possible with the same window length
+        elif last_obs is not None and last_obs.failed:
+            # If the observation failed,
+            # then Submit next observation to be taken as soon as possible with the same window length
             window_length = parse(observation_payload[end_keyword]) - parse(observation_payload[start_keyword])
             observation_payload[start_keyword] = datetime.now().isoformat()
             observation_payload[end_keyword] = (parse(observation_payload[start_keyword]) + window_length).isoformat()
@@ -197,12 +195,15 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
             observation_payload = self.update_observation_filters(observation_payload)
 
         observation_payload = self.update_observation_payload(observation_payload)
-        logger.debug(f'observation_payload 2: {observation_payload}')
+
+        form_class = facility.get_form('PHOTOMETRIC_STANDARDS')
+        converted_observation_payload = form_class().convert_old_observation_payload_to_fields(observation_payload)
 
         # Submission of the new observation to the facility
         form = facility.get_form('PHOTOMETRIC_STANDARDS')(observation_payload)
 
-        logger.info(f'Observation form data to be submitted for {self.dynamic_cadence.id}: {observation_payload}',
+        logger.info((f'Observation form data to be validated and subitted for {self.dynamic_cadence.id}:'
+                     f' {converted_observation_payload}'),
                     extra={'tags': {
                         'dynamic_cadence_id': self.dynamic_cadence.id,
                         'target': target.name
@@ -216,7 +217,6 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
             logger.error(traceback.format_exc())
 
         if form_is_valid:
-            #logger.debug(f"Progress flag: Passed second form valiity check\n")
             observation_ids = facility.submit_observation(form.observation_payload())
         else:
             logger.error(f'Unable to submit next cadenced observation: {form.errors.as_data()}',

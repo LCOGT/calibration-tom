@@ -239,6 +239,24 @@ class PhotometricStandardsManualSubmissionForm(LCOFullObservationForm):
             raise forms.ValidationError('At least one filter must be included in the request.')
         return cleaned_data
 
+    def observation_payload(self):
+        payload = super().observation_payload()
+
+        # these were set to "" and None in self.cleaned_data by self.is_valid()
+        # and need to be set to valid values here
+        if not payload['requests'][0]['optimization_type']:
+            payload['requests'][0]['optimization_type'] = 'TIME'
+        if not payload['requests'][0]['configuration_repeats']:
+            payload['requests'][0]['configuration_repeats'] = 1
+
+        if payload['requests'][0]['configurations'][0]['instrument_type'] == '2M0-SCICAM-MUSCAT':
+            # specify the narrowband filter positions
+            payload['requests'][0]['configurations'][0]['instrument_configs'][0]['optical_elements']['narrowband_g_position'] = 'Out'
+            payload['requests'][0]['configurations'][0]['instrument_configs'][0]['optical_elements']['narrowband_r_position'] = 'Out'
+            payload['requests'][0]['configurations'][0]['instrument_configs'][0]['optical_elements']['narrowband_i_position'] = 'Out'
+            payload['requests'][0]['configurations'][0]['instrument_configs'][0]['optical_elements']['narrowband_z_position'] = 'Out'
+
+        return payload
 
 
 class PhotometricStandardsFacility(LCOFacility):

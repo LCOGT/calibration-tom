@@ -43,6 +43,14 @@ importinstruments:
       cpu: 1000m
       memory: 1024Mi
 
+runcadencestrategies:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 1024Mi
 
 lcoServices:
   configdbURL: "http://configdb.lco.gtn"

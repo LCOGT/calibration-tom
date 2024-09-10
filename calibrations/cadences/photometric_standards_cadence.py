@@ -48,7 +48,7 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
         # float('inf') returns infinity, thus guaranteeing that filters with calibration age of None will be considered
         # as the oldest calibrations
         filter_dates.sort(key=lambda filters: filters[1] if filters[1] is not None else float('inf'), reverse=True)
-        filters_by_calib_age = filter_dates[:2]  # change the name of "new filters" to "filter_by_age"
+        filters_by_calib_age = filter_dates[:3]  # change the name of "new filters" to "filter_by_age"
 
         for inst_filter in instrument.instrumentfilter_set.all():
             observation_payload[f'{inst_filter.filter.name}_selected'] = False

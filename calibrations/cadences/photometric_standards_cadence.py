@@ -62,34 +62,31 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
         return observation_payload
 
     def update_observation_filterset(self, observation_payload):
-        #logger.info(msg=f'Updating observation_payload filter set: {observation_payload}')
+        logger.info(msg=f'Updating observation_payload filter set')
         instrument = Instrument.objects.get(code=self.dynamic_cadence.cadence_parameters['instrument_code'])
         #logger.info(msg=f'instrument : {instrument}')
-        filterset_dates = []
+
+        filterset_dates = [] 
         logger.info(msg=f'instrumentfilterset_set : {instrument.instrumentfilterset_set.all()}')
         for filter_set in instrument.instrumentfilterset_set.all(): # iterate through all filtersets on this instrument
             logger.info(msg=f'filter_set : {filter_set}')
             filterset_dates.append((filter_set, filter_set.get_last_instrumentfilterset_age(self.dynamic_cadence.observation_group)))  
-            # Above: each element in the list is the age of the last obs with the filterset, which age is determined in get_last_instrumentfilterset_age
+            # Above: each element in the filterset_dates list is a tuple with element 1 = filterset, element 2 = age determined by get_last_instrumentfilterset_age
 
-        # Below: float('inf') returns infinity, thus guaranteeing that filters with calibration age of None will be considered
-        # as the oldest calibrations
-        #logger.info(f'filterset_dates presorted : {filterset_dates}')
         filterset_dates.sort(key=lambda filterset: filterset[1] if filterset[1] is not None else float('inf'), reverse=True) # sorts by age
-        #logger.info(f'filterset_dates sorted : {filterset_dates}')
+        # Above: float('inf') returns infinity, thus guaranteeing that filters with calibration age of None will be considered the oldest calibrations
+
         oldest_instrumentfilterset, age = filterset_dates[0]  # select only the oldest filterset
         #logger.info(f'oldest_instrumentfilterset : {oldest_instrumentfilterset} is {age} days old.')
 
         for instrument_filter_set in instrument.instrumentfilterset_set.all(): # iterate through all filtersets on this instrument
-            #logger.info(msg=f'instrument_filter_set : {instrument_filter_set}')
-            for filter in instrument_filter_set.filter_set.filter_set_code.all():
-                observation_payload[f'{filter.name}_selected'] = False # De-select all filtersets
-        #logger.info(f'observation_payload reset : {observation_payload}')
+            
+            for filter in instrument_filter_set.filter_set.filter_combination.all():
+                observation_payload[f'{filter.name}_selected'] = False # De-select each filter in each instrument_filter_set
 
-        for filter in oldest_instrumentfilterset.filter_set.filter_set_code.all(): # iterate through each filterset
-            #logger.info(f'filter = {filter}')
+        for filter in oldest_instrumentfilterset.filter_set.filter_combination.all(): # iterate through each filter in the oldest filterset
+            
             observation_payload[f'{filter.name}_selected'] = True # Select the filters that belong to this filterset
-        #logger.info(f'observation_payload filtersets selected : {observation_payload}')
         
         return observation_payload
     

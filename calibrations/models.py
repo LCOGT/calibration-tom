@@ -56,13 +56,13 @@ class Filter(models.Model):
     )
 
 class FilterSet(models.Model):
-    filter_set_code = models.ManyToManyField(Filter)
+    filter_combination = models.ManyToManyField(Filter) # map filtersets to filters
 
     def __str__(self):
-        filters = self.filter_set_code.all()
+        filters = self.filter_combination.all()
         description = ' '
         for filter in filters:
-            description += f'{filter.name} '
+            description += f'{filter.name} ' # display filters in filter set
         return description
 
 class Instrument(models.Model):
@@ -114,18 +114,14 @@ class InstrumentFilterSet(models.Model):
             records = observation_group.observation_records.all()
 
         ages = []
-        filters = self.filter_set.filter_set_code.all()
-        #print('filters = ', filters)
+        filterset = self.filter_set.filter_combination.all()
+        #print('filterset = ', filterset)
 
-        for fs in filters: # loop through each filter in set
+        for filter in filterset: # loop through each filter in set
 
-            #print('fs = ',fs)
-
-            kwargs = {f'parameters__{fs.name}_selected': True,
+            kwargs = {f'parameters__{filter.name}_selected': True,
                   'parameters__instrument': self.instrument.code,
                   'status': 'COMPLETED'}
-
-            #print('kwargs = ', kwargs)
 
             last_calibration = records.order_by('-created').filter(**kwargs).first()
             #print('last_calibration = ', last_calibration)
@@ -136,10 +132,8 @@ class InstrumentFilterSet(models.Model):
                 age = (datetime.now(timezone.utc) - last_calibration.scheduled_end).days
 
             ages.append(age) # create list of filter ages in set
-            #print(ages)
 
         filterset_age = max(ages) # return only the age of the oldest filter in the set
-        #print('filterset_age = ',filterset_age)
 
         return filterset_age
 

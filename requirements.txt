@@ -1,7 +1,21 @@
 # TODO: switch to setup.py so test requirements can be separated
 deprecation~=2.1
-#tomtoolkit~=2.14
-tomtoolkit<3
+
+tomtoolkit==2.19.6
+
+Django==4.2.10
+django-bootstrap4==24.1
+django-contrib-comments==2.2.0
+django-crispy-forms==2.1
+django-dramatiq==0.11.6
+django-extensions==3.2.3
+django-filter==23.5
+django-gravatar2==1.4.4
+django-guardian==2.4.0
+django-storages==1.11.1
+djangorestframework~=3.15
+
+
 crispy-bootstrap4
 psycopg2-binary~=2.9
 gunicorn[gevent]==20.0.4

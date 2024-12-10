@@ -43,7 +43,7 @@ class Filter(models.Model):
     )
 
     def __str__(self):
-        return f'{self.name} filter (default: {self.exposure_count} x {self.exposure_time} second exposures)'
+        return f'{self.name} ({self.exposure_count} exp x {self.exposure_time} s)'
 
     # Boilerplate fields
     created = models.DateTimeField(
@@ -55,6 +55,15 @@ class Filter(models.Model):
         help_text='The time which this target was changed in the TOM database.'
     )
 
+class FilterSet(models.Model):
+    filter_combination = models.ManyToManyField(Filter) # map filtersets to filters
+
+    def __str__(self):
+        filters = self.filter_combination.all()
+        description = ' '
+        for filter in filters:
+            description += f'{filter.name} ' # display filters in filter set
+        return description
 
 class Instrument(models.Model):
     site = models.CharField(max_length=3)
@@ -80,12 +89,56 @@ class InstrumentFilter(models.Model):
             records = ObservationRecord.objects.all()
         else:
             records = observation_group.observation_records.all()
+
         kwargs = {f'parameters__{self.filter.name}_selected': True,
                   'parameters__instrument': self.instrument.code,
                   'status': 'COMPLETED'}
+
         last_calibration = records.order_by('-created').filter(**kwargs).first()
+
         if last_calibration and last_calibration.scheduled_end:
             return (datetime.now(timezone.utc) - last_calibration.scheduled_end).days
 
     def __str__(self):
         return f'{self.instrument.code} - {self.filter.name}'
+
+class InstrumentFilterSet(models.Model):
+    instrument = models.ForeignKey(Instrument, on_delete=models.CASCADE)
+    filter_set = models.ForeignKey(FilterSet, on_delete=models.CASCADE)
+    max_age = models.IntegerField(default=5)
+
+    def get_last_instrumentfilterset_age(self, observation_group=None):
+        if not observation_group:
+            records = ObservationRecord.objects.all()
+        else:
+            records = observation_group.observation_records.all()
+
+        ages = []
+        filterset = self.filter_set.filter_combination.all()
+        #print('filterset = ', filterset)
+
+        for filter in filterset: # loop through each filter in set
+
+            kwargs = {f'parameters__{filter.name}_selected': True,
+                  'parameters__instrument': self.instrument.code,
+                  'status': 'COMPLETED'}
+
+            last_calibration = records.order_by('-created').filter(**kwargs).first()
+            #print('last_calibration = ', last_calibration)
+            #print('last_calibration.scheduled_end = ', last_calibration.scheduled_end)
+
+            age = 0
+            if last_calibration and last_calibration.scheduled_end:
+                age = (datetime.now(timezone.utc) - last_calibration.scheduled_end).days
+
+            ages.append(age) # create list of filter ages in set
+
+        filterset_age = max(ages) # return only the age of the oldest filter in the set
+
+        return filterset_age
+
+    def __str__(self):
+        ic = self.instrument.code
+        fs = self.filter_set
+        
+        return f'{ic} : {fs}'

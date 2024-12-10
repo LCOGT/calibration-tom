@@ -13,7 +13,7 @@ from tom_observations.models import ObservationRecord
 from tom_targets.models import Target
 
 from configdb.configdb_connections import ConfigDBInterface
-from calibrations.models import Filter, Instrument, InstrumentFilter
+from calibrations.models import Filter, FilterSet, Instrument, InstrumentFilterSet
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -41,10 +41,13 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
     def update_observation_filters(self, observation_payload):
         logger.info(msg='Updating observation_payload filters')
         instrument = Instrument.objects.get(code=self.dynamic_cadence.cadence_parameters['instrument_code'])
+        #logger.info(msg=f'instrument : {instrument}')
         filter_dates = []
+        logger.info(msg=f'instrumentfilter_set : {instrument.instrumentfilter_set.all()}')
         for inst_filter in instrument.instrumentfilter_set.all():
+            logger.info(msg=f'inst_filter : {inst_filter}')
             filter_dates.append([inst_filter, inst_filter.get_last_calibration_age(self.dynamic_cadence.observation_group)])  # TODO: explore an annotation instead
-
+        
         # float('inf') returns infinity, thus guaranteeing that filters with calibration age of None will be considered
         # as the oldest calibrations
         filter_dates.sort(key=lambda filters: filters[1] if filters[1] is not None else float('inf'), reverse=True)
@@ -58,6 +61,35 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
 
         return observation_payload
 
+    def update_observation_filterset(self, observation_payload):
+        logger.info(msg=f'Updating observation_payload filter set')
+        instrument = Instrument.objects.get(code=self.dynamic_cadence.cadence_parameters['instrument_code'])
+        #logger.info(msg=f'instrument : {instrument}')
+
+        filterset_dates = [] 
+        logger.info(msg=f'instrumentfilterset_set : {instrument.instrumentfilterset_set.all()}')
+        for filter_set in instrument.instrumentfilterset_set.all(): # iterate through all filtersets on this instrument
+            logger.info(msg=f'filter_set : {filter_set}')
+            filterset_dates.append((filter_set, filter_set.get_last_instrumentfilterset_age(self.dynamic_cadence.observation_group)))  
+            # Above: each element in the filterset_dates list is a tuple with element 1 = filterset, element 2 = age determined by get_last_instrumentfilterset_age
+
+        filterset_dates.sort(key=lambda filterset: filterset[1] if filterset[1] is not None else float('inf'), reverse=True) # sorts by age
+        # Above: float('inf') returns infinity, thus guaranteeing that filters with calibration age of None will be considered the oldest calibrations
+
+        oldest_instrumentfilterset, age = filterset_dates[0]  # select only the oldest filterset
+        #logger.info(f'oldest_instrumentfilterset : {oldest_instrumentfilterset} is {age} days old.')
+
+        for instrument_filter_set in instrument.instrumentfilterset_set.all(): # iterate through all filtersets on this instrument
+            
+            for filter in instrument_filter_set.filter_set.filter_combination.all():
+                observation_payload[f'{filter.name}_selected'] = False # De-select each filter in each instrument_filter_set
+
+        for filter in oldest_instrumentfilterset.filter_set.filter_combination.all(): # iterate through each filter in the oldest filterset
+            
+            observation_payload[f'{filter.name}_selected'] = True # Select the filters that belong to this filterset
+        
+        return observation_payload
+    
     def run(self):
         last_obs = self.dynamic_cadence.observation_group.observation_records.order_by('-created').first()
         target = Target.objects.get(pk=self.dynamic_cadence.cadence_parameters['target_id'])
@@ -191,7 +223,8 @@ class PhotometricStandardsCadenceStrategy(ResumeCadenceAfterFailureStrategy):
             observation_payload = self.advance_window(
                 observation_payload, start_keyword=start_keyword, end_keyword=end_keyword
             )
-            observation_payload = self.update_observation_filters(observation_payload)
+            #observation_payload = self.update_observation_filters(observation_payload)
+            observation_payload = self.update_observation_filterset(observation_payload)
 
         observation_payload = self.update_observation_payload(observation_payload)
 
